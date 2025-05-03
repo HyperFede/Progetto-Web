@@ -1,0 +1,67 @@
+Nello script le tabelle sono organizzate secondo lo schema ER ristrutturato, traducendole con le traduzioni standard ad eccezione della associazione Approva, per non appesantire ulteriormente la tabella Utente, che è stata tradotta con una tabella a parte (StoricoApprovazioni).
+Qualche nome di attributo può avere subito variazioni per motivi di chiarezza.(Importi vari per intenderci)
+
+
+TRIGGERS:
+Sono vincoli check con sottoquery, se l'applicazione funziona bene con il giusto Flow di esecuzione, non ci dovrebbero preoccupare, ma per essere più sicuri, andrebbero soltanto gestite le eccezioni anche a livello applicativo
+
+
+POLITICHE DI DELETE:
+Le mie politiche di cancellazione non prevedono una SOFT DELETE, ma a noi interessa molto preservare lo storico di alcune tabelle (Es Ordine, vedi motivazioni sotto), infatti dove possibile, propongo un set null per preservare i dati che ci servono.
+Ciò può risultare confusionario, per cui è comunque valida la alternativa di mettere una soft delete a tutto, ma ovviamente va reimplementato tutto.
+
+POLITICHE DI UPDATE
+Sempre CASCADE, per semplicità.
+
+
+Legenda:
+ x --> conseugenza (comando) y
+(cancellare x porta a conseguenza su y)
+
+Cliente --> Elimina (Cascade) Carrello
+Eliminando un cliente Ha senso cancellare il carrello che per noi è una tabella "temporanea" che contiene i valori da copiare nella tabella Ordine quando effettivamente il cliente schiaccia "Ordina"
+
+Cliente --> Nullifica (Set null) Ordine
+Se elimino un cliente voglio mantenere anche i suoi vecchi ordini, altrimenti nelle dashboard da fare per Artigiano e Admin perdo dei dati (es anche se cancello un cliente ho comunque guadagnato i soldi)
+
+Cliente --> Nullifica (Set null) Recensione
+Per gli stessi motivi, preservo le recensioni, non ha senso eliminarle ma le rendiamo anonime
+
+Cliente --> Elimina (Cascade) Problema
+Tolto il dente, via il dolore, eliminare un cliente che ha un problema (Sia risolto sia irrisolto) fa eliminare il problema
+
+
+Artigiano --> Bloccato (Restrict) Prodotto
+Non si può eliminare un artigiano se vende ancora i suoi prodotti, (al massimo prima elimina i prodotti)
+
+Artigiano --> Elimina (Cascade) Problema
+Stesso motivo di cliente
+
+Artigiano --> Elimina (Cascade) StoricoApprovazioni
+Se elimino un Artigiano, non è più approvato quindi non serve più il record
+
+
+Admin --> Nullifica (Set null) Problema
+Ricordo che nella tabella problema se Admin==null allora il problema non è ancora stato preso in carico da nessuno.
+Se elimino un Admin, nella tabella Problema ho 2 tipi (sostanzialmente) di situazioni:
+-Problema risolto, posso nullificare l'admin, tanto il problema è già risolto (NB dovremmo ogni tanto cancellare i record dei problemi risolti)
+-Problema irrisolto, devo nullificare l'admin, perché un altro admin si deve prendere cura del problema
+
+Admin --> Nullifica (Set null) StoricoApprovazioni 
+Se cancello un Admin, diventa null, la approvazione è comunque mantenuta dall'attributo TIMESTAMP che se non è null, è approvato, se è null non è approvato
+
+[Astrazione possibile, non cancelliamo mai gli Admin]
+
+Prodotto --> Nullifica (Set null) DettagliOrdine 
+Per motivi di fare bene le dashboard vorrei mantenere negli ordini passati anche i prodotti che non ci sono più 
+ 
+Prodotto --> Elimina (Cascade) Recensione.
+Non bisogna mantenere le recensioni di prodotti che non ci sono più
+
+Prodotto --> Elimina (Cascade) DettagliCarrello  
+Se elimino un prodotto sparisce da tutti i carrelli 
+
+Ordine --> Elimina (Cascade) Problema 
+Il problema è eliminato alla radice
+
+
