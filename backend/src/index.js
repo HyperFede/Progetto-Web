@@ -20,7 +20,7 @@ const dbport = process.env.DB_PORT || 5432; // Usa la porta 5432 come default se
 const serverport = process.env.PORT || 3000; // Usa la porta 3000 come default se non specificata
 
 if (!dbport) {
-  console.log("Variabile d'ambiente PORT non impostata, utilizzo la porta di default 3000");
+  console.log("Variabile d'ambiente PORT non impostata, utilizzo la porta di default 5432");
 }
 
 // Middleware per il parsing di JSON request bodies
