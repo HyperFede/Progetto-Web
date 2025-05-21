@@ -1,0 +1,43 @@
+/* style.css */
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.filter-bar {
+    background-color: var(--background-color);
+    border: 1px solid var(--secondary-color);
+}
+
+.filter-bar .form-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.filter-bar .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.product-image-placeholder {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.card {
+    background-color: white;
+}
+
+header .nav-link:hover {
+    color: var(--primary-color);
+}
+
+.input-group{
+    margin: 0;
+}
+
+.form-check-input{
+    border-color: var(--secondary-color); 
+    background-color: var(--background-color);
+}

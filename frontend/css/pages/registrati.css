@@ -1,0 +1,45 @@
+/* Modifiche per allineamento testi */
+body{
+    overflow: hidden;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--dark-moss-green);
+    font-weight: 500;
+}
+
+.form-check {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+
+.form-text {
+    display: block;
+    margin-top: 0.5rem;
+}
+
+.form-check.form-switch.d-flex {
+    padding: 0;
+    margin: 0;
+    gap: 15px;
+}
+
+.form-check-label {
+    flex-grow: 1;
+    margin: 0;
+    line-height: 1.5;
+    padding-top: 2px;
+}
+
+.form-check-input {
+    position: static;
+    margin-left: 0 !important;
+}

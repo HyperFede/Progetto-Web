@@ -1,0 +1,106 @@
+:root {
+    /* Nuova palette colori */
+    --dark-moss-green: #606c38ff;
+    --pakistan-green: #283618ff;
+    --cornsilk: #e9d3ae;
+    --earth-yellow: #dda15eff;
+    --tigers-eye: #bc6c25ff;
+    
+    /* Variabili applicative */
+    --primary-color: var(--earth-yellow);
+    --secondary-color: var(--tigers-eye);
+    --background-color: var(--cornsilk);
+    --text-dark: var(--pakistan-green);
+    --text-light: var(--cornsilk);
+    --border-color: #dcdde1;
+    --shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Stili globali comuni */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    background-color: var(--background-color);
+    color: var(--text-dark);
+}
+
+.container-rel {
+    background: white;
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem auto;
+    box-sizing: border-box;
+}
+
+.title-center {
+    text-align: center;
+    color: var(--text-dark);
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+/* Form elements common styles */
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--dark-moss-green);
+    font-weight: 500;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.1);
+}
+
+/* Bottoni comuni */
+button, .btn {
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.primary-btn:hover {
+    background-color: var(--secondary-color);
+}
+
+a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+a:hover {
+    text-decoration: underline;
+}
