@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS Utente (
     Cognome VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
+    Indirizzo VARCHAR(255) NOT NULL,
     Tipologia VARCHAR(20) NOT NULL CHECK (Tipologia IN ('Admin','Cliente','Artigiano')),
     PIVA VARCHAR(50),
     AdminTimeStampCreazione TIMESTAMP,

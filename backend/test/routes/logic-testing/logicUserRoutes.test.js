@@ -20,15 +20,30 @@ app.use('/api/users', userRoutes);
 jest.mock('../../../src/config/db-connect', () => ({
     query: jest.fn()
 }));
+
+// Mock authentication and permission middleware
+// This ensures that if userRoutes applies these middlewares, they are bypassed for logic tests.
+jest.mock('../../../src/middleware/authMiddleWare', () => ({
+    isAuthenticated: jest.fn((req, res, next) => {
+        // Populate req.user as some routes might depend on it (e.g., for 'Self' permission or audit)
+        // You can customize this mock user as needed for specific test scenarios if necessary.
+        req.user = { idutente: 1, username: 'mockLogicUser', tipologia: 'Admin' };
+        next(); // Proceed to the next middleware or route handler
+    }),
+    hasPermission: jest.fn((permissions) => (req, res, next) => {
+        next(); // Assume permission is always granted for these logic tests
+    }),
+}));
 // Pulizia del mock prima di ogni test
 beforeEach(() => {
     pool.query.mockClear();
 });
 
 
-describe('User API Input/Output Tests', () => {
+describe('User API Logic Tests', () => {
 
     // TEST POST
+    
     describe('POST /api/users', () => {
         const baseUser = {
             username: 'testuser',
@@ -36,6 +51,7 @@ describe('User API Input/Output Tests', () => {
             cognome: 'User',
             email: 'test@example.com',
             password: 'password123',
+            indirizzo: 'Test Indirizzo,43, Test Citta',
             tipologia: 'Cliente'
         };
         const newUserArtigiano = {
@@ -44,6 +60,7 @@ describe('User API Input/Output Tests', () => {
             cognome: 'Di Prova',
             email: 'artigiano@example.com',
             password: 'passwordArt123',
+            indirizzo: 'Test Indirizzo,43, Test Citta',
             tipologia: 'Artigiano',
             piva: '12345678901',
             artigianodescrizione: 'Descrizione artigiano di prova'
@@ -179,7 +196,7 @@ describe('User API Input/Output Tests', () => {
         );
     });
 
-
+    
     // TEST PUT
     describe('PUT /api/users/:id', () => {
         const clienteBase = {
@@ -214,7 +231,7 @@ describe('User API Input/Output Tests', () => {
             piva: null,
             artigianodescrizione: null
         };
-
+        
         test('Aggiorna utente Cliente correttamente con campi forniti', async () => {
             const updateData = {
                 username: 'clienteaggiornato',
@@ -361,7 +378,7 @@ describe('User API Input/Output Tests', () => {
             pool.query.mockResolvedValueOnce({ rows: [] }); // Utente non trovato
 
             const res = await request(app)
-                .put(`/api/users/99999`) // ID non esistente
+                .put(`/api/users/999999`) // ID non esistente
                 .send({ username: 'anyupdate' });
 
             expect(res.statusCode).toBe(404);
@@ -378,7 +395,7 @@ describe('User API Input/Output Tests', () => {
             expect(res.statusCode).toBe(400);
             expect(res.body).toHaveProperty('message', 'Username ed Email non possono essere vuoti.');
         });
-
+        
         test('Errore 400 se PIVA o ArtigianoDescrizione sono resi vuoti per un Artigiano durante l aggiornamento', async () => {
             pool.query.mockResolvedValueOnce({ rows: [artigianoBase] }); // Artigiano esiste
 
@@ -397,8 +414,8 @@ describe('User API Input/Output Tests', () => {
             expect(resDescrizioneNulla.statusCode).toBe(400);
             expect(resDescrizioneNulla.body).toHaveProperty('message', 'Per la tipologia "Artigiano", PIVA e ArtigianoDescrizione sono obbligatori.');
         });
-
-
+        
+        
         test('Errore 409 se l aggiornamento causa un conflitto di username/email', async () => {
             pool.query.mockResolvedValueOnce({ rows: [clienteBase] }); // Utente da aggiornare esiste
             // Mock per l'operazione di UPDATE che fallisce per unique constraint
@@ -413,10 +430,12 @@ describe('User API Input/Output Tests', () => {
             expect(res.statusCode).toBe(409);
             expect(res.body).toHaveProperty('message', 'Username o Email già esistente.');
         });
+        
     });
 
     // TEST DELETE
     describe('DELETE /api/users/:id', () => {
+        
         test('Elimina utente correttamente', async () => {
             pool.query.mockResolvedValueOnce({ rows: [{ tipologia: 'Cliente' }] })
                 .mockResolvedValueOnce({ rows: [{}] }); // Mock per l'operazione di delete
@@ -426,7 +445,7 @@ describe('User API Input/Output Tests', () => {
             expect(res.statusCode).toBe(200);
             expect(res.body).toHaveProperty('message', 'Utente con ID 1 eliminato.');
         });
-
+        
         test('Errore 404 se utente da eliminare non esiste', async () => {
             pool.query.mockResolvedValueOnce({ rows: [] }); // Utente non trovato
 
@@ -435,6 +454,7 @@ describe('User API Input/Output Tests', () => {
             expect(res.statusCode).toBe(404);
             expect(res.body).toHaveProperty('message', 'Utente non trovato per l eliminazione.');
         });
+        
         test('Errore 403 se tentativo di eliminare un Admin', async () => {
             pool.query.mockResolvedValueOnce({ rows: [{ tipologia: 'Admin' }] }); // Simula fetch di un admin
 
@@ -443,5 +463,6 @@ describe('User API Input/Output Tests', () => {
             expect(res.statusCode).toBe(403);
             expect(res.body).toHaveProperty('message', 'Non puoi eliminare un utente Admin.');
         });
+        
     });
 });

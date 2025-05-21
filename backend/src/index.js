@@ -14,13 +14,14 @@ const userRoutes = require('./routes/userRoutes'); // Importeremo le route degli
 const productRoutes = require('./routes/productRoutes'); // Importa le route dei prodotti
 const orderRoutes = require('./routes/orderRoutes'); // Importa le route degli ordini
 const paymentRoutes = require('./routes/paymentRoutes'); // Importa le route dei pagamenti
+const authRoutes = require('./routes/authRoutes'); // Importa le route di autenticazione
 
 const app = express();
 const dbport = process.env.DB_PORT || 5432; // Usa la porta 5432 come default se non specificata
 const serverport = process.env.PORT || 3000; // Usa la porta 3000 come default se non specificata
 
 if (!dbport) {
-  console.log("Variabile d'ambiente PORT non impostata, utilizzo la porta di default 3000");
+  console.log("Variabile d'ambiente PORT non impostata, utilizzo la porta di default 5432");
 }
 
 // Middleware per il parsing di JSON request bodies
@@ -31,6 +32,7 @@ app.use('/api/users', userRoutes); // Monta le route degli utenti sotto /api/use
 app.use('/api/products', productRoutes); // Monta le route dei prodotti
 app.use('/api/orders', orderRoutes); // Monta le route degli ordini
 app.use('/api/payments', paymentRoutes); // Monta le route dei pagamenti
+app.use('/api/auth', authRoutes); // Monta le route di autenticazione
 
 // Endpoint di root per un semplice check
 app.get('/', (req, res) => {

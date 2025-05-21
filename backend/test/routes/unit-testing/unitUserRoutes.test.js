@@ -3,10 +3,32 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') }); //
 // __dirname si riferisce alla directory corrente del file (cioè src)
 // '../.env' sale di un livello per trovare il file .env nella cartella backend
 const request = require('supertest');
+const bcrypt = require('bcryptjs'); // bcrypt è usato per hashare password nei dati di base
 const express = require('express');
 const userRoutes = require('../../../src/routes/userRoutes');
 const pool = require('../../../src/config/db-connect');
 
+// Mocking the authentication and authorization middleware
+// This should be done before any modules that use it (like userRoutes) are required.
+const mockAuthenticatedUser = {
+    idutente: 1, // Default mock user ID
+    username: 'mocktestuser',
+    nome: 'Mock',
+    cognome: 'User',
+    email: 'mock@example.com',
+    tipologia: 'Admin', // Default to Admin to pass most permission checks easily
+    deleted: false
+};
+
+jest.mock('../../../src/middleware/authMiddleWare', () => ({
+    isAuthenticated: jest.fn((req, res, next) => {
+        req.user = mockAuthenticatedUser; // Attach a mock user to the request
+        next();
+    }),
+    hasPermission: jest.fn(permissions => (req, res, next) => {
+        next(); // Assume permission is granted for route unit tests
+    }),
+}));
 
 const app = express();
 app.use(express.json());
@@ -48,6 +70,7 @@ const baseUserCliente = {
     cognome: 'User',
     email: 'test@example.com',
     password: 'password123',
+    indirizzo: 'Test Indirizzo,43, Test Citta',
     tipologia: 'Cliente'
 };
 
@@ -58,10 +81,11 @@ const baseUserArtigiano = {
     email: 'artigiano@example.com',
     password: 'passwordArt123',
     tipologia: 'Artigiano',
+    indirizzo: 'Test Indirizzo,43, Test Citta',
     piva: '12345678901',
     artigianodescrizione: 'Descrizione artigiano di prova'
 };
-describe('User API Integration with DB Tests', () => {
+describe('User API Unit Tests', () => {
 
     // TEST POST 
     describe('POST /api/users', () => { 
@@ -128,7 +152,7 @@ describe('User API Integration with DB Tests', () => {
                 .send({ username: 'incomplete' });
 
             expect(res.statusCode).toBe(400);
-            expect(res.body).toHaveProperty('message', 'Username, Email, Password e Tipologia sono campi obbligatori.');
+            expect(res.body).toHaveProperty('message', 'Username, Nome,Cognome, Email, Password, Indirizzo,Tipologia, sono campi obbligatori.');
         });
 
 
@@ -304,7 +328,7 @@ describe('User API Integration with DB Tests', () => {
             const artigianoRes = await request(app).post('/api/users').send(artigianoToCreate);
             createdArtigianoId = artigianoRes.body.idutente;
         });
-        /*
+        
         test('Aggiorna utente Cliente correttamente', async () => {
             const updateData = {
                 username: 'updatedcliente',
@@ -332,7 +356,7 @@ describe('User API Integration with DB Tests', () => {
             expect(dbCheck.rows[0].nome).toBe(updateData.nome);
             expect(dbCheck.rows[0].email).toBe(updateData.email);
         });
-        */
+        
         test('Aggiorna utente Artigiano correttamente con solo PIVA e descrizione', async () => {
             const updateData = {
                 piva: '09876543210',

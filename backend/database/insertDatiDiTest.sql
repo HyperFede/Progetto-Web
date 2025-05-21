@@ -7,20 +7,20 @@ BEGIN
         RAISE NOTICE 'La tabella Utente è vuota. Inserimento dei dati di test in corso...';
 
         -- Inserimento Utenti
-        INSERT INTO Utente (Username, Nome, Cognome, Email, Password, Tipologia, PIVA, AdminTimeStampCreazione, ArtigianoDescrizione) 
+        INSERT INTO Utente (Username, Nome, Cognome, Email, Password,Indirizzo, Tipologia, PIVA, AdminTimeStampCreazione, ArtigianoDescrizione) 
         VALUES
         -- Admin
-        ('admin1', 'Mario', 'Rossi', 'admin@example.com', 'adminpass', 'Admin', NULL, CURRENT_TIMESTAMP, NULL),
+        ('admin1', 'Mario', 'Rossi', 'admin@example.com', 'adminpass', 'Via Roma,43,Busto Arsizio','Admin', NULL, CURRENT_TIMESTAMP, NULL),
         -- Artigiani
-        ('artigiano1', 'Luca', 'Bianchi', 'luca@example.com', 'artpass1', 'Artigiano', 'IT12345678901', NULL, 'Artigiano del legno'),
-        ('artigiano2', 'Sofia', 'Verdi', 'sofia@example.com', 'artpass2', 'Artigiano', 'IT98765432109', NULL, 'Ceramista'),
+        ('artigiano1', 'Luca', 'Bianchi', 'luca@example.com', 'artpass1', 'Via Roma,43,Busto Arsizio', 'Artigiano', 'IT12345678901', NULL, 'Artigiano del legno'),
+        ('artigiano2', 'Sofia', 'Verdi', 'sofia@example.com', 'artpass2', 'Viale XX Settembre,23,Gallarate', 'Artigiano', 'IT98765432109', NULL, 'Ceramista'),
         -- Clienti
-        ('cliente1', 'Giovanni', 'Neri', 'giovanni@example.com', 'cliente1pass', 'Cliente', NULL, NULL, NULL),
-        ('cliente2', 'Maria', 'Gialli', 'maria@example.com', 'cliente2pass', 'Cliente', NULL, NULL, NULL),
-        ('cliente3', 'Anna', 'Blu', 'anna@example.com', 'cliente3pass', 'Cliente', NULL, NULL, NULL);
+        ('cliente1', 'Giovanni', 'Neri', 'giovanni@example.com', 'cliente1pass', 'Piazza Garibaldi,3, Milano', 'Cliente', NULL, NULL, NULL),
+        ('cliente2', 'Maria', 'Gialli', 'maria@example.com',  'cliente2pass', 'Viale Cadorna ,43, Varese', 'Cliente', NULL, NULL, NULL),
+        ('cliente3', 'Anna', 'Blu', 'anna@example.com',  'cliente3pass', 'Via Milano,43, Roma', 'Cliente', NULL, NULL, NULL);
 
         -- Inserimento Carrelli (1 per utente)
-        INSERT INTO Carrello (IDUtente) 
+        INSERT INTO Carrello (IDUtente)
         SELECT IDUtente FROM Utente;
 
         -- Inserimento Prodotti
