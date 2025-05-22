@@ -1,5 +1,4 @@
 :root {
-    /* Nuova palette colori */
     --dark-moss-green: #606c38ff;
     --pakistan-green: #283618ff;
     --cornsilk: #e9d3ae;
@@ -14,6 +13,9 @@
     --text-light: var(--cornsilk);
     --border-color: #dcdde1;
     --shadow: 0 10px 30px rgba(0,0,0,0.1);
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545; 
 }
 
 /* Stili globali comuni */
@@ -47,7 +49,6 @@ body {
     font-weight: 700;
 }
 
-/* Form elements common styles */
 .input-group {
     margin-bottom: 1.5rem;
 }
@@ -75,7 +76,6 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.1);
 }
 
-/* Bottoni comuni */
 button, .btn {
     padding: 12px 25px;
     border-radius: 8px;
