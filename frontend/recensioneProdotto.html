@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrivi una Recensione</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/pages/recensioneProdotto.css">
+</head>
+<body>
+    <header class="py-3 mb-4 border-bottom custom-header">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <a href="index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+                <span class="fs-4 logo-text">Logo</span>
+            </a>
+            <ul class="nav nav-pills align-items-center header-nav">
+                <li class="nav-item"><a href="#" class="nav-link nav-link-custom">ACCEDI</a></li>
+                <li class="nav-item"><a href="#" class="nav-link nav-link-custom">REGISTRATI</a></li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link nav-link-cart">
+                        <i class="bi bi-cart fs-4"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container my-4">
+        <h2 class="page-title text-center mb-3">Scrivi una Recensione</h2>
+
+        <div class="row mb-3">
+            <div class="col">
+                <a href="#" onclick="history.back(); return false;" class="back-link-review">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    INDIETRO
+                </a>
+            </div>
+        </div>
+
+        <div class="review-form-container p-4">
+            <div class="d-flex align-items-center mb-3 product-info-header">
+                <img src="https://via.placeholder.com/80" alt="Immagine Prodotto" class="product-review-img me-3">
+                <h5 class="product-question">Com'era l'articolo? <span class="product-name-placeholder">[Nome Prodotto Esempio]</span></h5>
+            </div>
+
+            <form id="productReviewForm">
+                <div class="mb-4 text-center">
+                    <label class="form-label d-block mb-2 rating-label">La tua valutazione generale:</label>
+                    <div class="star-rating">
+                        <i class="bi bi-star" data-value="1"></i>
+                        <i class="bi bi-star" data-value="2"></i>
+                        <i class="bi bi-star" data-value="3"></i>
+                        <i class="bi bi-star" data-value="4"></i>
+                        <i class="bi bi-star" data-value="5"></i>
+                    </div>
+                    <input type="hidden" name="rating" id="ratingValue" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label d-block photo-upload-label">Mostrare l'aspetto dell'articolo?</label>
+                    <div class="photo-upload-box text-center" onclick="document.getElementById('photoUploadInput').click();">
+                        <i class="bi bi-camera fs-1 mb-2"></i>
+                        <p>AGGIUNGI FOTO</p>
+                    </div>
+                    <input type="file" id="photoUploadInput" class="d-none" accept="image/*" multiple>
+                    <div id="photoPreview" class="mt-2 d-flex flex-wrap"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="reviewTitleInput" class="form-label review-title-label">Dai un titolo alla recensione <span class="text-danger">(OBBLIGATORIO)</span></label>
+                    <input type="text" class="form-control review-input" id="reviewTitleInput" name="reviewTitle" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="reviewTextInput" class="form-label review-text-label">Scrivi una recensione:</label>
+                    <textarea class="form-control review-textarea" id="reviewTextInput" name="reviewText" rows="5" placeholder="Cosa ti è piaciuto o non ti è piaciuto? Come hai usato questo prodotto?"></textarea>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn rounded-pill submit-review-btn">INVIA</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="product-review.js"></script>
+</body>
+</html>
