@@ -1,0 +1,61 @@
+##Script.sql 
+
+Le tabelle sono organizzate secondo lo schema ER ristrutturato, traducendole con le traduzioni standard ad eccezione della associazione Approva, per non appesantire ulteriormente la tabella Utente, che è stata tradotta con una tabella a parte (StoricoApprovazioni).
+Qualche nome di attributo può avere subito variazioni per motivi di chiarezza.(Importi vari per intenderci)
+
+
+TRIGGERS:
+Eliminati, nessuno ha veramente una utilità superiore al peso che danno, la gestione sarà a livello applicativo
+
+
+POLITICHE DI DELETE:
+Distinguiamo 2 tipi di DELETE:
+--SOFT DELETE, realizzata tramite un attributo BOOLEAN isDeleted con default FALSE
+--HARD DELETE (corrispondente al comando SQL DELETE) per tutte le tabelle
+
+-->Cancellazione SOFT
+
+Valida esclusivamente per le seguenti tabelle:
+-Utente
+-Prodotto
+-Ordine
+
+Per le tabelle sulla quale si può eseguire una SOFT DELETE, la politica di cancellazione predefinita è sempre quella di SOFT DELETE, per mantenere la storicità e poter preservare i dati per evitare che le dashboard di Artigiano e Admin abbiano dei dati non accurati.
+
+Casi d'uso:
+-Cancellazione di un Cliente
+Un cliente si disiscrive dal sito, al quale non ci accederà più, (il controllo della auth deve verificare questa cosa)
+
+-Cancellazione di un Artigiano
+Un Artigiano si disiscrive dal sito, al quale non ci può più accedere, come conseguenza, in automatico renderà tutti i suoi prodotti soft deleted 
+
+-Cancellazione di un prodotto (da parte del proprio Artigiano)
+Rende quello specifico prodotto non cercabile e non più ordinabile
+
+-Cancellazione di Ordine (SOFT) (opzionale) 
+Può essere la nostra implementazione di un rimborso e/o un annullamento di un ordine (non richiesto per ora, ma se necessario lo lascerei)
+
+Per gli effetti della SOFT DELETE alcune tabelle hanno bisogno di una "ripulita" ogni tanto, possiamo assumere che uno script SQL venga eseguito ad intervalli regolari per pulire il DB di dati inutili. 
+esempi: 
+il Carrello di un Utente eliminato, oppure i problemi già risolti dopo un tot di tempo
+(lo script non è ancora richiesto, se facciamo in tempo possiamo farlo)
+
+
+-->Cancellazione HARD
+Per quanto riguarda le HARD DELETE, tutte le tabelle hanno una policy di CASCADE, quindi attenzione sempre a cancellare definitivamente i dati, una volta cancellato un record, non si avrà più traccia in nessuna altra tabella (necessario backup del DB frequente)
+
+Non è possibile cancellare un Utente/Prodotto/Ordine dalla applicazione in modo HARD, solo lo script pulitore (eventualmente) lo può fare.
+Per il resto delle tabelle è sempre possibile cancellare i record in modo HARD
+
+-->Casi particolari ed eccezioni:
+
+-Gli admin non possono essere cancellati in modo HARD in nessun modo, se hanno delle tabelle in cui sono referenziati,(politica di RESTRICT) questo è fatto per motivi di sicurezza dove si vuole sempre mantenere uno storico e sapere chi ha eseguito delle operazioni come approvazione di artigiani o risoluzione di problemi
+
+
+POLITICHE DI UPDATE
+Sempre CASCADE, per semplicità della applicazione, e per la questione degli ID seriali per ogni tabella, sacrifichiamo la scalabilità e la storicità, oltre a.
+
+
+
+## insertDatiDiTest.sql
+I dati sono di test, con password ancora visibile per semplicità, le query vengono eseguite all'avvio del Server (index.js), nella init del db, (c'è un controllo per vedere se il DB è vuoto)
