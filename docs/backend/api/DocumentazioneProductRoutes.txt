@@ -1,0 +1,289 @@
+Elenco endpoint API in ordine di specificità
+
+POST api/products/
+GET /api/products/
+GET /api/products/notdeleted
+
+GET /api/products/:id
+PUT /api/products/:id
+DELETE /api/products/:id
+
+PUT /api/products/:id/image
+GET /api/products/:id/image_content
+DELETE /api/products/:id/image
+
+
+
+
+Come per ogni API, alcuni endpoint sono protetti da authMiddleWare, per cui è necessario dare il token di autorizzazione nell'header
+Gli endpoint sono separati anche per la gestione delle immagini, che richiedono fileUploadMiddleware.
+
+
+
+#############
+#1 Creare un nuovo prodotto
+
+1.1 POST api/products
+
+@Descr Crea un nuovo prodotto (SENZA IMMAGINE).
+Aggiunge un prodotto alla tabella Prodotto, includendo i campi testuali/numerici.
+Per creare un nuovo prodotto con allegata una immagine, deve essere caricata separatamente tramite l'endpoint `PUT /api/products/:id/image` dopo la creazione del prodotto.
+
+@Access Accesso: Esclusivo Artigiano (nemmeno gli admin possono, si può rivedere)
+
+
+Input:
+    headers:
+    {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ'
+    }
+ Oggetto JSON nel corpo della richiesta (req.body) con i seguenti campi:
+    {
+        "nome": "Ciotola in Ceramica Artigianale",
+        "descrizione": "Una bellissima ciotola fatta a mano, perfetta per la tua colazione o come pezzo decorativo. Smaltata con colori naturali.",
+        "categoria": "Ceramiche",
+        "prezzounitario": 25.99,
+        "quantitadisponibile": 15,
+    }
+
+
+
+idartigiano non va messo, è preso dal token
+
+
+Output:
+    - Successo (201 Created): Oggetto JSON con i dati del prodotto creato.
+      { "idprodotto": Number, "nome": String, ..., "idartigiano": Number, "deleted": false }
+    - Errore (400 Bad Request):
+        - Se i campi obbligatori mancano.
+        - Se `prezzounitario` o `quantitadisponibile` non sono numeri validi o sono negativi.
+        - Se `idartigiano` (se fornito) non è un intero.
+    - Errore (403 Forbidden): Se `idartigiano` (se fornito) non corrisponde all'ID dell'utente Artigiano autenticato.
+    - Errore (409 Conflict): Se la creazione viola un vincolo univoco come errore 23505 dal DB, (non implementato per questa tabella), non dovrebbe accadere
+    - Errore (500 Internal Server Error): In caso di errore generico del server.
+      { "error": "Stringa di errore" }
+
+#############
+#2 Ottenere informazioni di prodotti:
+
+2.1 GET /api/products/
+
+Valutare di cambiare nome a products/all
+
+@Descr Ottiene tutti i prodotti inclusi i prodotti cancellati
+
+@Access Accesso: esclusivo Admin
+
+Input
+    headers:
+    {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ
+    }
+
+Output:
+     - Successo (200 OK): Array JSON di oggetti prodotto.
+       [
+          { 
+             "idprodotto": 58,
+             "nome": "Collana in argento",
+             ...,
+             "idartigiano": 517,
+             "immagine_url": "http://localhost:3000/api/products/58/image_content"
+          },
+          {
+            ....
+          }...
+       ]
+     - Errore (500 Internal Server Error): In caso di errore del server.
+       { "error": "Stringa di errore" }
+
+
+
+2.2 GET /api/products/notdeleted
+
+@Descr Ottiene tutti i prodotti non cancellati
+@Access Accesso: completamente libero
+
+Input (nessuno)
+
+Output:
+     - Successo (200 OK): Array JSON di oggetti prodotto (non cancellati)
+        [ { "idprodotto": Number, "nome": String, ..., "idartigiano": Number }, ... ]
+     - Errore (500 Internal Server Error): In caso di errore del server.
+       { "error": "Stringa di errore" }
+
+
+2.3 GET /api/products/:id
+
+@Descr Ottiene informazioni su un singolo prodotto, compreso il link della richiesta per prendere la sua immagine
+
+@Access Accesso: completamente libero
+
+Input (nessuno)
+
+Output:
+     - Successo (200 OK): Oggetto JSON con i dati del prodotto.
+        { "idprodotto": Number, "nome": String, ..., "idartigiano": Number }
+     - Errore (500 Internal Server Error): In caso di errore del server.
+       { "error": "Stringa di errore" }
+
+#############
+#3 Aggiornare un prodotto:
+
+3.1 PUT /api/products/:id
+
+@Descr Aggiorna i dati testuali/numerici di un prodotto esistente.
+Per aggiornare l'immagine, usare l'endpoint `PUT /api/products/:id/image`.
+
+
+@Access Accesso: solo algi utenti 'Artigiano' (solo per i propri prodotti) e 'Admin' (per qualsiasi prodotto).
+Gli Artigiani non possono cambiare l'`idartigiano` del prodotto.
+Gli Admin possono cambiare l'`idartigiano` del prodotto.
+
+
+Input:
+    - Parametro di rotta `id`: ID numerico del prodotto da aggiornare.
+    
+    headers:
+    {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey
+    }
+    - Corpo della richiesta (req.body): Oggetto JSON con i campi da aggiornare (tutti opzionali).
+    {
+      "nome": "nomeprodottoaggiornato",
+      "descrizione": "descrizioneaggiornata",
+      "categoria": "categoriaaggiornata",
+      "prezzounitario": 87,
+      "quantitadisponibile": 90,
+      "idartigiano": 125
+    }
+
+
+idartigiano non è obbligatorio, è necessario solo quando un Admin fa una richiesta e vuole anche cambiare l'id dell'artigiano di un prodotto esistente
+Un Artigiano non dovrebbe aggiungere quel campo, in quanto già dal token si ricava l'id, ma se dovesse:
+se l'id del prodotto combacia con il suo artigiano, allora passa
+se l'id del prodotto non combacia, status (403 Forbidden)
+
+ Output:
+ - Successo (200 OK): Oggetto JSON con un messaggio e i dati del prodotto aggiornato.
+   { "message": "Product updated successfully", "product": { ..., "immagine": http://localhost:3000/api/products/8/image_content } }
+ - Errore (400 Bad Request): ID prodotto non valido, nessun campo fornito per l'aggiornamento,
+                            valori non validi per `prezzounitario`, `quantitadisponibile`,
+                            o `idartigiano` (se fornito).
+ - Errore (403 Forbidden): Se un Artigiano tenta di aggiornare un prodotto non suo, o tenta di cambiare `idartigiano`.
+ - Errore (404 Not Found): Se il prodotto da aggiornare non esiste o è stato eliminato.
+ - Errore (500 Internal Server Error): In caso di errore del server, inclusi violazioni di vincoli DB (es. `idartigiano` non esistente se modificato da Admin).
+   { "error": "Stringa di errore" }
+
+
+#############
+#4 Cancellare prodotti:
+
+4.1 DELETE /api/products/:id
+
+@Descr Cancella un prodotto esistente (soft delete).
+Se il prodotto ha un'immagine memorizzata nel DB (come binario), questa non viene rimossa dal DB con questa operazione. 
+Per rimuovere l'immagine, usare `DELETE /api/products/:id/image`.
+
+@Access Accesso: esclusivo Artigiano o Admin
+Gli Artigiani possono eliminare solo i propri prodotti mentre gli Admin possono eliminare qualsiasi prodotto
+
+Input:
+    - Parametro di rotta `id`: ID numerico del prodotto da cancellare.
+    headers:
+    {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ
+    }
+
+Output:
+    - Successo (200 OK): Oggetto JSON con un messaggio di conferma e l'ID del prodotto eliminato.
+      { "message": "Product soft deleted successfully", "idprodotto": Number }
+    - Errore (400 Bad Request): Se l'ID del prodotto fornito non è un numero valido.
+      { "error": "Invalid product ID format." }
+    - Errore (403 Forbidden): Se un Artigiano tenta di eliminare un prodotto non suo.
+      { "error": "Forbidden: Artigiano can only delete their own products." }
+    - Errore (404 Not Found): Se il prodotto da eliminare non esiste o è già stato eliminato.
+      { "error": "Product not found or already deleted." }
+    - Errore (500 Internal Server Error): In caso di errore del server.
+      { "error": "Stringa di errore" }
+
+
+#############
+#5 Gestione Immagini Prodotto
+
+5.1 PUT /api/products/:id/image
+
+@Descr Carica o aggiorna l'immagine per un prodotto esistente.
+L'immagine viene inviata come dati binari grezzi (`image/png`, `image/jpeg`).
+
+IMPORTANTE:
+Per testare su postman o su codice, assicurarsi di caricare i file in modalità "raw" e che nell'header non ci sia scritto:
+Content type: application/json (sbagliato)
+Content type: image/png o image/jpeg (corretto)
+
+I dati binari dell'immagine vengono salvati direttamente nel database.
+
+@Access Accesso: 'Artigiano' (solo per i propri prodotti) e 'Admin' (per qualsiasi prodotto).
+
+Input:
+    - Parametro di rotta `id`: ID numerico del prodotto.
+    - Headers:
+        {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ...',
+            'Content-Type': 'image/png' (o 'image/jpeg', 'application/octet-stream', ecc.)
+        }
+    - Corpo della richiesta: Dati binari dell'immagine.
+
+Output:
+    - Successo (200 OK): Oggetto JSON con un messaggio di conferma.
+      { "message": "Immagine aggiornata con successo per il prodotto ID X" }
+    - Errore (400 Bad Request): ID prodotto non valido, nessun dato immagine nel corpo.
+    - Errore (403 Forbidden): Se un Artigiano tenta di aggiornare l'immagine di un prodotto non suo.
+    - Errore (404 Not Found): Se il prodotto non esiste o è stato eliminato.
+    - Errore (413 Payload Too Large): Se la dimensione del file supera il limite configurato (es. 10MB).
+    - Errore (415 Unsupported Media Type): Se il `Content-Type` non è un tipo di immagine supportato.
+    - Errore (500 Internal Server Error): In caso di errore del server.
+
+
+5.2 DELETE /api/products/:id/image
+
+@Descr Rimuove l'immagine associata a un prodotto (imposta il campo immagine a NULL nel DB).
+
+@Access Accesso: 'Artigiano' (solo per i propri prodotti) e 'Admin' (per qualsiasi prodotto).
+
+Input:
+    - Parametro di rotta `id`: ID numerico del prodotto.
+    - Headers:
+        {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ...'
+        }
+
+Output:
+    - Successo (200 OK): Oggetto JSON con un messaggio di conferma.
+      { "message": "Immagine rimossa con successo per il prodotto ID X" }
+    - Errore (400 Bad Request): ID prodotto non valido.
+    - Errore (403 Forbidden): Se un Artigiano tenta di rimuovere l'immagine di un prodotto non suo.
+    - Errore (404 Not Found): Se il prodotto non esiste, è stato eliminato, o non ha un'immagine associata.
+    - Errore (500 Internal Server Error): In caso di errore del server.
+
+
+5.3 GET /api/products/:id/image_content
+
+@Descr Recupera i dati binari dell'immagine di un prodotto.
+Questa rotta è pensata per essere usata come `src` in un tag `<img>` o per scaricare direttamente l'immagine.
+
+@Access Accesso: Pubblico.
+
+Input:
+    - Parametro di rotta `id`: ID numerico del prodotto.
+
+Output:
+    - Successo (200 OK):
+        - Headers: `Content-Type` impostato al tipo MIME dell'immagine (es. `image/png`).
+        - Corpo della risposta: I dati binari grezzi dell'immagine.
+    - Errore (400 Bad Request): ID prodotto non valido.
+    - Errore (404 Not Found): Se il prodotto non esiste, è stato eliminato, o non ha un'immagine.
+    - Errore (500 Internal Server Error): In caso di errore del server (es. dati immagine corrotti nel DB).
+
+
+Nota: La libreria `file-type` viene utilizzata internamente nell'endpoint `GET /api/products/:id/image_content` per determinare il Content-Type corretto dell'immagine da servire.

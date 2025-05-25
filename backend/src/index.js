@@ -42,7 +42,8 @@ app.get('/', (req, res) => {
 async function startServer() {
     try {
         await initDb(); // Inizializza il database prima di avviare il server
-        app.listen(serverport, () => {
+        // Return the server instance for potential use (e.g., graceful shutdown)
+        return app.listen(serverport, () => {
             console.log(`Server running on http://localhost:${serverport}`);
         });
     } catch (error) {
@@ -50,5 +51,11 @@ async function startServer() {
         process.exit(1); // Esce se l'inizializzazione del DB fallisce
     }
 }
+ 
+// Start the server only if this script is executed directly (e.g., `node src/index.js`)
+// and not when required by another module (like a test file).
+if (require.main === module) {
+    startServer();
+}
 
-startServer();
+module.exports = app; // Export the app instance for testing

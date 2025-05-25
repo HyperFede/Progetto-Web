@@ -36,12 +36,12 @@ BEGIN
         ('Piatto decorativo', 'Piatto in ceramica con motivi geometrici', 'Cucina', 35.00, 20, 3);
 
         -- Inserimento Ordini
-        INSERT INTO Ordine (IDUtente, Data, Ora, ImportoTotale) 
+        INSERT INTO Ordine (IDUtente, Data, Ora, ImportoTotale, Status) 
         VALUES
-        (4, '2023-10-01', '10:00:00', 545.00),
-        (4, '2023-10-05', '15:30:00', 240.00),
-        (5, '2023-10-10', '12:15:00', 105.00),
-        (6, '2023-10-15', '09:45:00', 180.00);
+        (4, '2023-10-01', '10:00:00', 545.00, 'In attesa'),
+        (4, '2023-10-05', '15:30:00', 240.00, 'Consegnato'),
+        (5, '2023-10-10', '12:15:00', 105.00, 'Consegnato'),
+        (6, '2023-10-15', '09:45:00', 180.00, 'Spedito');
 
         -- Dettagli Ordini
         INSERT INTO DettagliOrdine (IDOrdine, IDProdotto, Quantita, PrezzoStoricoUnitario) 

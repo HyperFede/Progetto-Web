@@ -97,6 +97,38 @@ router.post('/', async (req, res) => {
         res.status(500).json({ message: 'Errore del server durante la creazione dell utente.' });
     }
 });
+//route temporanea, per la creazione di un admin (NO PROD), è permesso creare un admin liberamente
+router.post('/test/admin', async (req, res) => {
+    // Estrae i dati dal corpo della richiesta.
+    let { username, nome, cognome, email, password, indirizzo } = req.body;
+    // controllo campi vuoti
+    if (!username || !email || !password || !indirizzo || !nome || !cognome) {
+        return res.status(400).json({ message: 'Username, Nome,Cognome, Email, Password, Indirizzo sono campi obbligatori.' });
+    }
+
+    try {
+        // Hash della password prima di salvarla nel DB
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        //inserimento nel DB
+        const newUser = await pool.query(
+            'INSERT INTO utente (username, nome, cognome, email, password, indirizzo, tipologia, admintimestampcreazione) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *',
+            [username, nome, cognome, email, hashedPassword, indirizzo, 'Admin']
+        );
+        //preparazione della risposta
+        const userResponse = { ...newUser.rows[0] };
+        delete userResponse.password;
+        res.status(201).json(userResponse);
+
+    } catch (error) {
+       // console.error('Errore nella creazione dell utente:', error);
+        // errore di postgres, che corrisponde a un conflitto di chiavi uniche
+        if (error.code === '23505') {
+            return res.status(409).json({ message: 'Username o Email già esistente.' });
+        }
+        res.status(500).json({ message: 'Errore del server durante la creazione dell utente.' });
+    }
+});
 
 /**
  * @route GET /api/users
@@ -193,7 +225,7 @@ router.get('/test-protected-route', isAuthenticated, hasPermission(['Admin', 'Ar
  * @route GET /api/users/:id
  * @description Recupera un singolo utente tramite il suo ID.
  *              La password non viene restituita.
- * @access Admin o l'utente stesso. (Self).
+ * @access Libero
  * 
  * Interazione Black-Box:
  *  Input:
@@ -206,7 +238,7 @@ router.get('/test-protected-route', isAuthenticated, hasPermission(['Admin', 'Ar
  *      - Errore (500 Internal Server Error): In caso di errore del server.
  *        { "message": "Errore del server durante il recupero dell utente." }
  */
-router.get('/:id', isAuthenticated, hasPermission (['Admin', 'Self']), async (req, res) => {
+router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const user = await pool.query(

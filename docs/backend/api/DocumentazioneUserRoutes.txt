@@ -9,14 +9,16 @@ DELETE /api/users/:id
 
 
 Alcune API sono protette da un middleware che gestisce autorizzazione e permessi (vedi dettagli in AuthMiddleWare)
+In Postman basta usare la funzione Bearer token, o scrivere a mano l'header
 
+#######
 # 1. Creare un nuovo utente (registrazione)
 
-POST /api/users
+1.1 POST /api/users
 
-Accesso: libero, chiunque può effettuare una richiesta di questo tipo
+@Access Accesso: libero, chiunque può effettuare una richiesta di questo tipo
 
-Dividiamo gli utenti in 3 Tipologie: Cliente,Artigiano ed Admin.
+@Descr Dividiamo gli utenti in 3 Tipologie: Cliente,Artigiano ed Admin.
 Per motivi di sicurezza abbiamo deciso che non è possibile creare un admin attraverso API, presumiamo che
 l'owner del DB crei gli Admin quando ce ne è bisogno.
 
@@ -24,15 +26,15 @@ Per gli altri utenti, l'endpoint funziona in questo modo:
 
 Input: Oggetto JSON nel corpo della richiesta (req.body) con i seguenti campi:
      {
-         "username": "String (obbligatorio)",
-         "nome": "String (obbligatorio)",
-         "cognome": "String (obbligatorio)",
-         "email": "String (obbligatorio)",
-         "password": "String (obbligatorio)",
-         "indirizzo": "String (obbligatorio)",
-         "tipologia": "String (obbligatorio, 'Cliente' o 'Artigiano')",
-         "piva": "String (opzionale, ma obbligatoria se tipologia='Artigiano')",
-         "artigianodescrizione": "String (opzionale, obbligatoria se tipologia='Artigiano')"
+       "username": "String (obbligatorio)",
+       "nome": "String (obbligatorio)",
+       "cognome": "String (obbligatorio)",
+       "email": "String (obbligatorio)",
+       "password": "String (obbligatorio)",
+       "indirizzo": "String (obbligatorio)",
+       "tipologia": "String (obbligatorio, 'Cliente' o 'Artigiano')",
+       "piva": "String (opzionale, ma obbligatoria se tipologia='Artigiano')",
+       "artigianodescrizione": "String (opzionale, obbligatoria se tipologia='Artigiano')"
      }
  Output:
      - Successo (201 Created): Oggetto JSON con i dati dell'utente creato (esclusa la password).
@@ -50,11 +52,12 @@ Input: Oggetto JSON nel corpo della richiesta (req.body) con i seguenti campi:
 
 #2 Ottenere informazioni dagli utenti
 
-GET /api/users/
+2.1 GET /api/users/
 
-Accesso: richiede isAuthenticated (più dettagli in AuthMiddleWare)
+@Descr ottiene tutti gli utenti, compresi i non cancellati
+
+@Access Accesso: richiede isAuthenticated (più dettagli in AuthMiddleWare)
 Permesso: richiede hasPermission di tipo Admin (più dettagli in AuthMiddleWare)
-
 Richiesto il permesso di tipo "Admin", solo gli admin che si sono autenticati possono visualizzare tutti gli utenti
 
 Input:
@@ -65,20 +68,18 @@ Output:
    - Successo (200 OK): Array JSON di oggetti utente.
      [ { "idutente": Number, "username": String, ..., "deleted": Boolean }, ... ]
    - Errore (500 Internal Server Error): In caso di errore del server.
-     { "message": "Errore del server durante il recupero degli utenti." }    
+     { "message": "Errore del server durante il recupero degli utenti." }
 
-GET /api/users/:id
+2.2 GET /api/users/:id
 
 Accesso: richiede isAuthenticated
-Permesso: richiede hasPermission di tipo Admin oppure di tipo Self
+Permesso: Libero, non restituisce mai la password
 
 Richiesto il permesso di tipo "Admin", oppure di tipo "Self".
 esclusivamente gli admin possono accedere oppure il proprio utente può accedere a questo endpoint. (sia Cliente sia Artigiano)
 
 Input:
      - Parametro di rotta `id`: ID numerico dell'utente.
-     - Header HTTP `Authorization`: Stringa nel formato "Bearer <token_jwt>" (necessario per il middleware `isAuthenticated`).
-        Esempio: `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 Output:
     - Successo (200 OK): Oggetto JSON con i dati dell'utente.
       { "idutente": Number, "username": String, ..., "deleted": Boolean } // NB: deleted è inutile in quanto è sempre false
@@ -88,7 +89,7 @@ Output:
       { "message": "Errore del server durante il recupero dell utente." }
 
 
-GET api/users/notdeleted
+2.3 GET api/users/notdeleted
 
 Accesso: richiede isAuthenticated
 Permesso: richiede hasPermission di tipo Admin
@@ -106,7 +107,7 @@ Output:
 
 # 3 Aggiornare informazioni
 
-PUT /api/users/:id
+3.1 PUT /api/users/:id
 
 Accesso: richiede isAuthenticated
 Permesso: richiede hasPermission di tipo Admin oppure di tipo Self
@@ -146,7 +147,7 @@ Output:
 
 #4 Eliminare un utente
 
-DELETE api/users/:id
+4.1 DELETE api/users/:id
 
 
 Accesso: richiede isAuthenticated

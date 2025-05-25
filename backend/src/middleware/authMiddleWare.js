@@ -36,7 +36,7 @@ if (!jwtSecret) {
 async function isAuthenticated(req, res, next) {
     // Estrae l'header Authorization dalla richiesta.
     const authHeader = req.headers.authorization;
-    console.log('Header Authorization:', authHeader);
+    //console.log('Header Authorization:', authHeader);
 
     // Controlla se l'header Authorization è presente e se inizia con 'Bearer '.
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -100,14 +100,12 @@ async function isAuthenticated(req, res, next) {
  * Middleware Factory per creare un middleware di autorizzazione basato sulla tipologia dell'utente oppure sull'ID della risorsa..
  * Questo factory restituisce una funzione middleware.
  * Input (per il factory):
- *  - `requiredPermissions`: Un array di stringhe che rappresentano i permessi richiesti.
- *    Possono essere tipologie di utente ('Admin', 'Cliente', 'Artigiano') o la parola chiave speciale 'Self'.
+ *  - `requiredPermissions`: Un array di stringhe che rappresentano i permessi richiesti. Possono essere tipologie di utente ('Admin', 'Cliente', 'Artigiano') o la parola chiave speciale 'Self'.
  *    La parola chiave 'Self' concede l'accesso se l'ID dell'utente autenticato (`req.user.idutente`)
  *    corrisponde all'ID specificato nel parametro di rotta `:id` (`req.params.id`).
- * 
- * 
- * 
- * 
+ *
+ *
+ *
  * Comportamento del middleware generato:
  *  - Presuppone che il middleware `isAuthenticated` sia stato eseguito prima e che `req.user`
  *    e `req.user.tipologia` siano popolati.
@@ -117,7 +115,7 @@ async function isAuthenticated(req, res, next) {
  *    - `req.params.id`: Il parametro 'id' dalla rotta (se presente).
  * 
  *  - Output (del middleware generato):
- *      - Se l'utente ha una delle tipologie consentite O se la condizione 'Same' è richiesta e soddisfatta:
+ *      - Se l'utente soddisfa almeno uno dei permessi richiesti:
  *      - Chiama `next()` per passare il controllo.
  *    - Altrimenti (l'utente non soddisfa nessuno dei permessi richiesti):
  *      - Restituisce una risposta JSON con status HTTP 403 (Forbidden) e messaggio:
@@ -134,25 +132,26 @@ function hasPermission(requiredPermissions) {
             return res.status(500).json({ message: 'Errore: utente non definito nella richiesta dopo autenticazione.' });
         }
 
-        const userId = req.user.idutente; // ID dell'utente autenticato.
+        const authenticatedUserId = req.user.idutente; // ID dell'utente autenticato.
+        const userTipologia = req.user.tipologia; // Tipologia dell'utente autenticato.
+        const targetResourceId = parseInt(req.params.id, 10); // ID della risorsa dalla rotta, parseInt gestisce undefined/null/non-numerici restituendo NaN.
 
-        // Estrae la tipologia dell'utente dalla richiesta.
-        const tipologia = req.user.tipologia;
+        const isAuthorized = requiredPermissions.some(permission => {
+            // Controllo per ruoli specifici
+            if (['Admin', 'Cliente', 'Artigiano'].includes(permission)) {
+                return permission === userTipologia;
+            }
+            // Controllo per 'Self' generico
+            if (permission === 'Self') {
+                return !isNaN(targetResourceId) && authenticatedUserId === targetResourceId;
+            }
+            // Se il permesso non è riconosciuto, ritorna false per questo permesso.
+            return false;
+        });
 
-        // Verifica se la tipologia dell'utente è presente nell'array delle tipologie consentite.
-        // 1. Controlla se l'utente ha una delle tipologie richieste
-        const hasRequiredRole = requiredPermissions.some(perm =>
-            ['Admin', 'Cliente', 'Artigiano'].includes(perm) && perm === tipologia
-        );
-
-        // 2. Controlla se il permesso 'Self' è richiesto E l'ID utente corrisponde all'ID nella rotta
-        const targetId = parseInt(req.params.id, 10); // Assumi che l'ID nella rotta sia un numero
-        const isSameUser = requiredPermissions.includes('Self') && !isNaN(targetId) && userId === targetId;
-
-        // Concede l'accesso se l'utente ha un ruolo richiesto O è lo stesso utente richiesto
-        if (hasRequiredRole || isSameUser) {
-            // L'utente ha il permesso, passa al prossimo middleware/handler.
-            next(); // L'utente ha il permesso, passa al prossimo middleware/handler.
+        if (isAuthorized) {
+            // L'utente soddisfa almeno uno dei permessi richiesti.
+            next();
         } else {
             // L'utente non ha il permesso, restituisce un errore 403 Forbidden.
             res.status(403).json({ message: 'Accesso negato. Non hai i permessi necessari per questa risorsa.' });

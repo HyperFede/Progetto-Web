@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS Ordine (
     Data DATE NOT NULL,
     Ora TIME NOT NULL,
     ImportoTotale NUMERIC(10,2) NOT NULL,
+    Status VARCHAR(50) NOT NULL CHECK (Status IN ('In attesa', 'Spedito', 'Consegnato')) DEFAULT 'In attesa',
     Deleted BOOLEAN NOT NULL DEFAULT FALSE -- Soft delete
 );
 
@@ -114,6 +115,7 @@ CREATE TABLE IF NOT EXISTS Problema (
         ON UPDATE CASCADE,
     Descrizione TEXT NOT NULL,
     Status VARCHAR(50) NOT NULL CHECK (Status IN ('Aperto', 'Risolto', 'In lavorazione')),
+    Immagine BYTEA,
 	TimeStampSegnalazione TIMESTAMP NOT NULL,
 	
     CHECK (IDCliente IS NOT NULL OR IDArtigiano IS NOT NULL)

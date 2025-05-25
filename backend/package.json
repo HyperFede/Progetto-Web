@@ -14,6 +14,7 @@
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "file-type": "^21.0.0",
     "jsonwebtoken": "^9.0.2",
     "jtest": "^0.0.1",
     "pg": "^8.15.6",
