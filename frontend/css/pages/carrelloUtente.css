@@ -1,0 +1,175 @@
+/* cart.css */
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-dark);
+}
+
+/* Header styles (coerenza con altre pagine) */
+.custom-header {
+    background-color: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+}
+.logo-text {
+    color: var(--primary-color);
+}
+.header-nav .nav-link-custom {
+    color: var(--secondary-color);
+}
+.header-nav .nav-link-custom:hover,
+.header-nav .nav-link-custom:focus {
+    color: var(--primary-color);
+}
+.header-nav .nav-link-cart {
+    color: var(--primary-color);
+}
+
+.cart-page-title {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+.price-column-header {
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+/* Lista Articoli */
+.cart-item {
+    border-bottom: 1px solid var(--border-color);
+}
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+}
+
+.cart-item-info .item-name {
+    color: var(--text-dark);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.quantity-controls .remove-item-btn {
+    background-color: transparent;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    padding: 0.25rem 0.5rem;
+}
+.quantity-controls .remove-item-btn:hover {
+    background-color: var(--danger-color);
+    color: var(--text-light);
+}
+
+.quantity-controls .quantity-btn {
+    background-color: transparent;
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    padding: 0.25rem 0.5rem;
+}
+.quantity-controls .quantity-btn:hover {
+    background-color: var(--secondary-color);
+    color: var(--text-light);
+}
+
+.quantity-controls .quantity-input {
+    width: 60px;
+    border-color: var(--border-color);
+    background-color: var(--background-color);
+    color: var(--text-dark);
+}
+.quantity-controls .quantity-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(221, 161, 94, 0.25); /* Usa var(--primary-color-rgb) se definito */
+}
+/* Rimuovi frecce di default per input number su Webkit/Mozilla se desiderato per estetica con bottoni custom */
+.quantity-controls .quantity-input::-webkit-outer-spin-button,
+.quantity-controls .quantity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.quantity-controls .quantity-input[type=number] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+.cart-item-price .item-price-value {
+    color: var(--text-dark);
+    font-size: 1.1rem;
+}
+.cart-item-price .text-muted {
+    font-size: 0.85rem;
+}
+
+/* Riepilogo Ordine */
+.order-summary-box {
+    background-color: var(--text-light); /* cornsilk (uguale a background-color) */
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    box-shadow: var(--shadow);
+    position: sticky; /* Rende la sidebar "appiccicosa" durante lo scroll */
+    top: 20px; /* Distanza dal top quando diventa sticky */
+}
+
+.order-summary-box .summary-title {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.order-summary-box .total-amount {
+    color: var(--primary-color);
+}
+
+.checkout-btn {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green); /* Testo scuro su earth-yellow */
+    border: 1px solid var(--primary-color);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.checkout-btn:hover {
+    background-color: var(--tigers-eye); /* Usa secondary per hover */
+    border-color: var(--tigers-eye);
+    color: var(--text-light); /* Testo chiaro su tigers-eye */
+}
+
+/* Bottone Scroll to Top */
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--primary-color);
+    color: var(--pakistan-green); /* Testo scuro su earth-yellow */
+    width: 45px;
+    height: 45px;
+    text-align: center;
+    line-height: 42px; /* Allineamento verticale icona */
+    font-size: 1.5rem;
+    border-radius: 50%;
+    text-decoration: none;
+    z-index: 1000;
+    display: none; /* Nascosto di default, mostrato via JS */
+    box-shadow: var(--shadow);
+    transition: background-color 0.2s, opacity 0.3s, visibility 0.3s;
+}
+.scroll-to-top:hover {
+    background-color: var(--tigers-eye);
+    color: var(--text-light);
+}
+
+.footer-text {
+    color: var(--text-dark);
+}
+
+/* Stili specifici per focus con var(--primary-color-rgb) se definita */
+/* Se var(--primary-color) è #dda15e (earth-yellow), RGB è 221, 161, 94 */
+.quantity-controls .quantity-input:focus {
+    /* Assicurati che --primary-color-rgb sia definito in global.css per usare la variabile qui,
+       altrimenti usa il valore esplicito come fatto sopra. */
+    /* box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25); */
+}
