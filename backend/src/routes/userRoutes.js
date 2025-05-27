@@ -4,7 +4,16 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const pool = require('../config/db-connect');
-const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare'); // Importa i middleware
+const { isAuthenticated, hasPermission, getUserFromToken} = require('../middleware/authMiddleWare'); // Importa i middleware e getUserFromToke
+const{createQueryBuilderMiddleware}  =  require('../middleware/queryBuilderMiddleware'); // Importa il middleware per la query builder
+
+// Recupera la chiave segreta per JWT dalle variabili d'ambiente.
+// Anche se getUserFromToken la usa internamente, è buona prassi averla disponibile se necessario.
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+    console.error('FATAL ERROR: userRoutes.js - JWT_SECRET is not defined.');
+    process.exit(1); // Termina l'applicazione se la chiave segreta non è configurata
+}
 
 // --- Operazioni CRUD per Utente ---
 
@@ -137,20 +146,38 @@ router.post('/test/admin', async (req, res) => {
  * @access Tipicamente Admin
  * 
  * Interazione Black-Box:
- *  Input: Nessuno (opzionalmente query params per paginazione/filtri non implementati qui).
+ *  Input: Query parameters opzionali per filtri e ordinamento. Esempi:
+ *      - `?tipologia=Cliente`
+ *      - `?username_like=test`
+ *      - `?deleted=true`
+ *      - `?sort=email&order=desc`
  *  Output:
  *      - Successo (200 OK): Array JSON di oggetti utente.
  *        [ { "idutente": Number, "username": String, ..., "deleted": Boolean }, ... ]
  *      - Errore (500 Internal Server Error): In caso di errore del server.
  *        { "message": "Errore del server durante il recupero degli utenti." }
  */
-router.get('/', isAuthenticated, hasPermission(['Admin']), async (req, res) => {
 
+const userQueryConfig = {
+    allowedFilters: [
+        { queryParam: 'tipologia', dbColumn: 'tipologia', type: 'exact', dataType: 'string' },
+        { queryParam: 'username_like', dbColumn: 'username', type: 'like', dataType: 'string' },
+        { queryParam: 'email_like', dbColumn: 'email', type: 'like', dataType: 'string' },
+        { queryParam: 'deleted', dbColumn: 'deleted', type: 'boolean', dataType: 'boolean' }
+    ],
+    allowedSortFields: ['idutente', 'username', 'nome', 'cognome', 'email', 'tipologia', 'deleted'],
+    defaultSortField: 'idutente',
+    defaultSortOrder: 'ASC'
+};
+
+router.get('/', 
+    isAuthenticated, 
+    hasPermission(['Admin']), 
+    createQueryBuilderMiddleware(userQueryConfig), // No baseWhereClause, Admin sees all by default
+    async (req, res) => {
     try {
-        //NB escludiamo la password dalla query
-        const allUsers = await pool.query(
-            'SELECT idutente, username, nome, cognome, email,indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione, deleted FROM utente ORDER BY idutente ASC'
-        );
+        const queryText = `SELECT idutente, username, nome, cognome, email,indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione, deleted FROM utente ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        const allUsers = await pool.query(queryText, req.sqlQueryValues);
         res.status(200).json(allUsers.rows);
     } catch (error) {
        // console.error('Errore nel recuperare gli utenti:', error);
@@ -163,22 +190,28 @@ router.get('/', isAuthenticated, hasPermission(['Admin']), async (req, res) => {
  * @description Recupera tutti gli utenti attivi (non marcati come 'deleted').
  *              La password non viene restituita.
  * @access Tipicamente Admin o per scopi specifici di frontend.
+ *         (Attualmente limitato ad Admin, come la rotta GET /)
  * 
  * Interazione Black-Box:
- *  Input: Nessuno.
+ *  Input: Query parameters opzionali per filtri e ordinamento (esclusi filtri su 'deleted').
  *  Output:
  *      - Successo (200 OK): Array JSON di oggetti utente attivi.
  *        [ { "idutente": Number, "username": String, ..., "deleted": false }, ... ]
  *      - Errore (500 Internal Server Error): In caso di errore del server.
  *        { "message": "Errore del server durante il recupero degli utenti." }
  */
-
-router.get('/notdeleted', isAuthenticated, hasPermission(['Admin']), async (req, res) => {
+router.get('/notdeleted', 
+    isAuthenticated, 
+    hasPermission(['Admin']), 
+    createQueryBuilderMiddleware({ 
+        ...userQueryConfig, 
+        allowedFilters: userQueryConfig.allowedFilters.filter(f => f.queryParam !== 'deleted'), // Rimuovi il filtro 'deleted'
+        baseWhereClause: 'deleted = FALSE' 
+    }),
+    async (req, res) => {
     try {
-        //NB escludiamo la password dalla query
-        const allUsers = await pool.query(
-            'SELECT idutente, username, nome, cognome, email, indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione,deleted FROM utente WHERE deleted = false ORDER BY idutente ASC'
-        );
+        const queryText = `SELECT idutente, username, nome, cognome, email, indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione,deleted FROM utente ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        const allUsers = await pool.query(queryText, req.sqlQueryValues);
         res.status(200).json(allUsers.rows);
     } catch (error) {
         //console.error('Errore nel recuperare gli utenti:', error);
@@ -224,33 +257,106 @@ router.get('/test-protected-route', isAuthenticated, hasPermission(['Admin', 'Ar
 /**
  * @route GET /api/users/:id
  * @description Recupera un singolo utente tramite il suo ID.
- *              La password non viene restituita.
- * @access Libero
+ *              La logica di accesso è complessa e dipende dalla tipologia dell'utente target
+ *              e dalla tipologia (e autenticazione) dell'utente che effettua la richiesta.
+ *              La password non viene mai restituita.
+ * @access Condizionale (vedi regole sotto)
  * 
  * Interazione Black-Box:
- *  Input:
- *      - Parametro di rotta `id`: ID numerico dell'utente.
+ *  Input: Parametro di rotta `id`: ID numerico dell'utente.
  *  Output:
- *      - Successo (200 OK): Oggetto JSON con i dati dell'utente.
- *        { "idutente": Number, "username": String, ..., "deleted": Boolean } // NB: deleted è inutile in quanto è sempre false
- *      - Errore (404 Not Found): Se l'utente con l'ID specificato non esiste Oppure è marcato come deleted.
- *        { "message": "Utente non trovato." }
- *      - Errore (500 Internal Server Error): In caso di errore del server.
- *        { "message": "Errore del server durante il recupero dell utente." }
+ *      - Successo (200 OK): Oggetto JSON con i dati dell'utente (campi variano in base ai permessi).
+ *      - Errore (400 Bad Request): ID utente non valido.
+ *      - Errore (401 Unauthorized): Token mancante/invalido quando richiesto per accedere a profili non-Artigiano.
+ *      - Errore (403 Forbidden): Accesso negato per la combinazione utente/risorsa.
+ *      - Errore (404 Not Found): Utente non trovato o eliminato (a meno che il visualizzatore non sia Admin).
+ *      - Errore (500 Internal Server Error): Errore generico del server.
  */
 router.get('/:id', async (req, res) => {
-    const { id } = req.params;
+    const targetId = parseInt(req.params.id, 10); // ID dell'utente il cui profilo si vuole visualizzare
+
+    if (isNaN(targetId)) {
+        return res.status(400).json({ message: 'ID utente non valido.' });
+    }
+
     try {
-        const user = await pool.query(
-            'SELECT idutente, username, nome, cognome, email, indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione, deleted FROM utente WHERE idutente = $1 and deleted = false' , [id]
+        // Fetch target user - recuperiamo sempre l'utente, anche se 'deleted',
+        // la logica successiva deciderà se mostrarlo.
+        const targetUserQuery = await pool.query(
+            'SELECT idutente, username, nome, cognome, email, indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione, deleted FROM utente WHERE idutente = $1',
+            [targetId]
         );
-        if (user.rows.length === 0) {
+
+        if (targetUserQuery.rows.length === 0) {
             return res.status(404).json({ message: 'Utente non trovato.' });
         }
-        res.status(200).json(user.rows[0]);
+        const targetUser = targetUserQuery.rows[0];
+
+        // Tenta di identificare l'utente autenticato (se presente) usando il nostro helper
+        let authenticatedUser = null;
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
+            if (token) {
+                try {
+                    authenticatedUser = await getUserFromToken(token);
+                    // getUserFromToken già gestisce il caso di utente 'deleted = true' restituendo null
+                } catch (jwtError) {
+                    // Se getUserFromToken lancia un errore JWT (es. scaduto),
+                    // authenticatedUser rimarrà null. La logica successiva gestirà questo.
+                    // Se l'accesso richiede autenticazione e il token è scaduto,
+                    // la condizione !authenticatedUser più avanti restituirà 401.
+                    // console.warn('[userRoutes GET /:id] JWT verification error:', jwtError.name); // Opzionale per debug
+                }
+            }
+        }
+
+        // Regola: Admin può accedere a ogni ID possibile, anche se 'deleted'
+        if (authenticatedUser && authenticatedUser.tipologia === 'Admin') {
+            const { password, ...userToSend } = targetUser; // Escludi password
+            return res.status(200).json(userToSend); //NOSONAR
+        }
+
+        // Se non è un Admin a guardare, e l'utente target è 'deleted', allora è 404
+        if (targetUser.deleted) {
+            return res.status(404).json({ message: 'Utente non trovato.' });
+        }
+
+        // Regola: Artigiano, Cliente, e non loggato possono accedere a ogni Artigiano (non eliminato)
+        if (targetUser.tipologia === 'Artigiano') {
+            // Per ora, restituiamo tutti i campi tranne la password per semplicità.
+            // Si potrebbe definire un set di campi "pubblici" per l'Artigiano qui.
+            const { password, ...userToSend } = targetUser;
+            return res.status(200).json(userToSend); //NOSONAR
+        }
+
+        // A questo punto, targetUser NON è Artigiano (quindi è Cliente o Admin)
+        // E il visualizzatore NON è Admin.
+        // L'autenticazione è OBBLIGATORIA.
+        if (!authenticatedUser) {
+            // Questo cattura sia il caso di token non fornito, sia token invalido/scaduto
+            // (perché authenticatedUser sarebbe null), sia utente del token non attivo.
+            return res.status(401).json({ message: 'Autenticazione richiesta per visualizzare questo profilo.' });
+        }
+
+        // Regola: Cliente può accedere a se stesso
+        if (authenticatedUser.tipologia === 'Cliente' && authenticatedUser.idutente === targetUser.idutente) {
+            const { password, ...userToSend } = targetUser;
+            return res.status(200).json(userToSend); //NOSONAR
+        }
+
+        // Tutti gli altri casi sono proibiti
+        // (es. Cliente che cerca di vedere un altro Cliente o un Admin; Artigiano che cerca di vedere un Cliente o un Admin)
+        return res.status(403).json({ message: 'Accesso negato. Non hai i permessi necessari per visualizzare questo utente.' });
+
     } catch (error) {
-        //console.error(`Errore nel recuperare l'utente con ID ${id}:`, error);
-        res.status(500).json({ message: 'Errore del server durante il recupero dell utente.' });
+        console.error(`Errore nel recuperare l'utente con ID ${targetId}:`, error);
+        // Se l'errore è un errore JWT che è stato rilanciato da getUserFromToken
+        // (anche se getUserFromToken ora gestisce la maggior parte dei casi restituendo null)
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+             return res.status(401).json({ message: 'Accesso non autorizzato. Token fornito non valido o scaduto.' });
+        }
+        return res.status(500).json({ message: 'Errore del server durante il recupero dell utente.' });
     }
 });
 
@@ -309,9 +415,8 @@ router.put('/:id', isAuthenticated, hasPermission(['Admin', 'Self']), async (req
         const finalTipologia = currentUser.tipologia; //la tipologia non può essere cambiata
 
         //NOTA BENE, anche se questa route ha il permesso di tipo: Self, per assunzione non possiamo modificare altri admin (per ora)
-        if (finalTipologia === 'Admin') {
-            res.status(403).json({ message: 'Non puoi modificare un utente Admin.' });
-            
+        if (currentUser.tipologia === 'Admin') {
+            return res.status(403).json({ message: 'Non puoi modificare un utente Admin.' });
         }
 
         if (username === '' || email === '' || username === null || email === null) {

@@ -5,6 +5,7 @@ const router = express.Router();
 const pool = require('../config/db-connect.js');
 const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare.js'); // Import authentication middleware
 const FileType = require('file-type'); // For inferring image MIME type
+const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js'); // Import the new middleware
 const { rawImageParser } = require('../middleware/fileUploadMiddleware.js'); // Importa il middleware specifico per le immagini
 
 
@@ -104,24 +105,48 @@ router.post('/', isAuthenticated, hasPermission(['Artigiano']), async (req, res)
  * @access Public
  *
  * Interazione Black-Box:
- *  Input: Nessuno.
+ *  Input: Query parameters opzionali per filtri e ordinamento. Esempi:
+ *      - `?categoria=Elettronica`
+ *      - `?idartigiano=123`
+ *      - `?prezzounitario_gte=10&prezzounitario_lte=50`
+ *      - `?nome_like=Lampada`
+ *      - `?sort=prezzounitario&order=desc`
  *  Output:
- *      - Successo (200 OK): Array JSON di oggetti prodotto.
+ *      - Successo (200 OK): Array JSON di oggetti prodotto filtrati e ordinati.
  *        [ { "idprodotto": Number, "nome": String, ..., "idartigiano": Number }, ... ]
  *      - Errore (500 Internal Server Error): In caso di errore del server.
  *        { "error": "Stringa di errore" }
  */
+
+const productQueryConfig = {
+    allowedFilters: [
+        { queryParam: 'categoria', dbColumn: 'categoria', type: 'exact', dataType: 'string' },
+        { queryParam: 'idartigiano', dbColumn: 'idartigiano', type: 'exact', dataType: 'integer' },
+        { queryParam: 'prezzounitario_gte', dbColumn: 'prezzounitario', type: 'gte', dataType: 'number' },
+        { queryParam: 'prezzounitario_lte', dbColumn: 'prezzounitario', type: 'lte', dataType: 'number' },
+        { queryParam: 'nome_like', dbColumn: 'nome', type: 'like', dataType: 'string' },
+        { queryParam: 'quantitadisponibile_lte', dbColumn: 'quantitadisponibile', type: 'lte', dataType: 'integer' }
+    ],
+    allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto'],
+    defaultSortField: 'idprodotto',
+    defaultSortOrder: 'ASC'
+};
+
 // GET /api/products/notdeleted
-router.get('/notdeleted', async (req, res) => {
-    // Nessuna autenticazione richiesta, rotta pubblica
+router.get(
+    '/notdeleted',
+    createQueryBuilderMiddleware({ ...productQueryConfig, baseWhereClause: 'deleted = FALSE' }),
+    async (req, res) => {
     try {
-        // Usa minuscole per i nomi delle colonne del database
-        const allProducts = await pool.query(
-            "SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano FROM Prodotto WHERE deleted = FALSE ORDER BY idprodotto ASC"
-        );
-        //per ogni prodotto (ogni riga del risultato) trasformiamo i dati per la risposta
+        // req.sqlWhereClause will be like "WHERE (deleted = FALSE) AND categoria = $1 ..."
+        // or "WHERE (deleted = FALSE)" if no other filters are applied by the user.
+        // req.sqlQueryValues will contain the corresponding values
+        // req.sqlOrderByClause will be like "ORDER BY nome ASC"
+
+        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        
+        const allProducts = await pool.query(queryText, req.sqlQueryValues);
         const productsWithUrls = allProducts.rows.map(product => transformProductForResponse(product, req));
-        // Restituisce tutti i prodotti
         res.json(productsWithUrls);
     } catch (err) {
         console.error('Error fetching products:', err.message);
@@ -136,19 +161,32 @@ router.get('/notdeleted', async (req, res) => {
  * @access Admin
  *
  * Interazione Black-Box:
- *  Input: Nessuno.
+ *  Input: Query parameters opzionali per filtri e ordinamento (come per /notdeleted, ma include 'deleted' field).
  *  Output:
  *      - Successo (200 OK): Array JSON di oggetti prodotto.
  *        [ { "idprodotto": Number, "nome": String, ..., "idartigiano": Number, "deleted": Boolean }, ... ]
  *      - Errore (500 Internal Server Error): In caso di errore del server.
  *        { "error": "Stringa di errore" }
  */
-router.get('/', isAuthenticated, hasPermission(['Admin']), async (req, res) => { // IT: Accesso solo per Admin
-    try {
-        const allProductsIncludingDeleted = await pool.query(
-            "SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano, deleted FROM Prodotto ORDER BY idprodotto ASC"
-        );
 
+const adminProductQueryConfig = {
+    ...productQueryConfig, // Inherit base filters and sorts from public config
+    allowedFilters: [ // Override or extend allowedFilters
+        ...productQueryConfig.allowedFilters,
+        { queryParam: 'deleted', dbColumn: 'deleted', type: 'boolean', dataType: 'boolean' } // Admins can filter by deleted status
+    ],
+    allowedSortFields: [...productQueryConfig.allowedSortFields, 'deleted'], // Admins can sort by deleted status
+    // No baseWhereClause for admins, they see all by default unless they filter
+};
+
+router.get('/',
+    isAuthenticated,
+    hasPermission(['Admin']),
+    createQueryBuilderMiddleware(adminProductQueryConfig),
+    async (req, res) => {
+    try {
+        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano, deleted FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        const allProductsIncludingDeleted = await pool.query(queryText, req.sqlQueryValues);
         const productsWithUrls = allProductsIncludingDeleted.rows.map(product => transformProductForResponse(product, req));
         res.json(productsWithUrls);
     } catch (err) {
