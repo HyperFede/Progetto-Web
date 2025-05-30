@@ -1,0 +1,123 @@
+.custom-header {
+    background-color: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+}
+.logo-text {
+    color: var(--primary-color);
+}
+.header-nav .nav-link-custom {
+    color: var(--secondary-color);
+}
+.header-nav .nav-link-custom:hover,
+.header-nav .nav-link-custom:focus {
+    color: var(--primary-color);
+}
+.header-nav .nav-link-cart {
+    color: var(--primary-color);
+}
+.add-product-btn {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    border: 1px solid var(--primary-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+.add-product-btn:hover {
+    background-color: var(--tigers-eye);
+    border-color: var(--tigers-eye);
+    color: var(--text-light);
+}
+
+.back-link-add-product {
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+}
+.back-link-add-product:hover {
+    color: var(--primary-color);
+}
+.back-link-add-product i {
+    font-size: 1.2rem;
+}
+
+.add-product-page-title {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+/* Box Form Centrale */
+.add-product-form-box {
+    background-color: var(--text-light);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    box-shadow: var(--shadow);
+}
+
+.product-image-upload-box {
+    border: 2px dashed var(--border-color);
+    padding: 2rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    background-color: var(--background-color);
+    border-radius: 0.25rem;
+}
+.product-image-upload-box:hover {
+    border-color: var(--primary-color);
+}
+.product-image-upload-box i {
+    color: var(--secondary-color);
+    display: block;
+}
+.product-image-upload-box p {
+    margin-bottom: 0.25rem;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+#imagePreviewContainer img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+}
+
+
+.add-product-form-box .form-label {
+    color: var(--text-dark);
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+.add-product-form-box .form-control,
+.add-product-form-box .form-select {
+    background-color: var(--background-color);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+}
+.add-product-form-box .form-control:focus,
+.add-product-form-box .form-select:focus {
+    background-color: var(--background-color);
+    color: var(--text-dark);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(221, 161, 94, 0.25);
+}
+
+
+/* Bottone Conferma */
+.confirm-add-product-btn {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    border: 1px solid var(--primary-color);
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+.confirm-add-product-btn:hover {
+    background-color: var(--tigers-eye);
+    border-color: var(--tigers-eye);
+    color: var(--text-light);
+}
