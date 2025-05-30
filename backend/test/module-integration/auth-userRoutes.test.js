@@ -28,22 +28,35 @@ app.use('/api/users', userRoutes);
 // --- Test Setup and Teardown ---
 let server;
 const testPort = 3003; // Use a different port for testing
+let clienteRegisteredData; // Declare at the top level
 
 beforeAll(async () => {
     // Start the Express server
     server = app.listen(testPort);
 });
 
-afterAll(async () => {
+afterAll(async () => { // This afterAll is for the entire file
     if (server) {
         await new Promise(resolve => server.close(resolve));
     }
+    // Clean up the main clienteRegisteredData user
+    if (clienteRegisteredData && clienteRegisteredData.idutente) {
+        try {
+            await pool.query('DELETE FROM utente WHERE idutente = $1', [clienteRegisteredData.idutente]);
+            console.log(`Cleaned up main test user (clienteRegisteredData) ID: ${clienteRegisteredData.idutente}`);
+        } catch (error) {
+            console.error(`Error cleaning up main test user (clienteRegisteredData) ID ${clienteRegisteredData.idutente}:`, error.message);
+        }
+    }
+
+    // Close the database connection pool to allow Jest to exit
+    await pool.end();
+    console.log('Database pool closed.');
 });
 
 // --- Integration Tests for User Journey ---
 
 describe('User Journey: Registration, Login, API Access', () => {
-    let clienteRegisteredData; // To store data returned from registration
     let clienteToken;
 
 
@@ -64,7 +77,7 @@ describe('User Journey: Registration, Login, API Access', () => {
         // For example, ensuring the database is clean or specific test data exists.
         console.log('Starting Cliente user journey tests.');
     });
-
+    
     test('should register a new Cliente via POST /api/users', async () => {
         const res = await request(app)
             .post('/api/users')
@@ -99,7 +112,7 @@ describe('User Journey: Registration, Login, API Access', () => {
         expect(res.body.user.idutente).toBe(clienteRegisteredData.idutente);
         clienteToken = res.body.token; // Save token for subsequent tests
     });
-
+    
     test('Cliente should update their own profile via PUT /api/users/:id', async () => {
         // Depends on previous tests
         expect(clienteRegisteredData).toBeDefined();
@@ -153,79 +166,107 @@ describe('User Journey: Registration, Login, API Access', () => {
             
         });
         
+       
+    }); // End of the main 'User Journey' describe block for registration/login
+
+    // Start a new describe block for more isolated tests to prevent token bleeding
+    describe('Isolated Token and Account Tests', () => {
+        let isolatedTestUser; // User for these specific tests
+        let isolatedTestUserId;
+
+        beforeAll(async () => {
+            // Create a dedicated user for this block of tests
+            const userDetails = {
+                username: 'isolatedUserForTokenTest',
+                nome: 'Isolated',
+                cognome: 'User',
+                email: 'isolated.user@example.com',
+                password: 'passwordIsolated123',
+                tipologia: 'Cliente',
+                indirizzo: '123 Isolation Drive',
+            };
+            const registerRes = await request(app).post('/api/users').send(userDetails);
+            expect(registerRes.statusCode).toBe(201);
+            isolatedTestUser = registerRes.body;
+            isolatedTestUserId = isolatedTestUser.idutente;
+        });
+
         test('should return 401 if the token is expired', async () => {
-            expect(clienteRegisteredData).toBeDefined(); // Relies on the user created in the outer scope
-            expect(clienteRegisteredData.idutente).toBeDefined();
+            expect(isolatedTestUser).toBeDefined();
+            expect(isolatedTestUserId).toBeDefined();
 
-            // Sign a token that expires almost immediately
+            // Sign a token that is already expired by setting 'iat' and 'exp' in the past
+            // and NOT providing the 'expiresIn' option.
+            // Ensure 'exp' is a Unix timestamp (seconds since epoch).
+            const iatTime = Math.floor(Date.now() / 1000) - (60 * 60); // Issued 1 hour ago
+            const expTime = Math.floor(Date.now() / 1000) - (30 * 60); // Expired 30 minutes ago
+            
+            //console.log('[ISOLATED_TEST_DEBUG] Creating expired token with iat:', iatTime, 'exp:', expTime, 'for user ID:', isolatedTestUserId);
+
             const expiredToken = jwt.sign(
-                { user: { id: clienteRegisteredData.idutente } },
-                jwtSecret,
-                { expiresIn: '1ms' } // Set a very short expiration time
+                { 
+                    user: { id: isolatedTestUserId },
+                    iat: iatTime,
+                    exp: expTime
+                },                jwtSecret // No 'expiresIn' option
             );
+            
+            // Log the token that is ABOUT to be sent
+            //console.log('[ISOLATED_TEST_DEBUG] Expired token variable right before sending:', expiredToken);
+            //console.log('[ISOLATED_TEST_DEBUG] Target URL for expired token test:', `/api/users/${isolatedTestUserId}`);
 
-            // Wait for a moment to ensure the token has expired
-            await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
-
-            const res = await request(app)
-                .get(`/api/users/${clienteRegisteredData.idutente}`) // Attempt to access a protected route
+            const apiRequest = request(app)
+                .get(`/api/users/${isolatedTestUserId}`) // Attempt to access a protected route
                 .set('Authorization', `Bearer ${expiredToken}`);
+            
+            const res = await apiRequest;
 
             expect(res.statusCode).toBe(401);
-            expect(res.body.message).toBe('Accesso non autorizzato. Token non valido o scaduto.');
+            expect(res.body.message).toBe('Autenticazione richiesta per visualizzare questo profilo.'); 
         });
         test('Cliente should be able to delete their own account via DELETE /api/users/:id', async () => {
             // For this, let's register and login a temporary user to delete
-            const tempClienteDetails = { ...newClienteDetails, email: 'tempdelete@example.com', username: 'tempdeleteuser' };
+            const tempClienteDetails = { username: 'tempdeleteuser', nome: 'Temp', cognome: 'Delete', email: 'tempdelete@example.com', password: 'passwordTemp123', tipologia: 'Cliente', indirizzo: 'Temp Address' };
             const registerRes = await request(app).post('/api/users').send(tempClienteDetails);
             expect(registerRes.statusCode).toBe(201);
             // Store id for cleanup piu tardi
-            tempClienteIdForCleanup = registerRes.body.idutente;
+            const tempClienteIdForThisTest = registerRes.body.idutente; // Use a local const
 
-            const loginRes = await request(app).post('/api/auth/login').send({ username: tempClienteDetails.username, password: tempClienteDetails.password });
+            const loginRes = await request(app).post('/api/auth/login').send({ username: tempClienteDetails.username, password: tempClienteDetails.password});
             expect(loginRes.statusCode).toBe(200);
             const tempClienteToken = loginRes.body.token;
 
             const deleteRes = await request(app)
-                .delete(`/api/users/${tempClienteIdForCleanup}`)
+                .delete(`/api/users/${tempClienteIdForThisTest}`)
                 .set('Authorization', `Bearer ${tempClienteToken}`);
             expect(deleteRes.statusCode).toBe(200); // Or 204
             expect(deleteRes.body.message).toContain('eliminato');
-            //TODO: modifica il controllo che deve venire da parte di un admin, in quanto ora viene fatto da se stesso e ovviamente non passa
-            // Verify user is gone or marked as deleted 
+
+            // Verify user is no longer accessible with their old token because they are marked as deleted
             const verifyRes = await request(app)
-                .get(`/api/users/${tempClienteIdForCleanup}`)
+                .get(`/api/users/${tempClienteIdForThisTest}`)
                 .set('Authorization', `Bearer ${tempClienteToken}`);
-            //NOTA il messaggio di errore non viene da get api/user, ma da authMiddleWare, in quanto NON PASSA isAuthenticated, perchè è eliminato
-            expect(verifyRes.statusCode).toBe(401); // 
-            expect(verifyRes.body.message).toMatch('Accesso non autorizzato. Utente non più attivo.'); 
+            // After soft deletion, a non-Admin attempting to GET the user profile should receive a 404
+            expect(verifyRes.statusCode).toBe(404); 
+            expect(verifyRes.body.message).toBe('Utente non trovato.'); 
+
+            // Cleanup this specific temporary user
+            if (tempClienteIdForThisTest) {
+                await pool.query('DELETE FROM utente WHERE idutente = $1', [tempClienteIdForThisTest]);
+                console.log(`Cleaned up user from delete test: ${tempClienteIdForThisTest}`);
+            }
           });
 
 
 
         afterAll(async () => {
-        // Clean up users created during these tests
-            if (clienteRegisteredData && clienteRegisteredData.idutente) {
+            // Clean up the user created for this isolated describe block
+            if (isolatedTestUserId) {
                 try {
-                    console.log(`Attempting to clean up user ID: ${clienteRegisteredData.idutente}`);
-                    // Use a direct database call to delete the user
-                    // This bypasses API permissions and directly cleans the test data.
-                    await pool.query('DELETE FROM utente WHERE idutente = $1', [clienteRegisteredData.idutente]);
-                    console.log(`Successfully cleaned up user ID: ${clienteRegisteredData.idutente}`);
+                    await pool.query('DELETE FROM utente WHERE idutente = $1', [isolatedTestUserId]);
+                    console.log(`Cleaned up isolatedTestUser ID: ${isolatedTestUserId}`);
                 } catch (error) {
-                    console.error(`Error cleaning up user ID ${clienteRegisteredData.idutente}:`, error.message);
-                    // Optionally, re-throw or handle if cleanup failure is critical
-                }
-            }
-
-            // Clean up the temporary user created for the delete test
-            if (tempClienteIdForCleanup) {
-                try {
-                    console.log(`Attempting to clean up temporary user ID: ${tempClienteIdForCleanup}`);
-                    await pool.query('DELETE FROM utente WHERE idutente = $1', [tempClienteIdForCleanup]);
-                    console.log(`Successfully cleaned up temporary user ID: ${tempClienteIdForCleanup}`);
-                } catch (error) {
-                    console.error(`Error cleaning up temporary user ID ${tempClienteIdForCleanup}:`, error.message);
+                    console.error(`Error cleaning up isolatedTestUser ID ${isolatedTestUserId}:`, error.message);
                 }
             }
         });

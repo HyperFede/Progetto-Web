@@ -8,6 +8,11 @@ const FileType = require('file-type'); // For inferring image MIME type
 const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js'); // Import the new middleware
 const { rawImageParser } = require('../middleware/fileUploadMiddleware.js'); // Importa il middleware specifico per le immagini
 
+// Funzioni di aiuto per la gestione delle transazioni.
+// Possibile da mettere in un middleWare.
+const beginTransaction = async () => pool.query('BEGIN');
+const commitTransaction = async () => pool.query('COMMIT');
+const rollbackTransaction = async () => pool.query('ROLLBACK');
 
 // Funzione di aiuto per trasformare i dati del prodotto prima di inviarli come risposta.
 // Aggiunge l'URL dell'immagine se presente e rimuove il campo 'immagine', trasforma i numeri in float se necessario.
@@ -62,13 +67,13 @@ router.post('/', isAuthenticated, hasPermission(['Artigiano']), async (req, res)
 
         // Validazione di base
         if (!nome || !descrizione || !categoria || prezzounitario === undefined || quantitadisponibile === undefined) {
-            return res.status(400).json({ error: 'Campi obbligatori mancanti: nome, descrizione, categoria, prezzounitario, quantitadisponibile sono richiesti.' });
+            return res.status(400).json({ error: 'Campi obbligatori mancanti: nome, descrizione, categoria, prezzo unitario, quantità disponibile sono richiesti.' });
         }
         if (typeof prezzounitario !== 'number' || prezzounitario <= 0) { 
-            return res.status(400).json({ error: 'prezzounitario deve essere un numero non negativo.' });
+            return res.status(400).json({ error: 'Il prezzo unitario deve essere un numero positivo.' });
         }
         if (typeof quantitadisponibile !== 'number' || quantitadisponibile <= 0 || !Number.isInteger(quantitadisponibile)) { 
-            return res.status(400).json({ error: 'quantitadisponibile deve essere un intero non negativo.' });
+            return res.status(400).json({ error: 'La quantità disponibile deve essere un intero positivo.' });
         }
 
         // Usa minuscole per i nomi delle colonne del database nella query SQL
@@ -83,40 +88,21 @@ router.post('/', isAuthenticated, hasPermission(['Artigiano']), async (req, res)
     } catch (err) {
         console.error('Errore durante la creazione del prodotto:', err.message, err.stack);
         if (err.code === '23505') { // violazione_univocità
-            return res.status(409).json({ error: 'Creazione prodotto fallita a causa di una violazione del vincolo di univocità.' });
+            return res.status(409).json({ error: 'Creazione prodotto fallita a causa di una violazione del vincolo di unicità.' });
         }
         if (err.code === '23503') { // violazione_chiave_esterna
-            return res.status(400).json({ error: 'idartigiano finale non valido. Artigiano non esistente.' });
+            return res.status(400).json({ error: 'ID artigiano finale non valido. Artigiano non esistente.' });
         }
         if (err.code === '23514') { // violazione_controllo (es. quantitadisponibile >= 0)
             if (err.constraint && err.constraint.includes('quantitadisponibile')) {
-               return res.status(400).json({ error: "quantitadisponibile cannot be negative." });
+               return res.status(400).json({ error: "La quantità disponibile non può essere negativa." });
             }
-            return res.status(400).json({ error: "Product data violates a check constraint." });
+            return res.status(400).json({ error: "I dati del prodotto violano un vincolo di controllo." });
         }
-        res.status(500).json({ error: "Server error while creating product." });
+        res.status(500).json({ error: "Errore del server durante la creazione del prodotto." });
     }
 });
 
-/**
- * @route GET /api/products/notdeleted
- * @description Recupera tutti i prodotti che non sono marcati come 'deleted'.
- *              Questa rotta è pubblica e non richiede autenticazione.
- * @access Public
- *
- * Interazione Black-Box:
- *  Input: Query parameters opzionali per filtri e ordinamento. Esempi:
- *      - `?categoria=Elettronica`
- *      - `?idartigiano=123`
- *      - `?prezzounitario_gte=10&prezzounitario_lte=50`
- *      - `?nome_like=Lampada`
- *      - `?sort=prezzounitario&order=desc`
- *  Output:
- *      - Successo (200 OK): Array JSON di oggetti prodotto filtrati e ordinati.
- *        [ { "idprodotto": Number, "nome": String, ..., "idartigiano": Number }, ... ]
- *      - Errore (500 Internal Server Error): In caso di errore del server.
- *        { "error": "Stringa di errore" }
- */
 
 const productQueryConfig = {
     allowedFilters: [
@@ -132,27 +118,6 @@ const productQueryConfig = {
     defaultSortOrder: 'ASC'
 };
 
-// GET /api/products/notdeleted
-router.get(
-    '/notdeleted',
-    createQueryBuilderMiddleware({ ...productQueryConfig, baseWhereClause: 'deleted = FALSE' }),
-    async (req, res) => {
-    try {
-        // req.sqlWhereClause will be like "WHERE (deleted = FALSE) AND categoria = $1 ..."
-        // or "WHERE (deleted = FALSE)" if no other filters are applied by the user.
-        // req.sqlQueryValues will contain the corresponding values
-        // req.sqlOrderByClause will be like "ORDER BY nome ASC"
-
-        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
-        
-        const allProducts = await pool.query(queryText, req.sqlQueryValues);
-        const productsWithUrls = allProducts.rows.map(product => transformProductForResponse(product, req));
-        res.json(productsWithUrls);
-    } catch (err) {
-        console.error('Error fetching products:', err.message);
-        res.status(500).json({ error: "Server error while fetching products." });
-    }
-});
 
 /**
  * @route GET /api/products/ 
@@ -161,7 +126,7 @@ router.get(
  * @access Admin
  *
  * Interazione Black-Box:
- *  Input: Query parameters opzionali per filtri e ordinamento (come per /notdeleted, ma include 'deleted' field).
+ *  Input: Query parameters opzionali per filtri e ordinamento (come per /notdeleted (vedi sotto), ma include 'deleted' field).
  *  Output:
  *      - Successo (200 OK): Array JSON di oggetti prodotto.
  *        [ { "idprodotto": Number, "nome": String, ..., "idartigiano": Number, "deleted": Boolean }, ... ]
@@ -191,7 +156,50 @@ router.get('/',
         res.json(productsWithUrls);
     } catch (err) {
         console.error('Error fetching all products (including deleted):', err.message, err.stack);
-        res.status(500).json({ error: "Server error while fetching all products." });
+        res.status(500).json({ error: "Errore del server durante il recupero di tutti i prodotti." });
+    }
+});
+
+
+/**
+ * @route GET /api/products/notdeleted
+ * @description Recupera tutti i prodotti che non sono marcati come 'deleted'.
+ *              Questa rotta è pubblica e non richiede autenticazione.
+ * @access Public
+ *
+ * Interazione Black-Box:
+ *  Input: Query parameters opzionali per filtri e ordinamento. Esempi:
+ *      - `?categoria=Elettronica`
+ *      - `?idartigiano=123`
+ *      - `?prezzounitario_gte=10&prezzounitario_lte=50`
+ *      - `?nome_like=Lampada`
+ *      - `?sort=prezzounitario&order=desc`
+ *  Output:
+ *      - Successo (200 OK): Array JSON di oggetti prodotto filtrati e ordinati.
+ *        [ { "idprodotto": Number, "nome": String, ..., "idartigiano": Number }, ... ]
+ *      - Errore (500 Internal Server Error): In caso di errore del server.
+ *        { "error": "Stringa di errore" }
+ */
+
+// GET /api/products/notdeleted
+router.get(
+    '/notdeleted',
+    createQueryBuilderMiddleware({ ...productQueryConfig, baseWhereClause: 'deleted = FALSE' }),
+    async (req, res) => {
+    try {
+        // req.sqlWhereClause will be like "WHERE (deleted = FALSE) AND categoria = $1 ..."
+        // or "WHERE (deleted = FALSE)" if no other filters are applied by the user.
+        // req.sqlQueryValues will contain the corresponding values
+        // req.sqlOrderByClause will be like "ORDER BY nome ASC"
+
+        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        
+        const allProducts = await pool.query(queryText, req.sqlQueryValues);
+        const productsWithUrls = allProducts.rows.map(product => transformProductForResponse(product, req));
+        res.json(productsWithUrls);
+    } catch (err) {
+        console.error('Error fetching products:', err.message);
+        res.status(500).json({ error: "Errore del server durante il recupero dei prodotti." });
     }
 });
 
@@ -223,20 +231,20 @@ router.get('/:id', async (req, res) => {
         // const authenticatedUser = req.user; // Rimosso poiché l'autenticazione non è più richiesta
  
         if (isNaN(productId)) {
-            return res.status(400).json({ error: "Invalid product ID format." });
+            return res.status(400).json({ error: "Formato ID prodotto non valido." });
         }
         // Usa minuscole per i nomi delle colonne del database
         const productResult = await pool.query("SELECT * FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE", [productId]);
 
         if (productResult.rows.length === 0) {
-            return res.status(404).json({ error: "Prodotto non trovato o è stato eliminato." });
+            return res.status(404).json({ error: "Prodotto non trovato o è stato rimosso." });
         }
 
         const productData = productResult.rows[0];
         res.json(transformProductForResponse(productData, req));
     } catch (err) {
         console.error('Error fetching product by ID:', err.message);
-        res.status(500).json({ error: "Server error while fetching product." });
+        res.status(500).json({ error: "Errore del server durante il recupero del prodotto." });
     }
 });
 
@@ -258,7 +266,6 @@ router.get('/:id', async (req, res) => {
  *          "categoria": "String",
  *          "prezzounitario": "Number (non negativo)",
  *          "quantitadisponibile": "Integer (non negativo)",
- *          // "immagine": "String (base64 encoded o null)" - Questo campo non verrà più usato qui
  *          "idartigiano": "Number (intero, solo se l'utente è Admin e vuole cambiare proprietario)"
  *        }
  *  Output:
@@ -272,7 +279,6 @@ router.get('/:id', async (req, res) => {
  *      - Errore (500 Internal Server Error): In caso di errore del server, inclusi violazioni di vincoli DB (es. `idartigiano` non esistente se modificato da Admin).
  *        { "error": "Stringa di errore" }
  */
-// PUT /api/products/:id
 router.put('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), async (req, res) => {
     // IT: Accesso per Artigiano (proprio prodotto) o Admin (qualsiasi prodotto)
     try {
@@ -282,19 +288,19 @@ router.put('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), async 
         const authenticatedUserId = authenticatedUser.idutente;
 
         if (isNaN(productId)) {
-            return res.status(400).json({ error: "Invalid product ID format." });
+            return res.status(400).json({ error: "Formato ID prodotto non valido." });
         }
 
         // Recupera il prodotto corrente per vedere se esiste e non è eliminato
         const existingProductQuery = await pool.query("SELECT * FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE", [productId]);
         if (existingProductQuery.rows.length === 0) {
-            return res.status(404).json({ error: "Prodotto non trovato o è stato eliminato, impossibile aggiornare." });
+            return res.status(404).json({ error: "Prodotto non trovato o è stato rimosso, impossibile aggiornare." });
         }
         const existingProduct = existingProductQuery.rows[0];
 
         // Autorizzazione: L'Artigiano può aggiornare solo i propri prodotti. L'Admin può aggiornare qualsiasi prodotto.
         if (authenticatedUser.tipologia === 'Artigiano' && existingProduct.idartigiano !== authenticatedUserId) {
-            return res.status(403).json({ error: "Vietato: L'Artigiano può aggiornare solo i propri prodotti." });
+            return res.status(403).json({ error: "Vietato: l'artigiano può aggiornare solo i propri prodotti." });
         }
 
         // Destruttura con chiavi minuscole attese dal corpo della richiesta
@@ -309,20 +315,20 @@ router.put('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), async 
         if (categoria !== undefined) updates.categoria = categoria;
         if (prezzounitario !== undefined) {
             if (typeof prezzounitario !== 'number' || prezzounitario < 0) {
-                return res.status(400).json({ error: 'prezzounitario deve essere un numero non negativo.' });
+                return res.status(400).json({ error: 'Il prezzo unitario deve essere un numero non negativo.' });
             }
             updates.prezzounitario = prezzounitario;
         }
         if (quantitadisponibile !== undefined) {
             if (typeof quantitadisponibile !== 'number' || quantitadisponibile < 0 || !Number.isInteger(quantitadisponibile)) {
-                return res.status(400).json({ error: 'quantitadisponibile deve essere un intero non negativo.' });
+                return res.status(400).json({ error: 'La quantità disponibile deve essere un intero non negativo.' });
             }
             updates.quantitadisponibile = quantitadisponibile;
         }
         // Gestisci l'aggiornamento di idartigiano in base al ruolo dell'utente
         if (newIdArtigiano !== undefined) {
             if (typeof newIdArtigiano !== 'number' || !Number.isInteger(newIdArtigiano)) {
-                return res.status(400).json({ error: 'idartigiano must be an integer.' });
+                return res.status(400).json({ error: 'L\'ID artigiano deve essere un intero.' });
             }
 
             if (authenticatedUser.tipologia === 'Admin') {
@@ -333,7 +339,7 @@ router.put('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), async 
                 // They cannot change the owner to someone else.
                 // The newIdArtigiano, if provided, must be their own ID.
                 if (newIdArtigiano !== authenticatedUserId) {
-                    return res.status(403).json({ error: "Vietato: Gli Artigiani non possono cambiare il proprietario del prodotto." });
+                    return res.status(403).json({ error: "Vietato: gli artigiani non possono cambiare il proprietario del prodotto." });
                 }
                 // Se newIdArtigiano è il proprio ID, è un aggiornamento valido (anche se possibilmente ridondante se invariato).
                 updates.idartigiano = newIdArtigiano;
@@ -369,22 +375,26 @@ router.put('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), async 
         
         const productData = updatedProductResult.rows[0]; // il driver pg restituisce chiavi minuscole
         const transformedProduct = transformProductForResponse(productData, req);
-        res.json({ message: "Product updated successfully", product: transformedProduct });
+        let message = "Prodotto aggiornato con successo";
+        if (transformedProduct.quantitadisponibile === 0) {
+            message += ". Nota: lo stock del prodotto è ora 0.";
+        }
+        res.json({ message: message, product: transformedProduct });
     } catch (err) {
         console.error('Errore durante l\'aggiornamento del prodotto:', err.message, err.stack);
         if (err.code === '23503') { // violazione_chiave_esterna
-            return res.status(400).json({ error: 'Invalid idartigiano. Artisan does not exist.' });
+            return res.status(400).json({ error: 'ID artigiano non valido. L\'artigiano non esiste.' });
         }
         if (err.code === '23514') { // check_violation
             if (err.constraint && err.constraint.includes('quantitadisponibile')) {
-                return res.status(400).json({ error: "quantitadisponibile cannot be negative." });
+                return res.status(400).json({ error: "La quantità disponibile non può essere negativa." });
             }
-            return res.status(400).json({ error: "Update violates a check constraint." });
+            return res.status(400).json({ error: "L'aggiornamento viola un vincolo di controllo." });
         }
         if (err.code === '23505') { // violazione_univocità
-            return res.status(409).json({ error: 'Update failed due to a unique constraint violation.' });
+            return res.status(409).json({ error: 'Aggiornamento fallito a causa di una violazione del vincolo di unicità.' });
         }
-        res.status(500).json({ error: "Server error while updating product." });
+        res.status(500).json({ error: "Errore del server durante l'aggiornamento del prodotto." });
     }
 });
 
@@ -418,20 +428,20 @@ router.delete('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), asy
         const authenticatedUser = req.user; // Ottieni l'oggetto utente completo
 
         if (isNaN(productId)) {
-            return res.status(400).json({ error: "Invalid product ID format." });
+            return res.status(400).json({ error: "Formato ID prodotto non valido." });
         }
 
         // Controlla se il prodotto esiste e non è eliminato
         // Non è necessario recuperare 'immagine' qui perché non la eliminiamo dal filesystem
         const productCheck = await pool.query("SELECT idartigiano, immagine FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE", [productId]);
         if (productCheck.rows.length === 0) {
-            return res.status(404).json({ error: "Prodotto non trovato o già eliminato." });
+            return res.status(404).json({ error: "Prodotto non trovato o già rimosso." });
         }
         const productToDelete = productCheck.rows[0];
 
         // Autorizzazione: L'Artigiano può eliminare solo i propri prodotti. L'Admin può eliminare qualsiasi prodotto.
         if (authenticatedUser.tipologia === 'Artigiano' && productCheck.rows[0].idartigiano !== authenticatedUser.idutente) {
-            return res.status(403).json({ error: "Vietato: L'Artigiano può eliminare solo i propri prodotti." });
+            return res.status(403).json({ error: "Vietato: l'artigiano può eliminare solo i propri prodotti." });
         }
 
         let deleteQueryText;
@@ -452,19 +462,165 @@ router.delete('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), asy
         if (deleteProduct.rowCount === 0) {
             // Questo può accadere se il prodotto è stato eliminato tra il controllo e l'aggiornamento (race condition)
             // o se era già eliminato e `AND deleted = FALSE` nell'UPDATE ha impedito un aggiornamento.
-            return res.status(404).json({ error: "Prodotto non trovato o già eliminato." });
+            return res.status(404).json({ error: "Prodotto non trovato o già rimosso." });
         }
         // Se si volesse pulire il campo immagine nel DB durante la soft delete, si aggiungerebbe:
         // await pool.query("UPDATE Prodotto SET immagine = NULL WHERE idprodotto = $1", [productId]);
         // Ma per ora, la soft delete non tocca il campo immagine, c'è un ednpoint dedicato.
 
-        res.json({ message: "Prodotto eliminato (soft delete) con successo", idprodotto: deleteProduct.rows[0].idprodotto });
+        res.json({ message: "Prodotto rimosso (soft delete) con successo", idprodotto: deleteProduct.rows[0].idprodotto });
     } catch (err) {
         console.error('Errore durante il soft delete del prodotto:', err.message);
-        res.status(500).json({ error: "Server error while soft deleting product." });
+        res.status(500).json({ error: "Errore del server durante la rimozione (soft delete) del prodotto." });
     }
 });
 
+
+
+/**
+ * @route PUT /api/products/:id/stock/add
+ * @description Incrementa la quantità disponibile (stock) di un prodotto.
+ * @access Artigiano (per i propri prodotti), Admin
+ *
+ * Interazione Black-Box:
+ *  Input:
+ *      - Parametro di rotta `id`: ID numerico del prodotto.
+ *      - Corpo della richiesta (req.body): Oggetto JSON con il campo `quantita`.
+ *        { "quantita": Number (intero positivo) }
+ *  Output:
+ *      - Successo (200 OK): Oggetto JSON con i dati del prodotto aggiornato.
+ *      - Errore (400 Bad Request): ID prodotto non valido, `quantita` non valido o mancante.
+ *      - Errore (403 Forbidden): Se un Artigiano tenta di modificare un prodotto non suo.
+ *      - Errore (404 Not Found): Se il prodotto non esiste o è stato eliminato.
+ *      - Errore (500 Internal Server Error): In caso di errore del server.
+ */
+router.put('/:id/stock/add', isAuthenticated, hasPermission(['Artigiano', 'Admin']), async (req, res) => {
+    const { id } = req.params;
+    const productId = parseInt(id, 10);
+    const { quantita } = req.body;
+    const authenticatedUser = req.user;
+
+    if (isNaN(productId)) {
+        return res.status(400).json({ error: "Formato ID prodotto non valido." });
+    }
+    if (typeof quantita !== 'number' || !Number.isInteger(quantita) || quantita <= 0) {
+        return res.status(400).json({ error: "La quantità deve essere un intero positivo." });
+    }
+
+    try {
+        await beginTransaction();
+
+        // Fetch product, lock the row for update if using transactions robustly
+        const productQuery = await pool.query("SELECT * FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE FOR UPDATE", [productId]);
+        if (productQuery.rows.length === 0) {
+            await rollbackTransaction();
+            return res.status(404).json({ error: "Prodotto non trovato o è stato rimosso." });
+        }
+        const product = productQuery.rows[0];
+
+        // Authorization
+        if (authenticatedUser.tipologia === 'Artigiano' && product.idartigiano !== authenticatedUser.idutente) {
+            await rollbackTransaction();
+            return res.status(403).json({ error: "Vietato: l'artigiano può modificare solo i propri prodotti." });
+        }
+
+        const newQuantity = product.quantitadisponibile + quantita;
+
+        const updateResult = await pool.query(
+            "UPDATE Prodotto SET quantitadisponibile = $1 WHERE idprodotto = $2 RETURNING *",
+            [newQuantity, productId]
+        );
+
+        await commitTransaction();
+        const updatedProduct = updateResult.rows[0];
+        const transformedProduct = transformProductForResponse(updatedProduct, req);
+        const message = "Stock del prodotto incrementato con successo";
+        // No special message needed for stock becoming 0 when adding,
+        // as it's an increment operation.
+
+        res.json({ message: message, product: transformedProduct });
+    } catch (err) {
+        await rollbackTransaction();
+        console.error(`Error incrementing stock for product ID ${productId}:`, err.message, err.stack);
+        // Potentially handle specific DB errors like check constraint violations if any
+        res.status(500).json({ error: "Errore del server durante l'incremento dello stock del prodotto." });
+    }
+});
+
+/**
+ * @route PUT /api/products/:id/stock/subtract
+ * @description Decrementa la quantità disponibile (stock) di un prodotto.
+ * @access Artigiano (per i propri prodotti), Admin per qualsiasi prodotto.
+ *
+ * Interazione Black-Box:
+ *  Input:
+ *      - Parametro di rotta `id`: ID numerico del prodotto.
+ *      - Corpo della richiesta (req.body): Oggetto JSON con il campo `quantita`.
+ *        { "quantita": Number (intero positivo) }
+ *  Output:
+ *      - Successo (200 OK): Oggetto JSON con i dati del prodotto aggiornato.
+ *      - Errore (400 Bad Request): ID prodotto non valido, `quantita` non valido o mancante, o stock insufficiente.
+ *      - Errore (403 Forbidden): Se un Artigiano tenta di modificare un prodotto non suo.
+ *      - Errore (404 Not Found): Se il prodotto non esiste o è stato eliminato.
+ *      - Errore (500 Internal Server Error): In caso di errore del server.
+ */
+router.put('/:id/stock/subtract', isAuthenticated, hasPermission(['Artigiano', 'Admin']), async (req, res) => {
+    const { id } = req.params;
+    const productId = parseInt(id, 10);
+    const { quantita } = req.body;
+    const authenticatedUser = req.user;
+
+    if (isNaN(productId)) {
+        return res.status(400).json({ error: "Formato ID prodotto non valido." });
+    }
+    if (typeof quantita !== 'number' || !Number.isInteger(quantita) || quantita <= 0) {
+        return res.status(400).json({ error: "La quantità deve essere un intero positivo." });
+    }
+
+    try {
+        await beginTransaction();
+
+        const productQuery = await pool.query("SELECT * FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE FOR UPDATE", [productId]);
+        if (productQuery.rows.length === 0) {
+            await rollbackTransaction();
+            return res.status(404).json({ error: "Prodotto non trovato o è stato rimosso." });
+        }
+        const product = productQuery.rows[0];
+
+        if (authenticatedUser.tipologia === 'Artigiano' && product.idartigiano !== authenticatedUser.idutente) {
+            await rollbackTransaction();
+            return res.status(403).json({ error: "Vietato: l'artigiano può modificare solo i propri prodotti." });
+        }
+
+        if (product.quantitadisponibile < quantita) {
+            await rollbackTransaction();
+            return res.status(400).json({ error: `Stock insufficiente. Disponibili: ${product.quantitadisponibile}, si sta tentando di decrementare di: ${quantita}.` });
+        }
+        
+        const newQuantity = product.quantitadisponibile - quantita;
+
+        const updateResult = await pool.query(
+            "UPDATE Prodotto SET quantitadisponibile = $1 WHERE idprodotto = $2 RETURNING *",
+            [newQuantity, productId]
+        );
+
+        await commitTransaction();
+        const updatedProduct = updateResult.rows[0];
+        const transformedProduct = transformProductForResponse(updatedProduct, req);
+        let message = "Stock del prodotto decrementato con successo";
+        if (transformedProduct.quantitadisponibile === 0) {
+            message += ". Nota: lo stock del prodotto è ora 0.";
+        }
+        res.json({ message: message, product: transformedProduct });
+    } catch (err) {
+        await rollbackTransaction();
+        console.error(`Error decrementing stock for product ID ${productId}:`, err.message, err.stack);
+        if (err.code === '23514') { // check_violation (e.g., quantitadisponibile >= 0 constraint)
+            return res.status(400).json({ error: "Lo stock non può essere negativo. L'aggiornamento viola un vincolo di controllo." });
+        }
+        res.status(500).json({ error: "Errore del server durante il decremento dello stock del prodotto." });
+    }
+});
 /**
  * @route PUT /api/products/:id/image
  * @description Carica/Aggiorna l'immagine per un prodotto esistente.
@@ -487,7 +643,6 @@ router.delete('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), asy
  *      - Errore (415 Unsupported Media Type): Se il Content-Type non è un tipo di immagine supportato.
  *      - Errore (500 Internal Server Error): In caso di errore del server.
  */
-// La definizione di rawImageUploadMiddleware è stata rimossa.
 router.put('/:id/image', isAuthenticated, hasPermission(['Artigiano', 'Admin']), rawImageParser('10mb'), async (req, res) => {
     try {
         const { id } = req.params;
@@ -506,11 +661,11 @@ router.put('/:id/image', isAuthenticated, hasPermission(['Artigiano', 'Admin']),
         // Controlla l'esistenza del prodotto e i permessi
         const productQuery = await pool.query("SELECT idartigiano FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE", [productId]);
         if (productQuery.rows.length === 0) {
-            return res.status(404).json({ error: "Prodotto non trovato o eliminato." });
+            return res.status(404).json({ error: "Prodotto non trovato o rimosso." });
         }
 
         if (authenticatedUser.tipologia === 'Artigiano' && productQuery.rows[0].idartigiano !== authenticatedUser.idutente) {
-            return res.status(403).json({ error: "Vietato: L'Artigiano può aggiornare immagini solo per i propri prodotti." });
+            return res.status(403).json({ error: "Vietato: l'artigiano può aggiornare immagini solo per i propri prodotti." });
         }
 
         // Salva il buffer dell'immagine (req.body) direttamente nel database
@@ -518,7 +673,6 @@ router.put('/:id/image', isAuthenticated, hasPermission(['Artigiano', 'Admin']),
             "UPDATE Prodotto SET immagine = $1 WHERE idprodotto = $2",
             [req.body, productId]
         );
-
         if (updateResult.rowCount === 0) {
             // Non dovrebbe accadere se il controllo precedente ha avuto successo, ma è una sicurezza
             return res.status(404).json({ error: "Aggiornamento immagine fallito, prodotto non trovato." });
@@ -553,12 +707,12 @@ router.delete('/:id/image', isAuthenticated, hasPermission(['Artigiano', 'Admin'
         // Controlla l'esistenza del prodotto e i permessi
         const productQuery = await pool.query("SELECT idartigiano, immagine FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE", [productId]);
         if (productQuery.rows.length === 0) {
-            return res.status(404).json({ error: "Prodotto non trovato o eliminato." });
+            return res.status(404).json({ error: "Prodotto non trovato o rimosso." });
         }
         const product = productQuery.rows[0];
 
         if (authenticatedUser.tipologia === 'Artigiano' && product.idartigiano !== authenticatedUser.idutente) {
-            return res.status(403).json({ error: "Vietato: L'Artigiano può rimuovere immagini solo per i propri prodotti." });
+            return res.status(403).json({ error: "Vietato: l'artigiano può rimuovere immagini solo per i propri prodotti." });
         }
 
         if (product.immagine === null) {
@@ -570,7 +724,6 @@ router.delete('/:id/image', isAuthenticated, hasPermission(['Artigiano', 'Admin'
             "UPDATE Prodotto SET immagine = NULL WHERE idprodotto = $1",
             [productId]
         );
-
         if (updateResult.rowCount === 0) {
             return res.status(404).json({ error: "Rimozione immagine fallita, prodotto non trovato." });
         }
@@ -615,9 +768,7 @@ router.get('/:id/image_content', async (req, res) => {
         }
 
         // Inferisci il tipo MIME dal buffer (es. 'image/jpeg', 'image/png')
-
-        // Modifichiamo la chiamata per usare 'fileTypeFromBuffer'
-        const fileTypeResult = await FileType.fileTypeFromBuffer(imageBuffer); 
+        const fileTypeResult = await FileType.fromBuffer(imageBuffer);
 
         if (fileTypeResult) {
             res.setHeader('Content-Type', fileTypeResult.mime);

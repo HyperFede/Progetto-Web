@@ -12,6 +12,10 @@ PUT /api/products/:id/image
 GET /api/products/:id/image_content
 DELETE /api/products/:id/image
 
+PUT /api/products/:id/stock/add
+PUT /api/products/:id/stock/subtract
+
+
 
 
 
@@ -70,9 +74,24 @@ Output:
 
 Valutare di cambiare nome a products/all
 
-@Descr Ottiene tutti i prodotti inclusi i prodotti cancellati
+Richiede il middleware queryBuilderMiddleware, che rende possibile il filtraggio della richiesta
 
+@Descr Ottiene tutti i prodotti inclusi i prodotti cancellati
 @Access Accesso: esclusivo Admin
+
+@Filters:
+Clausole WHERE: (esempi)
+categoria=Elettrodomestici //attenzione le maiuscole
+idartigiano = 123
+prezzounitario_gte = 10.59 
+prezzounitario_lte = 60.89
+nome_like = nome //restituisce come in SQL %nome%
+quantitadisponibile_lte = 50
+deleted = true/false (Questo filtro vale solo per questo endpoint ma non vale per /notdeleted in quando sarà di default false)
+
+Clausole ORDER BY:
+nome, prezzounitario,categoria,idprodotto
+
 
 Input
     headers:
@@ -103,8 +122,9 @@ Output:
 
 @Descr Ottiene tutti i prodotti non cancellati
 @Access Accesso: completamente libero
+@Filters, uguali a GET /api/products, senza il filtro "Deleted"
 
-Input (nessuno)
+Input (nessuno, oltre ai filtri)
 
 Output:
      - Successo (200 OK): Array JSON di oggetti prodotto (non cancellati)
@@ -217,7 +237,7 @@ Output:
 L'immagine viene inviata come dati binari grezzi (`image/png`, `image/jpeg`).
 
 IMPORTANTE:
-Per testare su postman o su codice, assicurarsi di caricare i file in modalità "raw" e che nell'header non ci sia scritto:
+Per testare su postman o su codice, assicurarsi di caricare i file in modalità "binary" e che nell'header non ci sia scritto:
 Content type: application/json (sbagliato)
 Content type: image/png o image/jpeg (corretto)
 
@@ -287,3 +307,34 @@ Output:
 
 
 Nota: La libreria `file-type` viene utilizzata internamente nell'endpoint `GET /api/products/:id/image_content` per determinare il Content-Type corretto dell'immagine da servire.
+
+6.1 PUT /api/products/:id/stock/add
+
+@Descr Endpoint utile per la gestione dello stock (assieme al suo complementare `PUT /api/products/:id/stock/subtract)
+Non è necessario utilizzarlo, basterebbe usare la PUT api/products/:id, ma siccome lo stock prevedo che è una operazione frequente lo teniamo
+Aggiunge una quantita detta "quantitadaaggiungere" al prodotto con id specificato
+
+@Access solo artigiani per i propri prodotti e admin per qualsiasi prodotto
+
+Input:
+    - Parametro di rotta `id`: ID numerico del prodotto.
+    - Headers:
+        {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ...'
+        }
+    - "quantitadaaggiungere" : 58
+
+Output: 
+    - Successo (200 OK): Oggetto JSON con i dati del prodotto aggiornato.
+    - Errore (400 Bad Request): ID prodotto non valido, `quantitadaaggiungere` non valido o mancante.
+    - Errore (403 Forbidden): Se un Artigiano tenta di modificare un prodotto non suo.
+    - Errore (404 Not Found): Se il prodotto non esiste o è stato eliminato.
+    - Errore (500 Internal Server Error): In caso di errore del server.
+
+6.2 PUT /api/products/:id/stock/subtract
+
+Analoga a /add, ma sottrae
+
+Casi differenti da /add:
+restituisce Errore (400 Bad request) se si prova a togliere più prodotti di quelli che ci sono
+Se invece si tolgono tutte le quantita di un prodotto, restituisce 200, rendendo il prodotto non piu disponibile (quantita=0)

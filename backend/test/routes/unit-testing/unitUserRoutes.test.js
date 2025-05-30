@@ -28,6 +28,7 @@ jest.mock('../../../src/middleware/authMiddleWare', () => ({
     hasPermission: jest.fn(permissions => (req, res, next) => {
         next(); // Assume permission is granted for route unit tests
     }),
+    getUserFromToken: jest.fn() // Add mock for getUserFromToken
 }));
 
 const app = express();
@@ -46,6 +47,10 @@ beforeEach(async () => {
     // Sostituisci temporaneamente pool.query con il metodo query del client transazionale
     originalPoolQuery = pool.query;
     pool.query = (...args) => testClient.query(...args);
+});
+beforeEach(() => {
+    // Reset mocks before each test
+    require('../../../src/middleware/authMiddleWare').getUserFromToken.mockReset();
 });
 
 // Esegui il rollback della transazione e rilascia il client dopo ogni test
@@ -204,22 +209,153 @@ describe('User API Unit Tests', () => {
     
     // TEST GET SINGOLO
     describe('GET /api/users/:id', () => {
-        test('Recupera utente esistente', async () => {
+        test('Recupera utente esistente (Admin visualizza Cliente)', async () => {
             // 1. Crea un utente tramite API per ottenere un ID valido
             const createUserRes = await request(app)
                 .post('/api/users')
                 .send(baseUserCliente);
             const userId = createUserRes.body.idutente;
+            expect(createUserRes.statusCode).toBe(201); // Ensure user was created
+
+            // Mock getUserFromToken to return the Admin user
+            const { getUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            getUserFromToken.mockResolvedValue(mockAuthenticatedUser);
 
             // 2. Richiedi l'utente tramite il suo ID
-            const res = await request(app).get(`/api/users/${userId}`);
-
+            const res = await request(app)
+                .get(`/api/users/${userId}`)
+                .set('Authorization', 'Bearer faketoken'); // Send auth header
 
             expect(res.statusCode).toBe(200);
             expect(res.body).toHaveProperty('idutente', userId);
             expect(res.body.username).toBe(baseUserCliente.username);
+            expect(res.body.tipologia).toBe('Cliente');
             expect(res.body).not.toHaveProperty('password');
 
+        });
+
+        test('Unauthenticated user fetches Artigiano profile successfully', async () => {
+            // 1. Create an Artigiano user
+            const artigianoRes = await request(app).post('/api/users').send(baseUserArtigiano);
+            expect(artigianoRes.statusCode).toBe(201);
+            const artigianoId = artigianoRes.body.idutente;
+
+            // Mock getUserFromToken to return null (simulating unauthenticated)
+            const { getUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            getUserFromToken.mockResolvedValue(null);
+
+            // 2. Request the Artigiano's profile without an Authorization header
+            const res = await request(app).get(`/api/users/${artigianoId}`);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.idutente).toBe(artigianoId);
+            expect(res.body.tipologia).toBe('Artigiano');
+            
+        });
+
+        test('Unauthenticated user gets 401 for Cliente profile', async () => {
+            // 1. Create a Cliente user
+            const clienteRes = await request(app).post('/api/users').send(baseUserCliente);
+            expect(clienteRes.statusCode).toBe(201);
+            const clienteId = clienteRes.body.idutente;
+
+            // Mock getUserFromToken to return null
+            const { getUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            getUserFromToken.mockResolvedValue(null);
+
+            // 2. Request the Cliente's profile without an Authorization header
+            const res = await request(app).get(`/api/users/${clienteId}`);
+
+            expect(res.statusCode).toBe(401);
+            expect(res.body.message).toBe('Autenticazione richiesta per visualizzare questo profilo.');
+        });
+
+        test('Cliente fetches their own profile successfully', async () => {
+            // 1. Create a Cliente user
+            const clienteDetails = { ...baseUserCliente, username: 'selfcliente', email: 'selfcliente@example.com' };
+            const createRes = await request(app).post('/api/users').send(clienteDetails);
+            expect(createRes.statusCode).toBe(201);
+            const clienteId = createRes.body.idutente;
+
+            // Mock getUserFromToken to return this specific Cliente user
+            const mockSelfCliente = { ...createRes.body, tipologia: 'Cliente', idutente: clienteId };
+            const { getUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            getUserFromToken.mockResolvedValue(mockSelfCliente);
+
+            // 2. Request their own profile
+            const res = await request(app)
+                .get(`/api/users/${clienteId}`)
+                .set('Authorization', 'Bearer faketokenforcliente');
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.idutente).toBe(clienteId);
+            expect(res.body.username).toBe(clienteDetails.username);
+        });
+
+        test('Cliente gets 403 trying to fetch another Cliente profile', async () => {
+            // 1. Create two Cliente users
+            const cliente1Details = { ...baseUserCliente, username: 'cliente1', email: 'cliente1@example.com' };
+            const cliente2Details = { ...baseUserCliente, username: 'cliente2', email: 'cliente2@example.com' };
+            
+            const create1Res = await request(app).post('/api/users').send(cliente1Details);
+            expect(create1Res.statusCode).toBe(201);
+            const cliente1Id = create1Res.body.idutente;
+            const mockCliente1User = { ...create1Res.body, tipologia: 'Cliente', idutente: cliente1Id };
+
+            const create2Res = await request(app).post('/api/users').send(cliente2Details);
+            expect(create2Res.statusCode).toBe(201);
+            const cliente2Id = create2Res.body.idutente;
+
+            // Mock getUserFromToken to return cliente1
+            const { getUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            getUserFromToken.mockResolvedValue(mockCliente1User);
+
+            // 2. Cliente1 tries to fetch Cliente2's profile
+            const res = await request(app)
+                .get(`/api/users/${cliente2Id}`)
+                .set('Authorization', 'Bearer faketokenforcliente1');
+
+            expect(res.statusCode).toBe(403);
+            expect(res.body.message).toBe('Accesso negato. Non hai i permessi necessari per visualizzare questo utente.');
+        });
+
+        test('Admin fetches a deleted user profile successfully', async () => {
+            // 1. Create a user and then soft-delete them directly in DB for this test
+            const userToCreate = { ...baseUserCliente, username: 'deletedUserTest', email: 'deleted@example.com' };
+            const createRes = await request(app).post('/api/users').send(userToCreate);
+            expect(createRes.statusCode).toBe(201);
+            const userId = createRes.body.idutente;
+
+            // Soft delete the user directly (this will be rolled back)
+            await testClient.query('UPDATE utente SET deleted = true WHERE idutente = $1', [userId]);
+
+            // Mock getUserFromToken to return the Admin user
+            const { getUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            getUserFromToken.mockResolvedValue(mockAuthenticatedUser); // mockAuthenticatedUser is an Admin
+
+            // 2. Admin requests the deleted user's profile
+            const res = await request(app)
+                .get(`/api/users/${userId}`)
+                .set('Authorization', 'Bearer faketokenforadmin');
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.idutente).toBe(userId);
+            expect(res.body.deleted).toBe(true); // Admin should see the 'deleted' status
+        });
+
+        test('Non-Admin user gets 404 for a deleted user profile', async () => {
+            const userToCreate = { ...baseUserCliente, username: 'deletedUserTest2', email: 'deleted2@example.com' };
+            const createRes = await request(app).post('/api/users').send(userToCreate);
+            expect(createRes.statusCode).toBe(201);
+            const userId = createRes.body.idutente;
+            await testClient.query('UPDATE utente SET deleted = true WHERE idutente = $1', [userId]);
+
+            const { getUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            getUserFromToken.mockResolvedValue(null); // Simulate unauthenticated or non-Admin
+
+            const res = await request(app).get(`/api/users/${userId}`);
+            expect(res.statusCode).toBe(404);
+            expect(res.body.message).toBe('Utente non trovato.');
         });
 
         test('Errore 404 per utente inesistente', async () => {

@@ -28,16 +28,6 @@ CREATE TABLE IF NOT EXISTS Utente (
 
 
 -- ==================================================
--- 2. Tabella Carrello 
--- ==================================================
-CREATE TABLE IF NOT EXISTS Carrello (
-    IDCarrello SERIAL PRIMARY KEY,
-    IDUtente INTEGER NOT NULL UNIQUE REFERENCES Utente(IDUtente) 
-        ON DELETE CASCADE 
-        ON UPDATE CASCADE
-);
-
--- ==================================================
 -- 3. Tabella Prodotto (con soft delete)
 -- ==================================================
 CREATE TABLE IF NOT EXISTS Prodotto (
@@ -139,7 +129,7 @@ CREATE TABLE IF NOT EXISTS StoricoApprovazioni (
 -- 9. Tabella DettagliCarrello 
 -- ==================================================
 CREATE TABLE IF NOT EXISTS DettagliCarrello (
-    IDCarrello INTEGER REFERENCES Carrello(IDCarrello)
+    IDCliente INTEGER REFERENCES Utente(IDUtente)
         ON DELETE CASCADE 
         ON UPDATE CASCADE,
     IDProdotto INTEGER NOT NULL REFERENCES Prodotto(IDProdotto)
@@ -147,7 +137,7 @@ CREATE TABLE IF NOT EXISTS DettagliCarrello (
         ON UPDATE CASCADE,
     Quantita INTEGER NOT NULL CHECK (Quantita > 0),
     TotaleParziale NUMERIC(10,2) NOT NULL,
-    PRIMARY KEY (IDCarrello, IDProdotto)
+    PRIMARY KEY (IDCliente, IDProdotto)
 );
 
 -- ==================================================

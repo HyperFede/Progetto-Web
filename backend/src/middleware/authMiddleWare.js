@@ -15,6 +15,43 @@ if (!jwtSecret) {
 }
 
 /**
+ * Funzione helper per recuperare un utente attivo basato su un token JWT.
+ * Non invia risposte HTTP direttamente, ma restituisce l'utente o null/error.
+ * @param {string} token - Il token JWT da verificare.
+ * @returns {Promise<Object|null>} L'oggetto utente se il token è valido e l'utente è attivo,
+ *                                  altrimenti null. Può lanciare errori JWT.
+ * @throws {Error} Lancia errori specifici di JWT (JsonWebTokenError, TokenExpiredError) se la verifica fallisce.
+ */
+async function getUserFromToken(token) {
+    if (!token) {
+        return null;
+    }
+    try {
+        const decoded = jwt.verify(token, jwtSecret);
+        const userId = decoded.user.id;
+
+        const userQuery = await pool.query(
+            'SELECT idutente, username, nome, cognome, email, tipologia, deleted FROM utente WHERE idutente = $1 AND deleted = false',
+            [userId]
+        );
+
+        if (userQuery.rows.length === 0) {
+            return null; // Utente non trovato o non attivo
+        }
+        return userQuery.rows[0]; // Restituisce l'utente
+    } catch (error) {
+        // Se l'errore è un errore JWT (es. scaduto, malformato), lo rilanciamo
+        // così il chiamante può gestirlo specificamente se necessario.
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError' || error.name === 'NotBeforeError') {
+            throw error;
+        }
+        console.error('[getUserFromToken] Errore imprevisto durante la verifica del token o query DB:', error);
+        throw error; // Rilancia altri errori (es. DB non raggiungibile, verranno gestiti dal chiamante)
+    }
+}
+
+
+/**
  * Middleware per verificare l'autenticazione di un utente tramite JWT.
  * Questo middleware intercetta una richiesta HTTP.
  * Input:
@@ -56,42 +93,38 @@ async function isAuthenticated(req, res, next) {
     }
 
     try {
-        // Tenta di verificare e decodificare il token JWT.
-        // Se il token è invalido (es. firma errata, scaduto), jwt.verify lancerà un'eccezione.
-        const decoded = jwt.verify(token, jwtSecret);
+        const user = await getUserFromToken(token);
 
-        // Estrae l'ID utente dal payload decodificato del token.
-        // Si assume che il payload del token contenga un oggetto 'user' con una proprietà 'id'.
-        const userId = decoded.user.id;
-
-        // Esegue una query al database per trovare l'utente corrispondente all'ID
-        // e verifica che l'utente non sia stato contrassegnato come 'deleted'.
-        const userQuery = await pool.query(
-            'SELECT idutente, username, nome, cognome, email, tipologia, deleted FROM utente WHERE idutente = $1 AND deleted = false',
-            [userId]
-        );
-
-        // Se la query non restituisce righe, l'utente non è stato trovato o è stato eliminato.
-        if (userQuery.rows.length === 0) {
-            // Questo può accadere se l'utente è stato eliminato (soft delete) dopo l'emissione del token.
+        if (!user) {
+            // getUserFromToken restituisce null se il token è invalido, l'utente non esiste o è inattivo.
+            // Qui potremmo distinguere l'errore se getUserFromToken lanciasse errori specifici
+            // e non li gestisse internamente con un return null.
+            // Per ora, un errore generico di token/utente non valido.
+            // Se getUserFromToken lancia un errore JWT, verrà catturato dal catch sottostante.
             return res.status(401).json({ message: 'Accesso non autorizzato. Utente non più attivo.' });
         }
 
         // Aggiunge l'oggetto utente (recuperato dal database) all'oggetto `req`.
         // Questo rende i dati dell'utente disponibili ai middleware successivi e ai gestori delle rotte.
-        req.user = userQuery.rows[0];
+        req.user = user;
 
         // Passa il controllo al middleware successivo nella catena o al gestore della rotta.
         next();
     } catch (error) {
+        // --- DEBUGGING BLOCK FOR EXPIRED TOKEN TEST ---
+        if (process.env.NODE_ENV === 'test') {
+            console.log('[AUTH_MIDDLEWARE_DEBUG] Error during jwt.verify:', error.name, error.message);
+        }
+        // --- END DEBUGGING BLOCK ---
+
         // Gestisce gli errori che possono verificarsi durante la verifica del token o la query al database.
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError' || error.name === 'NotBeforeError') {
             // Gestisce errori specifici della libreria JWT (token malformato, scaduto, non ancora attivo).
-            console.error('Errore verifica JWT:', error.message);
+            // console.error('Errore verifica JWT:', error.message); // Original log, can be noisy
             return res.status(401).json({ message: 'Accesso non autorizzato. Token non valido o scaduto.' });
         }
         // Per tutti gli altri errori (es. errori di database non gestiti specificamente)
-        console.error('Errore nel middleware di autenticazione (non JWT):', error);
+        // console.error('Errore nel middleware di autenticazione (non JWT):', error); // Original log
         return res.status(500).json({ message: 'Errore del server durante l\'autenticazione.' });
     }
 }
@@ -163,4 +196,5 @@ function hasPermission(requiredPermissions) {
 module.exports = {
     isAuthenticated,
     hasPermission,
+    getUserFromToken, // Esporta la nuova funzione
 };

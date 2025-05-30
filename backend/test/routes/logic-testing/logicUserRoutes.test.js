@@ -21,24 +21,42 @@ jest.mock('../../../src/config/db-connect', () => ({
     query: jest.fn()
 }));
 
+// Definisci l'utente mock che verrà usato sia da isAuthenticated che da getUserFromToken (mockato)
+const mockLogicUser = { 
+    idutente: 1, 
+    username: 'mockLogicUser', 
+    tipologia: 'Admin', 
+    deleted: false, 
+    email: 'mockadmin@example.com' 
+    // Aggiungi altri campi se necessari per la logica di req.user
+};
+
 // Mock authentication and permission middleware
 // This ensures that if userRoutes applies these middlewares, they are bypassed for logic tests.
 jest.mock('../../../src/middleware/authMiddleWare', () => ({
     isAuthenticated: jest.fn((req, res, next) => {
         // Populate req.user as some routes might depend on it (e.g., for 'Self' permission or audit)
         // You can customize this mock user as needed for specific test scenarios if necessary.
-        req.user = { idutente: 1, username: 'mockLogicUser', tipologia: 'Admin' };
+        req.user = mockLogicUser;
         next(); // Proceed to the next middleware or route handler
     }),
     hasPermission: jest.fn((permissions) => (req, res, next) => {
         next(); // Assume permission is always granted for these logic tests
     }),
+    getUserFromToken: jest.fn() // Mock per getUserFromToken
 }));
 // Pulizia del mock prima di ogni test
 beforeEach(() => {
     pool.query.mockClear();
+    // Accedi alla funzione mockata per resettarla
+    const { getUserFromToken: mockedGetUserFromToken } = require('../../../src/middleware/authMiddleWare');
+    mockedGetUserFromToken.mockReset();
+    jest.spyOn(console, 'error').mockImplementation(() => {}); // Sopprime console.error
 });
 
+afterEach(() => {
+    console.error.mockRestore(); // Ripristina console.error
+});
 
 describe('User API Logic Tests', () => {
 
@@ -145,18 +163,88 @@ describe('User API Logic Tests', () => {
 
     // TEST GET SINGOLO
     describe('GET /api/users/:id', () => {
-        test('Recupera utente esistente', async () => {
-            //simulo un utente esistente
-            pool.query.mockResolvedValue({ rows: [{ idutente: 1, username: 'user1' }] });
+        test('Recupera utente esistente (come Admin visualizza Cliente)', async () => {
+            const targetCliente = { 
+                idutente: 1, 
+                username: 'targetUser', 
+                tipologia: 'Cliente', 
+                deleted: false, 
+                email: 'target@example.com',
+                nome: 'Target',
+                cognome: 'Cliente',
+                indirizzo: '123 Target St'
+                // Aggiungi altri campi se la tua rotta li restituisce e vuoi verificarli
+            };
+            // Mock per la query che recupera il targetUser
+            pool.query.mockResolvedValueOnce({ rows: [targetCliente] });
 
-            const res = await request(app).get('/api/users/1');
+            // Mock per getUserFromToken che simula un Admin autenticato
+            const { getUserFromToken: mockedGetUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            mockedGetUserFromToken.mockResolvedValue(mockLogicUser); // mockLogicUser è un Admin
+
+            const res = await request(app)
+                .get(`/api/users/${targetCliente.idutente}`)
+                .set('Authorization', 'Bearer faketoken'); // Simula l'invio di un token
 
             expect(res.statusCode).toBe(200);
-            expect(res.body).toHaveProperty('idutente', 1);
+            expect(res.body).toHaveProperty('idutente', targetCliente.idutente);
+            expect(res.body.username).toBe(targetCliente.username);
+            expect(res.body.tipologia).toBe('Cliente');
+            // Verifica che getUserFromToken sia stato chiamato (perché c'è un header Authorization)
+            expect(mockedGetUserFromToken).toHaveBeenCalledWith('faketoken');
+            // Verifica che pool.query sia stato chiamato per ottenere il targetUser
+            expect(pool.query).toHaveBeenCalledWith(
+                'SELECT idutente, username, nome, cognome, email, indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione, deleted FROM utente WHERE idutente = $1',
+                [targetCliente.idutente]
+            );
         });
 
-        test('Errore 404 per utente inesistente', async () => {
-            
+        test('Errore 401 se utente non autenticato cerca di vedere un profilo Cliente', async () => {
+            const targetCliente = { idutente: 2, username: 'anotherCliente', tipologia: 'Cliente', deleted: false, email: 'another@example.com' };
+            pool.query.mockResolvedValueOnce({ rows: [targetCliente] }); // Mock per SELECT del targetUser
+
+            // Non c'è header Authorization, quindi getUserFromToken non sarà chiamato dalla logica della rotta.
+            // authenticatedUser rimarrà null.
+            const { getUserFromToken: mockedGetUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            mockedGetUserFromToken.mockResolvedValue(null); // Anche se non chiamato, impostiamo per coerenza
+
+            const res = await request(app)
+                .get(`/api/users/${targetCliente.idutente}`); // Nessun header Authorization
+
+            expect(res.statusCode).toBe(401);
+            expect(res.body.message).toBe('Autenticazione richiesta per visualizzare questo profilo.');
+            expect(mockedGetUserFromToken).not.toHaveBeenCalled(); // Non dovrebbe essere chiamato se non c'è header
+        });
+        
+        test('OK 200 se utente non autenticato vede un profilo Artigiano', async () => {
+            const targetArtigiano = { 
+                idutente: 3, 
+                username: 'publicArtigiano', 
+                tipologia: 'Artigiano', 
+                deleted: false, 
+                email: 'public@artigiano.com',
+                nome: 'Public',
+                cognome: 'Artigiano',
+                indirizzo: 'Via Pubblica 1',
+                piva: '11111111111',
+                artigianodescrizione: 'Sono visibile'
+            };
+            pool.query.mockResolvedValueOnce({ rows: [targetArtigiano] });
+
+            const { getUserFromToken: mockedGetUserFromToken } = require('../../../src/middleware/authMiddleWare');
+            mockedGetUserFromToken.mockResolvedValue(null); // Simula nessun utente autenticato
+
+            const res = await request(app)
+                .get(`/api/users/${targetArtigiano.idutente}`); // Nessun header Authorization
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.idutente).toBe(targetArtigiano.idutente);
+            expect(res.body.tipologia).toBe('Artigiano');
+            expect(mockedGetUserFromToken).not.toHaveBeenCalled(); // Non dovrebbe essere chiamato
+        });
+
+
+        test('Errore 404 per utente inesistente (anche se Admin chiede)', async () => {
             pool.query.mockResolvedValue({ rows: [] });
             const fakeId = 99999; // ID non esistente
             const res = await request(app).get(`/api/users/${fakeId}`);

@@ -97,3 +97,24 @@ const productQueryConfig = {
     defaultSortField: 'idprodotto',
     defaultSortOrder: 'ASC'
 };
+
+Esempio:
+l'endpoint chimato con:
+
+GET api/products/?categoria=frutta&prezzounitario_lte=2&prezzounitario_gte=10&nome_like=p&sort=-nome
+
+
+Restituirà i prodotti con:
+
+WHERE categoria = 'Frutta' AND prezzounitario <=2 AND prezzounitario >= 10 AND nome ILIKE '%p%'
+ORDER BY nome DESC
+
+quindi tutti i prodotti di tipo Frutta, che costano tra i 2 e 10 euro, con la lettera p nel nome ordinati per nome in ordine discendente
+
+
+Attenzione alla sintassi:
+
+? segue i filtri
+& aggiunge un filtro
+- indica il contrario di un filtro ORDER BY (quindi significa ordine decrescente)
+Non mettere spazi nella request

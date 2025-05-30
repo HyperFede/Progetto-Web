@@ -84,7 +84,7 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        // Hash della password prima di salvarla nel DB
+        // Hash della password prima di salvarla nel DB (non cambiare parametro che i dati di test sono hashati su questo peso )
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         //inserimento nel DB
@@ -106,38 +106,7 @@ router.post('/', async (req, res) => {
         res.status(500).json({ message: 'Errore del server durante la creazione dell utente.' });
     }
 });
-//route temporanea, per la creazione di un admin (NO PROD), è permesso creare un admin liberamente
-router.post('/test/admin', async (req, res) => {
-    // Estrae i dati dal corpo della richiesta.
-    let { username, nome, cognome, email, password, indirizzo } = req.body;
-    // controllo campi vuoti
-    if (!username || !email || !password || !indirizzo || !nome || !cognome) {
-        return res.status(400).json({ message: 'Username, Nome,Cognome, Email, Password, Indirizzo sono campi obbligatori.' });
-    }
 
-    try {
-        // Hash della password prima di salvarla nel DB
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        //inserimento nel DB
-        const newUser = await pool.query(
-            'INSERT INTO utente (username, nome, cognome, email, password, indirizzo, tipologia, admintimestampcreazione) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *',
-            [username, nome, cognome, email, hashedPassword, indirizzo, 'Admin']
-        );
-        //preparazione della risposta
-        const userResponse = { ...newUser.rows[0] };
-        delete userResponse.password;
-        res.status(201).json(userResponse);
-
-    } catch (error) {
-       // console.error('Errore nella creazione dell utente:', error);
-        // errore di postgres, che corrisponde a un conflitto di chiavi uniche
-        if (error.code === '23505') {
-            return res.status(409).json({ message: 'Username o Email già esistente.' });
-        }
-        res.status(500).json({ message: 'Errore del server durante la creazione dell utente.' });
-    }
-});
 
 /**
  * @route GET /api/users
@@ -239,21 +208,7 @@ router.get('/notdeleted',
  *        { "message": "Accesso negato. Non hai i permessi necessari per questa risorsa." }
  */
 
-/************************************************************************************************************* */
-//TESTING FOR POSTMAN MIDDLEWARE PROTECTED
-// Questa rotta è protetta: richiede autenticazione e che l'utente sia di tipologia 'Admin' o 'Artigiano'.
-// DEVE ESSERE DEFINITA PRIMA DI ROTTE GENERICHE CON PARAMETRI COME /:id
-router.get('/test-protected-route', isAuthenticated, hasPermission(['Admin', 'Artigiano']), (req, res) => {
-    // Se il codice arriva qui, significa che l'utente è autenticato e ha i permessi corretti.
-    // req.user è disponibile grazie al middleware isAuthenticated.
-    res.status(200).json({
-        message: `Accesso consentito alla rotta protetta, ${req.user.username}!`,
-        user: {
-            id: req.user.idutente,
-            tipologia: req.user.tipologia
-        }
-    });
-});
+
 /**
  * @route GET /api/users/:id
  * @description Recupera un singolo utente tramite il suo ID.

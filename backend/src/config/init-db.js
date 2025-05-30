@@ -11,9 +11,9 @@ async function initDb() {
         console.log('Connecting to the database...');
         // La connessione è già stabilita da pool.connect()
         console.log('Database connected.');
-
+        //cambiare script in base a cio che serve
         const scriptPath = path.join(__dirname, '..', '..', 'database', 'script.sql');
-        const insertPath = path.join(__dirname, '..', '..', 'database', 'insertDatiDiTest.sql');
+        const insertPath = path.join(__dirname, '..', '..', 'database', 'insertData.sql');
         const script = fs.readFileSync(scriptPath, 'utf8');
         const insert = fs.readFileSync(insertPath, 'utf8');
         await client.query(script);

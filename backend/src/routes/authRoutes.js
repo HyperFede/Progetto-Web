@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
 
     // Valida l'input: username e password non devono essere null o stringhe vuote.
     if (username === null || password === null || username === '' || password === '' || !username || !password) {
-        return res.status(400).json({ message: 'Username e Password sono obbligatori.' });
+        return res.status(400).json({ message: 'Username e password sono obbligatori.' });
     }
 
     try {
@@ -94,7 +94,7 @@ router.post('/login', async (req, res) => {
         res.status(200).json({
             token: token, // Invia il JWT generato
             user: userResponse, // Invia i dati utente (senza password)
-            message: 'Login effettuato con successo.'
+            message: 'Accesso effettuato con successo.'
         });
     } catch (error) {
         console.error('Errore durante il login:', error); // Log dell'errore per debug lato server.

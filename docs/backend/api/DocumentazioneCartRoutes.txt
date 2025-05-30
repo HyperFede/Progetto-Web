@@ -1,0 +1,292 @@
+Elenco endpoint API per la gestione del Carrello (`/api/cart`)
+
+GET api/cart/
+GET api/cart/:idcliente
+
+POST api/cart/items
+
+PUT api/cart/items/:idprodotto
+PUT api/cart/items/:idprodotto/subtract
+PUT api/cart/items/:idprodotto/add
+
+DELETE api/cart/items/:idprodotto
+DELETE api/cart/items/clear
+
+#############
+# Introduzione
+
+Questi endpoint permettono agli utenti 'Cliente' di gestire il proprio carrello della spesa
+e agli 'Admin' di visualizzare i carrelli, se necessario.
+
+Come per altre API protette, molti endpoint richiedono autenticazione (`isAuthenticated`)
+e permessi specifici (`hasPermission`) gestiti tramite `authMiddleWare`.
+È necessario fornire il token di autorizzazione JWT nell'header `Authorization` come Bearer token.
+(Vedi `DocumentazioneAuthMiddleWare.txt` per dettagli).
+
+L'ID del cliente per le operazioni sul carrello (aggiunta, modifica, rimozione di articoli)
+è ricavato dal token JWT dell'utente autenticato, garantendo che i Clienti
+possano modificare solo il proprio carrello. (ad eccezione per gli utenti admin, che va specificato nella rotta come parametro)
+#############
+#1 Aggiungere un prodotto al carrello
+
+1.1 POST api/cart/items
+
+@Descr Aggiunge un prodotto con una quantità specificata al carrello dell'utente autenticato.
+- Se il prodotto non è ancora nel carrello, viene aggiunto con la quantità specificata.
+- Se il prodotto è già nel carrello, manda un avviso di utilizzare l'endpoint PUT api/cart/items/:idprodotto per aggiornare la quantità.
+(evnetuale possibilità di unire le POST con le PUT per comodità)
+L'ID del cliente viene ricavato dal token di autenticazione.
+
+@Access Accesso: Cliente.
+Richiede `isAuthenticated` e `hasPermission(["Cliente"])`.
+
+Input:
+    headers:
+    {
+        'Authorization': 'Bearer <token_jwt>'
+    }
+    Corpo della richiesta (req.body): Oggetto JSON con i dettagli dell'articolo.
+    {
+        "idprodotto": Number,  // Obbligatorio
+        "quantita": Number     // Obbligatorio, deve essere > 0.
+    }
+
+Output:
+    - Successo (201 Created): Oggetto JSON con il carrello aggiornato.
+      { "idcliente": Number, "idprodotto" : Number, "quantita": Number, "totaleparziale": Number, "nomeprodotto": String, "prezzounitario": Number}
+    - Errore (400 Bad Request):
+        - Campi obbligatori (`idprodotto`, `quantita`) mancanti o non validi.
+        - `quantita` non è un numero positivo.
+        - Quantità richiesta supera la disponibilità del prodotto.
+      { "error": "Dati input non validi (es. 'Quantità deve essere positiva', 'Prodotto esaurito', 'ID prodotto mancante')." }
+    - Errore (401 Unauthorized): Token mancante o non valido.
+    - Errore (403 Forbidden): L'utente non ha il permesso (es. non è 'Cliente').
+    - Errore (404 Not Found): Se il prodotto con `idprodotto` non esiste nel database generale dei prodotti o non è disponibile.
+      { "error": "Prodotto non trovato o non disponibile." }
+      - 409 Conflict: Se il prodotto è già presente nel carrello dell'utente.
+     In questo caso, è obbligatorio (per ora) di usare PUT /api/carts/items/:idprodotto per aggiornare la quantità.
+    - Errore (500 Internal Server Error): In caso di errore del server.
+      { "error": "Errore del server durante l'aggiunta dell'articolo al carrello." }
+
+#############
+#2 Ottenere il carrello
+
+2.1 GET api/cart/ 
+
+@Descr Ottiene tutti gli articoli di tutti i carrelli di tutti i clienti
+
+
+@Access Accesso: Admin.
+Richiede `isAuthenticated` e `hasPermission(["Admin"])`.
+
+Input:
+    headers:
+    {
+        'Authorization': 'Bearer <token_jwt>'
+    }
+
+Output:
+    - Successo (200 OK): Oggetto JSON con i dati dei carrelli.
+      {
+        {
+        "idcliente": 5,
+        "idprodotto": 102,
+        "quantita": 1,
+        "totaleparziale": "120.00",
+        "nomeprodotto": "Set Tazze Ceramica",
+        "prezzounitario": "120.00"
+        },
+        {}...
+      },
+      
+    - Errore (401 Unauthorized): Token mancante o non valido.
+      { "error": "Token di autenticazione mancante o non valido." }
+    - Errore (403 Forbidden): L'utente non è di tipo 'Admin' o non ha i permessi necessari.
+      { "error": "Accesso negato. Permessi insufficienti." }
+    - Errore (500 Internal Server Error): In caso di errore del server.
+      { "error": "Errore del server durante il recupero del carrello." }
+
+2.2 GET api/cart/:idcliente
+
+@Descr Ottiene il carrello e i suoi articoli per un cliente specifico, identificato da `idcliente`.
+@Access Accesso: Admin (per qualsiasi `idcliente`) o Cliente (solo per il proprio `idcliente`).
+Richiede `isAuthenticated` e `hasPermission(["Admin", "Self"])`.
+"Self" implica che se l'utente autenticato non è Admin, `idcliente` deve corrispondere al suo ID.
+
+Input:
+    - Parametro di rotta `idcliente`: ID numerico del cliente.
+    headers:
+    {
+        'Authorization': 'Bearer <token_jwt>'
+    }
+
+Output:
+    - Successo (200 OK): Oggetto JSON con i dati del carrello.
+      {
+        "idcliente": Number,
+        "items": [
+          { "idprodotto": Number, "quantita": Number, "prezzounitario": Number, "totaleparziale": Number, "nomeprodotto": Srting },
+          {...}...
+        ],
+        "totale": Number,
+        "totaleArticoli": Number
+      }
+    - Errore (400 Bad Request): Se `idcliente` non è un numero valido.
+      { "error": "ID cliente non valido." }
+    - Errore (401 Unauthorized): Token mancante o non valido.
+      { "error": "Token di autenticazione mancante o non valido." }
+    - Errore (403 Forbidden): L'utente non è Admin e sta tentando di accedere al carrello di un altro utente.
+      { "error": "Accesso negato al carrello specificato." }
+    - Errore (404 Not Found): Se il cliente con `idcliente` o il suo carrello non esistono.
+      { "error": "Carrello non trovato per il cliente specificato." }
+    - Errore (500 Internal Server Error): In caso di errore del server.
+      { "error": "Errore del server durante il recupero del carrello." }
+
+#############
+#3 Modificare le quantità del carrello
+
+3.1 PUT api/cart/items/:idprodotto
+
+@Descr Aggiorna (imposta) la quantità di un prodotto specifico *già presente* nel carrello dell'utente autenticato.
+- Se la `quantita` fornita nel corpo è > 0, la quantità dell'articolo nel carrello viene impostata a questo valore.
+- Se la `quantita` fornita è 0 oppure un numero negativo, il prodotto viene direttamente rimosso
+- Per eliminare un prodotto da un carrello servirsi di DELETE api/cart/items/:idprodotto
+- Se l'articolo specificato da `idprodotto` non è presente nel carrello, viene restituito un errore 404.
+L'ID del cliente viene ricavato dal token di autenticazione.
+
+@Access Accesso: Cliente.
+Richiede `isAuthenticated` e `hasPermission(["Cliente"])`.
+
+Input:
+    -idprodotto: parametro di rotta: il prodotto del carrello del cliente che si vuole modificare la quantità
+    headers:
+    {
+        'Authorization': 'Bearer <token_jwt>'
+    }
+    Corpo della richiesta (req.body): Oggetto JSON con i dettagli dell'articolo.
+    {
+        "quantita": Number     // Obbligatorio, deve essere > 0.
+    }
+
+Output: (con risposta 200) il riferimento del prodotto aggiornato alla quantità richiesta es.
+{
+    "idcliente": 5,
+    "idprodotto": 102,
+    "quantita": 5,
+    "totaleparziale": "600.00",
+    "nomeprodotto": "Set Tazze Ceramica",
+    "prezzounitario": "120.00"
+}
+
+Opzionale il messaggio: prodotto rimosso dal carrello in quanto la quantita è diventata 0 o meno
+
+
+-400 Bad Request, se si prova a chiedere più quantita di quella disponibile:
+- 404 Not Found: Se il prodotto non esiste o non è disponibile o se l'articolo non è nel carrello.
+In questo caso, è obbligatorio (per ora) di usare POST /api/carts/items per aggiungerlo.
+- 500 internal server error
+
+@Access Accesso: Cliente.
+Richiede `isAuthenticated` e `hasPermission(["Cliente"])`.
+
+3.2 PUT api/cart/items/:idprodotto/subtract
+
+@Descr Decrementa la quantità di un prodotto nel carrello dell'utente autenticato.
+Se la quantità risultante dopo la sottrazione è zero o meno, l'articolo viene automaticamente rimosso dal carrello.
+L'ID del cliente viene ricavato dal token di autenticazione.
+
+@Access Accesso: Cliente.
+Richiede `isAuthenticated` e `hasPermission(["Cliente"])`.
+
+Input:
+    - Parametro di rotta `idprodotto`: ID numerico del prodotto nel carrello.
+    headers:
+    {
+        'Authorization': 'Bearer <token_jwt>'
+    }
+    Corpo della richiesta (req.body) (opzionale):
+    {
+        "quantita": Number
+    }
+
+
+Output: (con risposta 200) il riferimento del prodotto aggiornato con la nuova quantita
+{
+    "idcliente": 5,
+    "idprodotto": 102,
+    "quantita": 5,
+    "totaleparziale": "600.00",
+    "nomeprodotto": "Set Tazze Ceramica",
+    "prezzounitario": "120.00"
+}
+opzionale il messaggio: item del carrello rimosso correttamente in quanto quantita <=0
+
+-400 Bad Request, se si prova a chiedere più quantita di quella disponibile:
+- 404 Not Found: Se il prodotto non esiste o non è disponibile o se l'articolo non è nel carrello.
+In questo caso, è obbligatorio (per ora) di usare POST /api/carts/items per aggiungerlo.
+- 500 internal server error
+
+
+3.3 PUT api/cart/items/:idprodotto/add
+
+@Descr Incrementala quantità di un prodotto già presente nel carrello dell'utente autenticato.
+L'ID del cliente viene ricavato dal token di autenticazione.
+
+@Access Accesso: Cliente.
+Richiede `isAuthenticated` e `hasPermission(["Cliente"])`.
+
+Identico a subtract, solo non rimuove mai prodotti, al massimo può dare errore perchè lo stock è insufficiente
+
+#############  
+#4 Cancellare prodotti dal carrello
+
+4.1 DELETE api/cart/items/:idprodotto
+
+@Descr Rimuove completamente un prodotto specifico (identificato da `idprodotto`) dal carrello dell'utente autenticato.
+L'ID del cliente viene ricavato dal token di autenticazione.
+Ha lo stesso effetto di una PUT che imposta quantita a 0 o meno.
+
+@Access Accesso: Cliente.
+Richiede `isAuthenticated` e `hasPermission(["Cliente"])`.
+
+Input:
+    - Parametro di rotta `idprodotto`: ID numerico del prodotto da rimuovere.
+    headers:
+    {
+        'Authorization': 'Bearer <token_jwt>'
+    }
+
+Output:
+    - Successo (200 OK): 
+      // Alternativamente: { "message": "Articolo rimosso con successo.} 
+    - Errore (400 Bad Request): `idprodotto` non valido.
+      { "error": "ID prodotto non valido." }
+    - Errore (401 Unauthorized): Token mancante o non valido.
+    - Errore (403 Forbidden): L'utente non ha il permesso.
+    - Errore (404 Not Found): Prodotto con `idprodotto` non trovato nel carrello dell'utente.
+      { "error": "Articolo non trovato nel carrello." }
+    - Errore (500 Internal Server Error): In caso di errore del server.
+      { "error": "Errore del server durante la rimozione dell'articolo." }
+
+#############
+4.2 DELETE api/cart/items/clear
+
+@Descr Rimuove tutti gli articoli dal carrello dell'utente autenticato.
+L'ID del cliente viene ricavato dal token di autenticazione.
+
+@Access Accesso: Cliente.
+Richiede `isAuthenticated` e `hasPermission(["Cliente"])`.
+
+Input:
+    headers:
+    {
+        'Authorization': 'Bearer <token_jwt>'
+    }
+
+Output:
+    - Successo (200 OK): ù
+      { "message": "Carrello svuotato con successo." }
+    - Errore (401 Unauthorized): Token mancante o non valido.
+    - Errore (403 Forbidden): L'utente non ha il permesso.
+    - Errore (500 Internal Server Error): In caso di errore del server.
+      { "error": "Errore del server durante lo svuotamento del carrello." }

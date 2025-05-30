@@ -2,7 +2,7 @@
 
 const request = require('supertest');
 const bcrypt = require('bcryptjs');
-const app = require('../../src/index.js'); // Corrected path to your main Express app file
+const app = require('../../src/server.js'); // Updated path to your main Express app file
 const pool = require('../../src/config/db-connect'); // Adjusted path to your database pool
 
 describe('Product API Routes (using other Routes)', () => {

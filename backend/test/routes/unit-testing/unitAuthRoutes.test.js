@@ -36,6 +36,11 @@ afterEach(async () => {
     }
 });
 
+afterAll(async () => {
+    // Close the database connection pool after all tests in this file are done
+    await pool.end();
+});
+
 describe('POST /api/auth/login - Unit Tests', () => {
     const testUserCredentials = {
         nome: 'Test',

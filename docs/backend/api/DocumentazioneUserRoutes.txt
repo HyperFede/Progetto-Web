@@ -7,7 +7,6 @@ GET /api/users/:id
 PUT /api/users/:id
 DELETE /api/users/:id
 
-
 Alcune API sono protette da un middleware che gestisce autorizzazione e permessi (vedi dettagli in AuthMiddleWare)
 In Postman basta usare la funzione Bearer token, o scrivere a mano l'header
 
