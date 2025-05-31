@@ -8,6 +8,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Speci
 console.log('DB_USER in index.js dopo dotenv.config():', process.env.DB_USER);
 
 const express = require('express');  // Importa il framework Express
+const cookieParser = require('cookie-parser'); // Importa il middleware per il parsing dei cookie
 const cors = require('cors'); // Importa il middleware CORS
 const initDb = require('./config/init-db'); // Importa la funzione initDb per inizializzare il database
 const userRoutes = require('./routes/userRoutes'); // Importeremo le route degli utenti
@@ -18,6 +19,11 @@ const authRoutes = require('./routes/authRoutes'); // Importa le route di autent
 const cartRoutes = require('./routes/cartRoutes'); // Importa le route del carrello
 
 const app = express();
+app.use(cors()); // Abilita CORS per tutte le richieste
+app.use(cookieParser()); // Usa il middleware per il parsing dei cookie
+
+
+
 const dbport = process.env.DB_PORT || 5432; // Usa la porta 5432 come default se non specificata
 const serverport = process.env.PORT || 3000; // Usa la porta 3000 come default se non specificata
 

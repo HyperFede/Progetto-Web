@@ -90,9 +90,20 @@ router.post('/login', async (req, res) => {
         const userResponse = { ...user };
         delete userResponse.password;
 
+        // Imposta il token JWT in un cookie HttpOnly
+        res.cookie('accessToken', token, {
+            httpOnly: true, // Il cookie non è accessibile tramite JavaScript del client
+            secure: process.env.NODE_ENV === 'production', // Invia il cookie solo su HTTPS in produzione
+            sameSite: 'Strict', // Mitiga attacchi CSRF. 'Lax' potrebbe essere un'alternativa se hai bisogno di navigazione cross-site GET.
+            maxAge: 24 * 60 * 60 * 1000, // 24 ore, dovrebbe corrispondere alla scadenza del JWT
+            path: '/' // Rende il cookie disponibile per tutte le route del dominio
+        });
+
         // Invia una risposta di successo (200 OK) con il token JWT, i dati dell'utente e un messaggio.
         res.status(200).json({
-            token: token, // Invia il JWT generato
+            // Non è più strettamente necessario inviare il token nel corpo JSON se si usa solo il cookie,
+            // ma può essere utile per client non-browser o per debug.
+            token: token,
             user: userResponse, // Invia i dati utente (senza password)
             message: 'Accesso effettuato con successo.'
         });
@@ -124,6 +135,16 @@ router.post('/logout', (req, res) => {
     //    Ciò richiederebbe una modifica al middleware `isAuthenticated` per controllare questa lista.
     // 2. Refresh Tokens: Usare token di accesso a breve scadenza e token di refresh a lunga scadenza.
     //    Il logout invaliderebbe il refresh token sul server.
+
+    // Cancella il cookie accessToken
+    res.cookie('accessToken', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        expires: new Date(0), // Imposta la data di scadenza al passato per eliminare il cookie
+        path: '/'
+    });
+
     res.status(200).json({ message: 'Logout effettuato con successo. Il client dovrebbe ora eliminare il token.' });
 });
 

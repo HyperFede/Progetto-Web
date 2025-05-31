@@ -71,27 +71,26 @@ async function getUserFromToken(token) {
  *      { message: 'Errore del server durante l'autenticazione.' }
  */
 async function isAuthenticated(req, res, next) {
-    // Estrae l'header Authorization dalla richiesta.
-    const authHeader = req.headers.authorization;
-    //console.log('Header Authorization:', authHeader);
+    let token = null;
+    const authHeader = req.headers.authorization; // Estrae l'header Authorization dalla richiesta.
 
-    // Controlla se l'header Authorization è presente e se inizia con 'Bearer '.
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        // Se l'header non è valido o mancante, restituisce un errore 401.
-        // Nota: per un'applicazione web tradizionale con reindirizzamenti, si potrebbe usare:
-        // return res.redirect(302, '/login-page');
+    // 1. Prova a ottenere il token dall'header Authorization
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const parts = authHeader.split(' ');
+        if (parts.length === 2 && parts[1]) {
+            token = parts[1];
+        }
+    }
+
+    // 2. Se non trovato nell'header, prova a ottenerlo dal cookie HttpOnly
+    if (!token && req.cookies && req.cookies.accessToken) {
+        token = req.cookies.accessToken;
+    }
+
+    // Se il token non è stato trovato né nell'header né nel cookie, o è malformato
+    if (!token) {
         return res.status(401).json({ message: 'Accesso non autorizzato. Token mancante o malformato.' });
     }
-
-    // Estrae il token JWT dall'header Authorization (rimuovendo 'Bearer ').
-    const token = authHeader.split(' ')[1];
-
-    // Controlla se il token è effettivamente presente dopo 'Bearer '.
-    if (!token) {
-        // Se il token è vuoto, restituisce un errore 401.
-        return res.status(401).json({ message: 'Accesso non autorizzato. Token non valido.' });
-    }
-
     try {
         const user = await getUserFromToken(token);
 
