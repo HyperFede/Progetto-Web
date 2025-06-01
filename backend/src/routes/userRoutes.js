@@ -432,7 +432,7 @@ router.put('/:id', isAuthenticated, hasPermission(['Admin', 'Self']), async (req
  * @description Esegue una "soft delete" di un utente, impostando il campo 'deleted' a true.
  *              Non permette l'eliminazione di utenti Admin.
  * @access Tipicamente Admin, e Self.
- * 
+ *  
  * Interazione Black-Box:
  *  Input:
  *      - Parametro di rotta `id`: ID numerico dell'utente da eliminare.

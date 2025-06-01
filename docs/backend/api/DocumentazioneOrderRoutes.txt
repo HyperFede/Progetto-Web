@@ -1,0 +1,202 @@
+Elenco Endpoint
+
+GET api/orders/
+GET api/orders/:id
+GET api/orders/my-orders
+
+POST api/orders/create-and-reserve
+
+DELETE api/orders/:id
+
+#1 creare un nuovo ordine
+
+POST api/orders/create-and-reserve
+
+@Descr Crea un nuovo ordine, con status= 'In attesa', (verra modificato in seguito) con i dettagliOrdine presi dal carrello.
+Se ha successo, svuota anche il carrello 
+Prima di creare il nuovo ordine si controlla lo stock e in caso positivo si prenota quella quantita per 15 minuti (timer)
+
+dopo questi 15 minuti, se il pagamento non ha avuto successo (controlla nella tabella pagamento), lo status di questo ordine va a Scaduto
+
+se si prova a riutilizzare questo endpoint (furbetti che tornano indietro) mentre si ha un ordine con status "in attesa", si ottiene un messaggio di errore di remind
+Hai già un ordine in attesa Procedi al pagamento o attendi la sua scadenza.
+
+@Access solo cliente (fa ordini solo per se stesso)
+
+Input
+l'Endpoint non richiede alcun input, questo endpoint fa la ricerca nel carrello del cliente che lo usa (oltre al token JWT)
+
+
+output:
+{
+    "message": "Ordine creato e articoli riservati con successo. Hai 15 minuti per completare il pagamento.",
+    "ordine": {
+        "idordine": 13,
+        "dataOrdine": "2025-06-01T22:00:00.000Z",
+        "oraOrdine": "00:37:38.372084",
+        "status": "In attesa",
+        "importoTotale": "359.00"
+    }
+}
+
+Caso di ordine ancora in attesa
+
+{
+    "message": "Hai già un ordine in attesa (ID: 13). Procedi al pagamento o attendi la sua scadenza.",
+    "ordine": {
+        "idordine": 13,
+        "dataOrdine": "2025-06-01T22:00:00.000Z",
+        "oraOrdine": "00:37:38.372084",
+        "importoTotale": "359.00",
+        "status": "In attesa"
+    },
+    "existingOrder": true
+}
+
+Errori comuni:
+400
+
+-se il carrello dell'utente non ha prodotti
+{
+    "message": "Il tuo carrello è vuoto."
+}
+-se il prodotto è marcato come deleted oppure out of stock
+{
+    "message": "Prodotto \"[Nome del Prodotto]\" (ID: [ID del Prodotto]) non più disponibile."
+}
+401 (unauthorized)
+
+{
+    "message": "Token non fornito."
+}
+
+403 (forbidden)
+
+{
+    "message": "Accesso negato a questo ordine."
+}
+
+404 (not found)
+
+{
+    "message": "Ordine non trovato."
+}
+
+500 (server error)
+
+{
+    "message": "Errore del server durante la creazione dell'ordine."
+}
+
+
+#2 visualizzare gli ordini:
+GET api/orders/
+
+@Descr restituisce tutti gli ordini del DB (filtrabili)
+
+@Access Admin
+@filters esempi:
+GET /api/orders?status=Pagato
+GET /api/orders?deleted=true&sort=importototale&order=asc
+GET /api/orders?idutente=5
+GET /api/orders?data_gte=2023-01-01&data_lte=2023-01-31
+GET /api/orders?nomeutente_like=john
+GET /api/orders?status=In attesa&sort=ora&order=asc //nota lo spazio per in attesa
+
+Input (nessuno oltre al token)
+
+output
+[
+    {
+        "idordine": 13,
+        "idutente": 5,
+        "data": "2025-06-01T22:00:00.000Z",
+        "ora": "00:37:38.372084",
+        "importototale": "359.00",
+        "status": "Scaduto",
+        "deleted": false,
+        "nomeutente": "cli1",
+        "emailutente": "g.russo@mail.com",
+        "indirizzospedizione": "Via Clienti 7, Napoli",
+        "dettagli": [
+            {
+                "idprodotto": 4,
+                "quantita": 1,
+                "prezzostoricounitario": "89.00",
+                "nomeprodotto": "Collana Argento",
+                "totaleriga": "89.00"
+            },
+            {
+                "idprodotto": 7,
+                "quantita": 1,
+                "prezzostoricounitario": "120.00",
+                "nomeprodotto": "Scultura Cavallo",
+                "totaleriga": "120.00"
+            },
+            {
+                "idprodotto": 6,
+                "quantita": 2,
+                "prezzostoricounitario": "75.00",
+                "nomeprodotto": "Bracciale Intrecciato",
+                "totaleriga": "150.00"
+            }
+        ]
+    },
+    {
+        ...
+        "dettagli": [
+            {
+                ...
+            },
+            {
+                ...
+            }
+        ]
+    }
+]
+
+GET api/orders/:id
+
+
+@Descr restituisce gli ordini con id = :id (filtrabili)
+@Access Admin or Cliente (per i suoi ordini)
+
+input: nessuno oltre al token
+
+
+
+Output:
+{
+    "idordine": 11,
+    "idutente": 5,
+    "data": "2025-05-31T22:00:00.000Z",
+    "ora": "22:03:09.511599",
+    "importototale": "215.00",
+    "status": "Scaduto",
+    "deleted": false,
+    "nomeutente": "cli1",
+    "emailutente": "g.russo@mail.com",
+    "indirizzospedizione": "Via Clienti 7, Napoli",
+    "dettagli": [
+        {
+            "idprodotto": 3,
+            "quantita": 1,
+            "prezzostoricounitario": "65.00",
+            "nomeprodotto": "Anfora Greca",
+            "totaleriga": "65.00"
+        },
+        {
+            "idprodotto": 6,
+            "quantita": 2,
+            "prezzostoricounitario": "75.00",
+            "nomeprodotto": "Bracciale Intrecciato",
+            "totaleriga": "150.00"
+        }
+    ]
+}
+
+GET api/orders/my-orders
+
+Prende tutti gli ordini del cliente autenticato (con i dettagli)
+
+DELETE :id fa soft delete (per ora non eliminiamo del tutto)
