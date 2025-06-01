@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS Ordine (
     Data DATE NOT NULL,
     Ora TIME NOT NULL,
     ImportoTotale NUMERIC(10,2) NOT NULL,
-    Status VARCHAR(50) NOT NULL CHECK (Status IN ('In attesa', 'Spedito', 'Consegnato')) DEFAULT 'In attesa',
+    Status VARCHAR(50) NOT NULL CHECK (Status IN ('In attesa', 'Da spedire', 'Scaduto', 'Spedito', 'Consegnato')) DEFAULT 'In attesa',
     Deleted BOOLEAN NOT NULL DEFAULT FALSE -- Soft delete
 );
 
@@ -68,6 +68,20 @@ CREATE TABLE IF NOT EXISTS DettagliOrdine (
     Quantita INTEGER NOT NULL,
     PrezzoStoricoUnitario NUMERIC(10,2) NOT NULL,
     PRIMARY KEY (IDOrdine, IDProdotto)
+);
+
+-- ==================================================
+-- New table: SubOrdine (sub-order per Artigiano)
+-- ==================================================
+-- Questa tabella permette di gestire gli ordini suddivisi per Artigiano
+-- e lo stato di avanzamento di ciascun Artigiano per un determinato Ordine.
+
+
+CREATE TABLE IF NOT EXISTS SubOrdine (
+    IDOrdine INTEGER NOT NULL REFERENCES Ordine(IDOrdine) ON DELETE CASCADE ON UPDATE CASCADE,
+    IDArtigiano INTEGER NOT NULL REFERENCES Utente(IDUtente) ON DELETE CASCADE ON UPDATE CASCADE,
+    SubOrdineStatus VARCHAR(50) NOT NULL CHECK (SubOrdineStatus IN ('In attesa', 'Da spedire', 'Scaduto', 'Spedito', 'Consegnato')) DEFAULT 'In attesa',
+    PRIMARY KEY (IDOrdine, IDArtigiano) -- assicura che un Artigiano non possa avere più SubOrdini per lo stesso Ordine
 );
 
 -- ==================================================
