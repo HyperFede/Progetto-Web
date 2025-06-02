@@ -33,18 +33,18 @@ BEGIN
         ('Porta Gioie', 'Scatola intarsiata con coperchio', 'Arredo', 95.00, 12, 4);
 
         -- 3. Insert Orders (10 orders across clients)
-        INSERT INTO Ordine (IDUtente, Data, Ora, ImportoTotale, Status)
+        INSERT INTO Ordine (IDUtente, Data, Ora, ImportoTotale, Status,StripeCheckOutSessionID)
         VALUES
-        (5, '2025-01-15', '10:30:00', 0, 'Consegnato'),  -- cli1
-        (6, '2025-02-03', '14:22:00', 0, 'Spedito'),     -- cli2
-        (5, '2025-02-10', '09:45:00', 0, 'Da spedire'),  -- cli1
-        (7, '2025-03-01', '16:15:00', 0, 'In attesa'),   -- cli3
-        (6, '2025-03-18', '11:30:00', 0, 'Consegnato'),  -- cli2
-        (7, '2025-04-05', '13:05:00', 0, 'Spedito'),     -- cli3
-        (5, '2025-04-22', '15:40:00', 0, 'Consegnato'),  -- cli1
-        (7, '2025-05-12', '10:10:00', 0, 'Da spedire'),  -- cli3
-        (6, '2025-05-19', '17:20:00', 0, 'In attesa'),  -- cli2
-        (5, '2025-05-28', '08:55:00', 0, 'Spedito');    -- cli1
+        (5, '2025-01-10', '12:00:00', 0, 'In attesa', 'cs_1'),
+        (6, '2025-01-20', '15:45:00', 0, 'Da spedire', 'cs_2'),
+        (5, '2025-01-25', '10:00:00', 0, 'Scaduto', 'cs_3'),
+        (7, '2025-02-05', '13:30:00', 0, 'Spedito', 'cs_4'),
+        (6, '2025-02-15', '09:15:00', 0, 'Consegnato', 'cs_5'),
+        (7, '2025-02-25', '11:50:00', 0, 'In attesa', 'cs_6'),
+        (5, '2025-03-05', '14:05:00', 0, 'Da spedire', 'cs_7'),
+        (7, '2025-03-20', '16:40:00', 0, 'Spedito', 'cs_8'),
+        (6, '2025-04-01', '08:30:00', 0, 'Consegnato', 'cs_9'),
+        (5, '2025-04-10', '17:55:00', 0, 'Spedito', 'cs_10');
 
         -- 4. Insert Order Details (3-4 items per order)
         INSERT INTO DettagliOrdine (IDOrdine, IDProdotto, Quantita, PrezzoStoricoUnitario)
@@ -107,11 +107,14 @@ BEGIN
         SELECT DISTINCT 
         dor.IDOrdine, 
         p.IDArtigiano,
-        CASE 
-            WHEN o.Status = 'In attesa' THEN 'In attesa'
-            WHEN o.Status = 'Consegnato' THEN 'Consegnato'
-            ELSE 'Da spedire'
-        END
+        CASE o.Status
+            WHEN 'In attesa' THEN 'In attesa'
+            WHEN 'Da spedire' THEN 'Da spedire'
+            WHEN 'Scaduto' THEN 'Scaduto'
+            WHEN 'Spedito' THEN 'Spedito'
+            WHEN 'Consegnato' THEN 'Consegnato'
+            ELSE 'In attesa' -- Default fallback, though all statuses should be covered by Ordine CHECK constraint
+        END AS SubOrdineStatus
         FROM DettagliOrdine as dor
         JOIN Prodotto p ON dor.IDProdotto = p.IDProdotto
         JOIN Ordine o ON dor.IDOrdine = o.IDOrdine;
@@ -140,15 +143,19 @@ BEGIN
         (7, 9, 3, 285.00);
 
         -- 10. Insert Payments
-        INSERT INTO Pagamento (IDOrdine, StripePaymentIntentID, StripeStatus, Modalita, ImportoTotale, Timestamp)
+        -- Note: TimestampCreazione will use DEFAULT CURRENT_TIMESTAMP if not explicitly provided and the column is defined with it.
+        -- We are explicitly setting it here for consistent test data.
+        INSERT INTO Pagamento (IDOrdine, StripePaymentIntentID, StripeStatus, Modalita, ImportoTotale, Valuta, TimestampCreazione)
         SELECT 
-        IDOrdine,
-        'pi_' || MD5(RANDOM()::TEXT)::VARCHAR(27), 
-        'succeeded', 
-        'Carta', 
-        ImportoTotale, 
-        (Data || ' ' || Ora)::TIMESTAMP + INTERVAL '5 minutes'
-        FROM Ordine;
+            o.IDOrdine,
+            'pi_' || SUBSTRING(MD5(RANDOM()::TEXT) FOR 27), -- Generates a unique string for StripePaymentIntentID
+            'succeeded',                                   -- StripeStatus
+            'card',                                        -- Modalita (e.g., from Stripe payment_method_types)
+            o.ImportoTotale,
+            'EUR',                                         -- Valuta
+            (o.Data || ' ' || o.Ora)::TIMESTAMP + INTERVAL '5 minutes' -- TimestampCreazione
+        FROM Ordine o
+        WHERE o.Status IN ('Consegnato', 'Spedito', 'Da spedire'); -- Only create payments for orders that are logically paid
 
         RAISE NOTICE 'Dati di test inseriti con successo.';
     ELSE

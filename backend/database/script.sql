@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS Ordine (
     Ora TIME NOT NULL,
     ImportoTotale NUMERIC(10,2) NOT NULL,
     Status VARCHAR(50) NOT NULL CHECK (Status IN ('In attesa', 'Da spedire', 'Scaduto', 'Spedito', 'Consegnato')) DEFAULT 'In attesa',
+    StripeCheckOutSessionID VARCHAR(255) UNIQUE, -- Added UNIQUE constraint
     Deleted BOOLEAN NOT NULL DEFAULT FALSE -- Soft delete
 );
 
@@ -160,11 +161,12 @@ CREATE TABLE IF NOT EXISTS DettagliCarrello (
 CREATE TABLE IF NOT EXISTS Pagamento (
     IDPagamento SERIAL PRIMARY KEY,
     IDOrdine INTEGER UNIQUE NOT NULL REFERENCES Ordine(IDOrdine)
-        ON DELETE CASCADE 
+        ON DELETE CASCADE
         ON UPDATE CASCADE,
-    StripePaymentIntentID VARCHAR(255) NOT NULL,
+    StripePaymentIntentID VARCHAR(255) NOT NULL UNIQUE, -- Added UNIQUE
     StripeStatus VARCHAR(50) NOT NULL,
-    Modalita VARCHAR(50) NOT NULL CHECK (Modalita IN ('Carta', 'PayPal', 'Bonifico')), --Da cambiare vedendo Stripe integration
+    Modalita VARCHAR(255) NOT NULL, -- Removed CHECK constraint, increased length for flexibility
     ImportoTotale NUMERIC(10,2) NOT NULL,
-    Timestamp TIMESTAMP NOT NULL
+    Valuta VARCHAR(3) NOT NULL, -- Necessary column for currency
+    TimestampCreazione TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP -- Added DEFAULT
 );

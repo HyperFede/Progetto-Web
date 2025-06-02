@@ -9,6 +9,7 @@ console.log('DB_USER in index.js dopo dotenv.config():', process.env.DB_USER);
 
 const express = require('express');  // Importa il framework Express
 const cookieParser = require('cookie-parser'); // Importa il middleware per il parsing dei cookie
+
 const cors = require('cors'); // Importa il middleware CORS
 const initDb = require('./config/init-db'); // Importa la funzione initDb per inizializzare il database
 const userRoutes = require('./routes/userRoutes'); // Importeremo le route degli utenti
