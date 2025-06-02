@@ -34,8 +34,16 @@ body {
 }
 
 /* Lista Articoli */
+.cart-items-list {
+    background-color: var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    box-shadow: var(--shadow);
+    padding: 1rem;
+}
+
 .cart-item {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--divider-color);
 }
 .cart-item:last-child {
     border-bottom: none;
@@ -107,7 +115,7 @@ body {
 
 /* Riepilogo Ordine */
 .order-summary-box {
-    background-color: var(--text-light); /* cornsilk (uguale a background-color) */
+    background-color: var(--border-color); /* cornsilk (uguale a background-color) */
     border: 1px solid var(--border-color);
     border-radius: 0.375rem;
     box-shadow: var(--shadow);

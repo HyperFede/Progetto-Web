@@ -11,11 +11,12 @@
     --background-color: var(--cornsilk);
     --text-dark: var(--pakistan-green);
     --text-light: var(--cornsilk);
-    --border-color: #dcdde1;
+    --border-color: #ffffffe6;
     --shadow: 0 10px 30px rgba(0,0,0,0.1);
     --success-color: #198754;
     --warning-color: #ffc107;
-    --danger-color: #dc3545; 
+    --danger-color: #dc3545;
+    --divider-color: #9a9a9a; 
 }
 
 /* Stili globali comuni */

@@ -68,12 +68,15 @@ body {
     box-shadow: 0 0 0 0.1rem rgba(221, 161, 94, 0.25);
 }
 .payment-method-option .form-check-input.payment-radio {
-    margin-top: 0.5em;
+    margin: 0 0.5em 0 0;
     border-color: var(--secondary-color);
+    padding: 0;
 }
 .payment-method-option .form-check-input.payment-radio:checked {
+    margin: 0 0.5em 0 0;
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+    padding: 0;
 }
 .payment-method-option .form-check-label {
     cursor: pointer;
