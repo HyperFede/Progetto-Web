@@ -4,8 +4,9 @@ body {
 }
 
 .filter-bar {
-    background-color: var(--background-color);
+    background-color: var(--border-color);
     border: 1px solid var(--secondary-color);
+    box-shadow: var(--shadow);
 }
 
 .filter-bar .form-label {
