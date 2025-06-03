@@ -18,6 +18,7 @@ const orderRoutes = require('./routes/orderRoutes'); // Importa le route degli o
 const paymentRoutes = require('./routes/paymentRoutes'); // Importa le route dei pagamenti
 const authRoutes = require('./routes/authRoutes'); // Importa le route di autenticazione
 const cartRoutes = require('./routes/cartRoutes'); // Importa le route del carrello
+const subOrderRoutes = require('./routes/subOrderRoutes'); // Importa le route degli ordini secondaris
 
 const app = express();
 app.use(cors()); // Abilita CORS per tutte le richieste
@@ -42,6 +43,7 @@ app.use('/api/orders', orderRoutes); // Monta le route degli ordini
 app.use('/api/payments', paymentRoutes); // Monta le route dei pagamenti
 app.use('/api/auth', authRoutes); // Monta le route di autenticazione
 app.use('/api/cart', cartRoutes); // Monta le route del carrello
+app.use('/api/suborders', subOrderRoutes); // Monta le route degli ordini secondari
 
 
 // Endpoint di root per un semplice check

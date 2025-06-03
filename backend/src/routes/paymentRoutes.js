@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare.js'); // Import isAuthenticated and hasPermission
 const pool = require('../config/db-connect'); // Assicurati che il percorso sia corretto
 const Stripe = require('stripe');
 
@@ -15,6 +16,35 @@ const beginTransaction = async (client) => client.query('BEGIN');
 const commitTransaction = async (client) => client.query('COMMIT');
 const rollbackTransaction = async (client) => client.query('ROLLBACK');
 
+/**
+ * Helper function to create SubOrdine records for each artisan involved in an order.
+ * This is called after a payment is successfully verified and recorded.
+ * @param {number} orderId - The ID of the main order.
+ *@param {object} client - The database client to use for the transaction.
+*/
+ const createSubOrdiniForOrder = async (orderId,client) => {
+    try {
+        const insertSubOrdiniQuery = `
+            INSERT INTO SubOrdine (IDOrdine, IDArtigiano, SubOrdineStatus) 
+            SELECT DISTINCT
+                $1::INTEGER,      -- IDOrdine
+                p.IDArtigiano,'Da spedire'
+            FROM
+                DettagliOrdine dor
+            JOIN
+                Prodotto p ON dor.IDProdotto = p.IDProdotto
+            WHERE
+                dor.IDOrdine = $1::INTEGER
+            ON CONFLICT (IDOrdine, IDArtigiano) DO NOTHING; 
+        `;
+        // SubOrdineStatus will use 'Da spedire'
+        await client.query(insertSubOrdiniQuery, [orderId]);
+        console.log(`[Verify Session] SubOrdini created/ensured for order ${orderId}. con status = 'Da spedire'`);
+    } catch (error) {
+        console.error(`[Verify Session] Error creating SubOrdini for order ${orderId}: ${error.message}`, error.stack);
+        throw error; // Re-throw to be caught by the calling transaction block
+    }
+};
 // POST per processare un pagamento per un ordine
 // router.post('/process', async (req, res) => {
 //     // Questo endpoint potrebbe essere deprecato se la Stripe Checkout Session viene creata direttamente da orderRoutes
@@ -116,8 +146,8 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
 //Testato su ordine scaduto/in attesa
 
 
-router.post('/verify-session', async (req, res) => {
-    const { sessionId: actualPaidSessionId } = req.body;
+router.post('/verify-session', isAuthenticated, hasPermission(['Cliente']), async (req, res) => {
+    const { sessionid: actualPaidSessionId } = req.body;
     if (!actualPaidSessionId) {
         return res.status(400).json({ error: 'Session ID is required.' });
     }
@@ -142,14 +172,25 @@ router.post('/verify-session', async (req, res) => {
         console.log(`[Verify Session] Processing order ID ${finalOrderId} from Stripe session ${actualPaidSessionId}.`);
 
         // 4. Recupera l'ordine dal DB usando finalOrderId.
-        //    Questo permette di controllare il suo stato attuale e il suo StripeCheckoutSessionID memorizzato per logging/consistenza.
-        const orderQuery = await pool.query('SELECT StripeCheckOutSessionID, Status FROM Ordine WHERE idordine = $1', [finalOrderId]);
+        //    Questo permette di controllare il suo stato attuale, il proprietario e il suo StripeCheckoutSessionID memorizzato.
+        const orderQuery = await pool.query(
+            'SELECT IDUtente, StripeCheckOutSessionID, Status FROM Ordine WHERE idordine = $1', 
+            [finalOrderId]
+        );
         if (orderQuery.rows.length === 0) {
             console.error(`Verify Session Error: Order ${finalOrderId} (from paid session) not found in DB. Paid session: ${actualPaidSessionId}.`);
             // Questo implica che un ordine associato a un pagamento riuscito non esiste nel nostro sistema, il che è un problema critico.
             return res.status(404).json({ error: `Order ${finalOrderId} associated with the payment was not found in our system.` });
         }
         const dbOrder = orderQuery.rows[0];
+
+        // At this point, hasPermission(['Cliente']) has already ensured req.user.tipologia is 'Cliente'.
+        // The following check ensures the 'Cliente' owns this specific order.
+        // Authorization: Check if the order belongs to the authenticated user
+        if (req.user.idutente !== dbOrder.idutente) {
+            console.warn(`[Verify Session] AuthZ failed: User ${req.user.idutente} attempted to verify session ${actualPaidSessionId} for order ${finalOrderId} owned by user ${dbOrder.idutente}.`);
+            return res.status(403).json({ error: 'Access denied. You do not have permission to verify this payment session.' });
+        }
 
         // Informativo: Registra se l'ID sessione memorizzato nel DB differisce da quello appena pagato.
         // Questo va bene se è stata creata una nuova sessione per un ordine in sospeso, e una più vecchia è stata usata per il pagamento.
@@ -186,14 +227,37 @@ router.post('/verify-session', async (req, res) => {
                      console.log(`Verify Session: Order ${finalOrderId} status updated to 'Da spedire' from paid session ${actualPaidSessionId}.`);
                 }
 
+                                // Determine the actual payment method used
+                let actualPaymentMethodType = 'unknown'; // Default
+                if (paymentIntentId) {
+                    try {
+                        const paymentIntent = await stripe.paymentIntents.retrieve(
+                            paymentIntentId,
+                            { expand: ['payment_method'] } // Expand the payment_method object
+                        );
+                        if (paymentIntent.payment_method && paymentIntent.payment_method.type) {
+                            actualPaymentMethodType = paymentIntent.payment_method.type;
+                        } else {
+                            console.warn(`[Verify Session] Could not determine specific payment method type from expanded payment_method for PI: ${paymentIntentId}. Using default '${actualPaymentMethodType}'.`);
+                        }
+                    } catch (piError) {
+                        console.error(`[Verify Session] Error retrieving PaymentIntent ${paymentIntentId} to determine payment method: ${piError.message}. Using default '${actualPaymentMethodType}'.`);
+                    }
+                } else {
+                    console.error(`[Verify Session] CRITICAL: Stripe session ${actualPaidSessionId} is 'paid' but has no payment_intent ID. Modalita will be '${actualPaymentMethodType}'.`);
+                }
+
                 // 2. Crea un record di Pagamento
                 await pgClient.query(
                     `INSERT INTO Pagamento (IDOrdine, StripePaymentIntentID, ImportoTotale, Valuta, StripeStatus, Modalita)
                      VALUES ($1, $2, $3, $4, $5, $6)
                      ON CONFLICT (StripePaymentIntentID) DO NOTHING`, // Assumendo che StripePaymentIntentID sia unico
-                    [finalOrderId, paymentIntentId, amountTotal, currency.toUpperCase(), 'succeeded', stripeSession.payment_method_types ? stripeSession.payment_method_types.join(', ') : 'card']
+                    [finalOrderId, paymentIntentId, amountTotal, currency.toUpperCase(), 'succeeded', actualPaymentMethodType]
                 );
                 console.log(`Verify Session: Payment record created/ensured for order ${finalOrderId} (Stripe PI: ${paymentIntentId}) from paid session ${actualPaidSessionId}.`);
+
+                //3. Crea SubOrdini per ogni artigiano coinvolto nell'ordine
+                await createSubOrdiniForOrder(finalOrderId,pgClient);
 
                 await commitTransaction(pgClient);
                 res.status(200).json({ success: true, message: 'Payment verified and order updated.', orderStatus: 'Da spedire', paymentStatus: stripeSession.payment_status });
@@ -213,11 +277,11 @@ router.post('/verify-session', async (req, res) => {
                 try {
                     await beginTransaction(pgClient);
                     await pgClient.query(
-                        `UPDATE Ordine SET Status = 'Pagamento fallito' WHERE idordine = $1 AND Status = 'In attesa'`,
+                        `UPDATE Ordine SET Status = 'Scaduto' WHERE idordine = $1 AND Status = 'In attesa'`,
                         [finalOrderId]
                     );
-                    updatedOrderStatus = 'Pagamento fallito';
-                    console.log(`Verify Session: Order ${finalOrderId} status updated to 'Pagamento fallito' due to unpaid (but complete) session ${actualPaidSessionId}.`);
+                    updatedOrderStatus = 'Scaduto'; // Aggiorna lo stato dell'ordine a 'Scaduto'
+                    console.log(`Verify Session: Order ${finalOrderId} status updated to 'Scaduto' due to unpaid (but complete) session ${actualPaidSessionId}.`);
                     await commitTransaction(pgClient);
                 } catch (dbError) {
                     await rollbackTransaction(pgClient);

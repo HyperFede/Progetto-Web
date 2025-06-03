@@ -47,10 +47,15 @@ router.get('/', isAuthenticated,hasPermission(['Admin']), async (req, res) => {
     
     try {
         const result = await pool.query(query);
-        res.json(result.rows);
+        const parsedItems = result.rows.map(item => ({
+            ...item,
+            prezzounitario: parseFloat(item.prezzounitario).toFixed(2),
+            totaleparziale: parseFloat(item.totaleparziale).toFixed(2)
+        }));
+        res.json(parsedItems);
     } catch (error) { //NOSONAR
         console.error('Errore nel recupero dei carrelli:', error);
-        res.status(500).json({ message: 'Errore del server durante il recupero dei carrelli.' });
+        res.status(500).json({ message: 'Errore del server durante il recupero dei carrelli.', error: error.message });
     }
 });
 
@@ -118,17 +123,21 @@ router.get('/:idcliente', isAuthenticated, hasPermission(['Admin', 'Cliente']), 
         //     return res.status(404).json({ message: 'Carrello non trovato o vuoto per l\'utente specificato.' });
         // }
 
-        const cartItems = result.rows;
+        const rawCartItems = result.rows;
         let totaleCarrello = 0;
 
-        for (const item of cartItems) {
+        for (const item of rawCartItems) {
             // item.totaleparziale is likely a string if it comes from a NUMERIC/DECIMAL DB type.
             //  (in piu js fa cose strane con i numeri)
             totaleCarrello += parseFloat(item.totaleparziale) || 0;
         }
+        const parsedCartItems = rawCartItems.map(item => ({
+            ...item,
+            prezzounitario: parseFloat(item.prezzounitario).toFixed(2),
+            totaleparziale: parseFloat(item.totaleparziale).toFixed(2)
+        }));
 
-        // Format to 2 decimal places and ensure it's a number in the response.
-        res.json({ items: cartItems, totaleCarrello: parseFloat(totaleCarrello.toFixed(2)) });
+        res.json({ items: parsedCartItems, totaleCarrello: parseFloat(totaleCarrello.toFixed(2)) });
     } catch (error) { //NOSONAR
         console.error('Errore nel recupero del carrello:', error);
         res.status(500).json({ message: 'Errore del server durante il recupero del carrello.' });
@@ -213,9 +222,9 @@ router.post('/items', isAuthenticated, hasPermission(['Cliente']), async (req, r
             idcliente: newDettaglioCart.idcliente,
             idprodotto: newDettaglioCart.idprodotto,
             quantita: newDettaglioCart.quantita,
-            totaleparziale: newDettaglioCart.totaleparziale,
+            totaleparziale: parseFloat(newDettaglioCart.totaleparziale).toFixed(2),
             nomeprodotto: prodotto.nome, // Aggiunto
-            prezzounitario: prodotto.prezzounitario // Aggiunto (già presente in prodotto)
+            prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2)
         };
 
         await commitTransaction();
@@ -318,9 +327,9 @@ router.put('/items/:idprodotto', isAuthenticated, hasPermission(['Cliente']), as
                 idcliente: updatedDettaglioCart.idcliente,
                 idprodotto: updatedDettaglioCart.idprodotto,
                 quantita: updatedDettaglioCart.quantita,
-                totaleparziale: updatedDettaglioCart.totaleparziale,
+                totaleparziale: parseFloat(updatedDettaglioCart.totaleparziale).toFixed(2),
                 nomeprodotto: prodotto.nome,
-                prezzounitario: prodotto.prezzounitario
+                prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2)
             };
 
             await commitTransaction();
@@ -414,9 +423,9 @@ router.put('/items/:idprodotto/add', isAuthenticated, hasPermission(['Cliente'])
             idcliente: updatedDettaglioCart.idcliente,
             idprodotto: updatedDettaglioCart.idprodotto,
             quantita: updatedDettaglioCart.quantita,
-            totaleparziale: updatedDettaglioCart.totaleparziale,
+            totaleparziale: parseFloat(updatedDettaglioCart.totaleparziale).toFixed(2),
             nomeprodotto: prodotto.nome,
-            prezzounitario: prodotto.prezzounitario
+            prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2)
         };
 
         await commitTransaction();
@@ -507,9 +516,9 @@ router.put('/items/:idprodotto/subtract', isAuthenticated, hasPermission(['Clien
                 idcliente: updatedDettaglioCart.idcliente,
                 idprodotto: updatedDettaglioCart.idprodotto,
                 quantita: updatedDettaglioCart.quantita,
-                totaleparziale: updatedDettaglioCart.totaleparziale,
+                totaleparziale: parseFloat(updatedDettaglioCart.totaleparziale).toFixed(2),
                 nomeprodotto: prodotto.nome,
-                prezzounitario: prodotto.prezzounitario
+                prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2)
             };
 
             await commitTransaction();
