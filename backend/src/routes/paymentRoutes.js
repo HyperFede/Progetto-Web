@@ -259,8 +259,16 @@ router.post('/verify-session', isAuthenticated, hasPermission(['Cliente']), asyn
                 //3. Crea SubOrdini per ogni artigiano coinvolto nell'ordine
                 await createSubOrdiniForOrder(finalOrderId,pgClient);
 
+                // 4. Svuota il carrello del cliente
+                const idcliente = req.user.idutente; // ID del cliente autenticato
+                await pgClient.query(
+                    'DELETE FROM dettaglicarrello WHERE idcliente = $1',
+                    [idcliente]
+                );
+                console.log(`[Verify Session] Cart cleared for client ${idcliente} after successful payment for order ${finalOrderId}.`);
+
                 await commitTransaction(pgClient);
-                res.status(200).json({ success: true, message: 'Payment verified and order updated.', orderStatus: 'Da spedire', paymentStatus: stripeSession.payment_status });
+                res.status(200).json({ success: true, message: 'Payment verified, order updated, and cart cleared.', orderStatus: 'Da spedire', paymentStatus: stripeSession.payment_status });
             } catch (dbError) {
                 await rollbackTransaction(pgClient);
                 console.error(`Verify Session DB Error for order ${finalOrderId} (paid session ${actualPaidSessionId}): ${dbError.message}`, dbError.stack);

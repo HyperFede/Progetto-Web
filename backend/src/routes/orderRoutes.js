@@ -273,7 +273,7 @@ router.post('/reserve-and-create-checkout-session', isAuthenticated, hasPermissi
     // const finalIndirizzoSpedizione = indirizzospedizione || indirizzospedizioneDefault;
 
     
-    // Prima di procedere, controlla se l'utente ha già un ordine in stato 'In attesa'.
+    // Prima di procedere, conFtrolla se l'utente ha già un ordine in stato 'In attesa'.
     try {
         const existingPendingOrderQuery = await pool.query(
             `SELECT idordine, data, ora, importototale, status, stripecheckoutsessionid 
@@ -551,8 +551,6 @@ router.post('/reserve-and-create-checkout-session', isAuthenticated, hasPermissi
             );
         }
 
-        // 5. Svuota il carrello
-        await client.query('DELETE FROM dettaglicarrello WHERE idcliente = $1', [idcliente]);
         // Recupera l'email del cliente per Stripe
         const userEmailQuery = await pool.query('SELECT email FROM Utente WHERE idutente = $1', [idcliente]); // Usa direttamente il pool o lo stesso client
         const customerEmail = userEmailQuery.rows.length > 0 ? userEmailQuery.rows[0].email : null;
