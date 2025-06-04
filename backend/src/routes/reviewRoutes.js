@@ -80,7 +80,7 @@ router.post('/', isAuthenticated, hasPermission(['Cliente']), async (req, res) =
             `SELECT 1
              FROM Ordine o
              JOIN DettagliOrdine dor ON o.IDOrdine = dor.IDOrdine
-             JOIN Prodotto p ON dor.IDProdotto = p.IDProdotto
+             JOIN Prodotto p ON dor.IDProdotto = p.IDProd   otto
              JOIN SubOrdine so ON o.IDOrdine = so.IDOrdine AND p.IDArtigiano = so.IDArtigiano
              WHERE o.IDUtente = $1      -- Authenticated user's ID
                AND dor.IDProdotto = $2   -- Product being reviewed
