@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/pages/index.css">
 </head>
 <body>
-    <header class="py-3 mb-4 border-bottom">
+    <header class="py-3 mb-4 border-bottom d-none d-lg-block">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">
             <a href="index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
@@ -22,7 +22,12 @@
                 <li class="nav-item" style="color: var(--secondary-color)">|</li>
                 <li class="nav-item"><a href="registrati.html" class="nav-link" style="color: var(--secondary-color);">REGISTRATI</a></li>
                 <li class="nav-item">
-                    <a href="carrelloUtente.html" class="nav-link" style="color: var(--primary-color);">
+                    <!-- UNLOGGED -->
+                    <!---
+                    <a href="login.html" class="nav-link" style="color: var(--secondary-color);">
+                        <i class="bi bi-cart fs-4"></i>
+                    </a>-->
+                    <a href="carrelloUtente.html" class="nav-link" style="color: var(--secondary-color);">
                         <i class="bi bi-cart fs-4"></i>
                     </a>
                 </li>
@@ -30,7 +35,81 @@
         </div>
     </header>
 
-    <main class="container">
+<!-- Navbar per schermi < lg -->
+    <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none"> <!-- Mantenuto fixed-top come richiesto in precedenza -->
+         <div class="container-fluid d-flex justify-content-between align-items-center">
+            <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a href="index.html" class="d-flex align-items-center text-dark text-decoration-none">
+                <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
+            </a>
+            <div class="ms-auto"></div> <!-- Spacer to push toggler and logo to the left -->
+
+            <!-- Offcanvas UNLOGGED -->
+            <!--<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menù</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                        <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="login.html">
+                                <i class="bi bi-person-fill me-2"></i>ACCEDI
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                             <a class="nav-link active" aria-current="page" href="registrati.html"> <i class="bi bi-pencil-square me-2"></i>REGISTRATI
+                             </a>
+                        </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>-->
+
+            <!-- Offcanvas menu LOGGED-->
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Il Mio Account</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                        <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="dashboardUtente.html">
+                                <i class="bi bi-person-fill me-2"></i>IL MIO PROFILO
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                             <a class="nav-link" aria-current="page" href="dashboardStoricoOrdini.html"> <i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
+                             </a>
+                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#"> <i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI
+                                </a>
+                            </li>
+                            </ul>
+                        <hr class="sidebar-divider">
+                        <button class="btn logout-btn w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                        </button>
+                    </div>
+                </div>
+            </div>
+           <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
+                <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
+                    <a href="carrelloUtente.html" class="nav-link" style="color: var(--secondary-color);">
+                        <i class="bi bi-cart fs-3"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container my-4 pt-lg-0">
         <div class="row mb-4 g-3 align-items-center p-3 rounded filter-bar">
             <div class="col-md-5">
                 <label for="searchQuery" class="form-label">Cosa Cerchi?</label>
@@ -66,16 +145,25 @@
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <div class="col">
                 <div class="card h-100" style="border-color: var(--secondary-color);">
+                    <a href="dettaglioProdotto.html" class="text-decoration-none text-dark">
                     <div class="product-image-placeholder d-flex align-items-center justify-content-center" style="background-color: #e9ecef; height: 200px; color: var(--secondary-color);">
                         IMG
                     </div>
-                    <div class="card-body d-flex flex-column">
+                    </a>
+                    <div class="card-body d-flex flex-column p-3">
                         <h5 class="card-title" style="color: var(--primary-color);">Nome Prodotto 1</h5>
                         <ul class="list-unstyled mt-2 mb-3 flex-grow-1">
                             <li><small class="text-muted">Valutazioni: <i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-half" style="color: var(--primary-color);"></i><i class="bi bi-star" style="color: var(--primary-color);"></i></small></li>
                             <li><small class="text-muted">Artigiano: Nome Artigiano</small></li>
                             <li><strong style="color: var(--primary-color);">Prezzo: €XX.XX</strong></li>
                         </ul>
+                        <!-- UNLOGGED -->
+                        <!--
+                        <a href="login.html" class="nav-link" style="color: var(--secondary-color);">
+                            <i class="bi bi-cart fs-4"></i>
+                        </a>-->
+
+                        <!-- LOGGED (aggiunge il prodotto al carrello)-->
                         <button class="btn mt-auto" style="background-color: var(--primary-color); color: white;">Aggiungi al carrello</button>
                     </div>
                 </div>
@@ -83,10 +171,12 @@
 
             <div class="col">
                 <div class="card h-100" style="border-color: var(--secondary-color);">
+                    <a href="dettaglioProdotto.html" class="text-decoration-none text-dark">
                      <div class="product-image-placeholder d-flex align-items-center justify-content-center" style="background-color: #e9ecef; height: 200px; color: var(--secondary-color);">
                         IMG
                     </div>
-                    <div class="card-body d-flex flex-column">
+                    </a>
+                    <div class="card-body d-flex flex-column p-3">
                         <h5 class="card-title" style="color: var(--primary-color);">Nome Prodotto 2</h5>
                          <ul class="list-unstyled mt-2 mb-3 flex-grow-1">
                             <li><small class="text-muted">Valutazioni: <i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star" style="color: var(--primary-color);"></i></small></li>
