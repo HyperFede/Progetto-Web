@@ -33,18 +33,18 @@ BEGIN
         ('Porta Gioie', 'Scatola intarsiata con coperchio', 'Arredo', 95.00, 12, 4);
 
         -- 3. Insert Orders (10 orders across clients)
-        INSERT INTO Ordine (IDUtente, Data, Ora, ImportoTotale, Status)
+        INSERT INTO Ordine (IDUtente, Data, Ora, ImportoTotale, Status,StripeCheckOutSessionID)
         VALUES
-        (5, '2025-01-15', '10:30:00', 0, 'Consegnato'),  -- cli1
-        (6, '2025-02-03', '14:22:00', 0, 'Spedito'),     -- cli2
-        (5, '2025-02-10', '09:45:00', 0, 'Da spedire'),  -- cli1
-        (7, '2025-03-01', '16:15:00', 0, 'In attesa'),   -- cli3
-        (6, '2025-03-18', '11:30:00', 0, 'Consegnato'),  -- cli2
-        (7, '2025-04-05', '13:05:00', 0, 'Spedito'),     -- cli3
-        (5, '2025-04-22', '15:40:00', 0, 'Consegnato'),  -- cli1
-        (7, '2025-05-12', '10:10:00', 0, 'Da spedire'),  -- cli3
-        (6, '2025-05-19', '17:20:00', 0, 'In attesa'),  -- cli2
-        (5, '2025-05-28', '08:55:00', 0, 'Spedito');    -- cli1
+        (5, '2025-01-10', '12:00:00', 0, 'In attesa', 'cs_1'),
+        (6, '2025-01-20', '15:45:00', 0, 'Da spedire', 'cs_2'),
+        (5, '2025-01-25', '10:00:00', 0, 'Scaduto', 'cs_3'),
+        (7, '2025-02-05', '13:30:00', 0, 'Spedito', 'cs_4'),
+        (6, '2025-02-15', '09:15:00', 0, 'Consegnato', 'cs_5'),
+        (7, '2025-02-25', '11:50:00', 0, 'In attesa', 'cs_6'),
+        (5, '2025-03-05', '14:05:00', 0, 'Da spedire', 'cs_7'),
+        (7, '2025-03-20', '16:40:00', 0, 'Spedito', 'cs_8'),
+        (6, '2025-04-01', '08:30:00', 0, 'Consegnato', 'cs_9'),
+        (5, '2025-04-10', '17:55:00', 0, 'Spedito', 'cs_10');
 
         -- 4. Insert Order Details (3-4 items per order)
         INSERT INTO DettagliOrdine (IDOrdine, IDProdotto, Quantita, PrezzoStoricoUnitario)
@@ -107,11 +107,14 @@ BEGIN
         SELECT DISTINCT 
         dor.IDOrdine, 
         p.IDArtigiano,
-        CASE 
-            WHEN o.Status = 'In attesa' THEN 'In attesa'
-            WHEN o.Status = 'Consegnato' THEN 'Consegnato'
-            ELSE 'Da spedire'
-        END
+        CASE o.Status
+            WHEN 'In attesa' THEN 'In attesa'
+            WHEN 'Da spedire' THEN 'Da spedire'
+            WHEN 'Scaduto' THEN 'Scaduto'
+            WHEN 'Spedito' THEN 'Spedito'
+            WHEN 'Consegnato' THEN 'Consegnato'
+            ELSE 'In attesa' -- Default fallback, though all statuses should be covered by Ordine CHECK constraint
+        END AS SubOrdineStatus
         FROM DettagliOrdine as dor
         JOIN Prodotto p ON dor.IDProdotto = p.IDProdotto
         JOIN Ordine o ON dor.IDOrdine = o.IDOrdine;
@@ -125,11 +128,11 @@ BEGIN
         (7, 8, 'Decora perfettamente il mio salotto', 4, '2025-03-10', '16:45:00');
 
         -- 8. Insert Approvals
-        INSERT INTO StoricoApprovazioni (IDArtigiano, IDAdmin, DataApprovazione)
+        INSERT INTO StoricoApprovazioni (IDArtigiano, IDAdmin, Esito, DataEsito)
         VALUES
-        (2, 1, '2024-11-01 09:00:00'),
-        (3, 1, '2024-11-01 10:30:00'),
-        (4, 1, '2024-11-02 11:15:00');
+        (2, 1, 'Approvato', '2024-11-01 09:00:00'),
+        (3, 1, 'Approvato', '2024-11-01 10:30:00'),
+        (4, 1, 'Approvato', '2024-11-02 11:15:00');
 
         -- 9. Insert Cart Items
         INSERT INTO DettagliCarrello (IDCliente, IDProdotto, Quantita, TotaleParziale)
@@ -140,15 +143,56 @@ BEGIN
         (7, 9, 3, 285.00);
 
         -- 10. Insert Payments
-        INSERT INTO Pagamento (IDOrdine, StripePaymentIntentID, StripeStatus, Modalita, ImportoTotale, Timestamp)
+        -- Note: TimestampCreazione will use DEFAULT CURRENT_TIMESTAMP if not explicitly provided and the column is defined with it.
+        -- We are explicitly setting it here for consistent test data.
+        INSERT INTO Pagamento (IDOrdine, StripePaymentIntentID, StripeStatus, Modalita, ImportoTotale, Valuta, TimestampCreazione)
         SELECT 
-        IDOrdine,
-        'pi_' || MD5(RANDOM()::TEXT)::VARCHAR(27), 
-        'succeeded', 
-        'Carta', 
-        ImportoTotale, 
-        (Data || ' ' || Ora)::TIMESTAMP + INTERVAL '5 minutes'
-        FROM Ordine;
+            o.IDOrdine,
+            'pi_' || SUBSTRING(MD5(RANDOM()::TEXT) FOR 27), -- Generates a unique string for StripePaymentIntentID
+            'succeeded',                                   -- StripeStatus
+            'card',                                        -- Modalita (e.g., from Stripe payment_method_types)
+            o.ImportoTotale,
+            'EUR',                                         -- Valuta
+            (o.Data || ' ' || o.Ora)::TIMESTAMP + INTERVAL '5 minutes' -- TimestampCreazione
+        FROM Ordine o
+        WHERE o.Status IN ('Consegnato', 'Spedito', 'Da spedire'); -- Only create payments for orders that are logically paid
+
+        -- Insert problem reports with no joint issues and optional admin assignment
+        -- Corrected problem reports with valid client-order and artisan-order relationships
+        INSERT INTO Problema (
+            IDCliente, 
+            IDArtigiano, 
+            IDAdmin, 
+            IDOrdine, 
+            Descrizione, 
+            Status, 
+            Immagine, 
+            TimeStampSegnalazione
+        ) VALUES
+        -- Client-reported problems (must match Ordine.IDUtente)
+        (5, NULL, NULL, 1, 'Prodotto danneggiato durante la consegna', 'Aperto', NULL, '2025-01-12 14:30:00'),
+        (5, NULL, 1, 3, 'Prodotto diverso da quello ordinato', 'In lavorazione', NULL, '2025-01-27 15:10:00'),
+        (5, NULL, NULL, 7, 'Mancano pezzi dalla confezione', 'Aperto', NULL, '2025-03-07 11:20:00'),
+        (5, NULL, 1, 10, 'Difetti di fabbricazione visibili', 'Risolto', NULL, '2025-04-12 09:15:00'),
+        (6, NULL, NULL, 2, 'Prodotto non funzionante', 'Aperto', NULL, '2025-01-22 16:45:00'),
+        (6, NULL, 1, 5, 'Problemi di assemblaggio - istruzioni mancanti', 'Risolto', NULL, '2025-02-17 10:30:00'),
+        (6, NULL, 1, 9, 'Materiali di qualità inferiore alle aspettative', 'In lavorazione', NULL, '2025-04-03 14:20:00'),
+        (7, NULL, NULL, 4, 'Danno estetico sul prodotto', 'Aperto', NULL, '2025-02-07 09:40:00'),
+        (7, NULL, 1, 6, 'Prodotto diverso dal campione mostrato', 'Risolto', NULL, '2025-02-27 13:25:00'),
+        (7, NULL, NULL, 8, 'Ritardo nella consegna', 'Aperto', NULL, '2025-03-22 17:55:00'),
+
+        -- Artisan-reported problems (must have SubOrdine for IDOrdine+IDArtigiano)
+        (NULL, 2, NULL, 1, 'Pagamento non ricevuto', 'Aperto', NULL, '2025-01-13 10:15:00'),
+        (NULL, 2, 1, 5, 'Materiali specificati non disponibili', 'In lavorazione', NULL, '2025-02-16 11:30:00'),
+        (NULL, 2, NULL, 8, 'Ritardo nella spedizione dei materiali critici', 'Aperto', NULL, '2025-03-21 15:20:00'),
+        (NULL, 2, 1, 10, 'Richiesta chiarimenti su specifiche prodotto', 'Risolto', NULL, '2025-04-11 12:45:00'),
+        (NULL, 3, NULL, 1, 'Disaccordo sulla qualità dei materiali richiesti', 'Aperto', NULL, '2025-01-14 09:25:00'),
+        (NULL, 3, 1, 4, 'Problemi con fornitore materiali', 'In lavorazione', NULL, '2025-02-06 14:50:00'),
+        (NULL, 3, NULL, 7, 'Specifiche prodotto ambigue', 'Aperto', NULL, '2025-03-08 16:35:00'),
+        (NULL, 3, 1, 9, 'Richiesta assistenza tecnica post-vendita', 'Risolto', NULL, '2025-04-04 10:10:00'),
+        (NULL, 4, NULL, 2, 'Modifiche richieste dopo conferma ordine', 'Aperto', NULL, '2025-01-23 11:55:00'),
+        (NULL, 4, 1, 6, 'Pagamento parziale non ricevuto', 'Risolto', NULL, '2025-02-28 15:45:00');
+
 
         RAISE NOTICE 'Dati di test inseriti con successo.';
     ELSE
