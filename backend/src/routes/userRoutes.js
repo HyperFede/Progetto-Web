@@ -15,6 +15,11 @@ if (!jwtSecret) {
     process.exit(1); // Termina l'applicazione se la chiave segreta non è configurata
 }
 
+// Funzioni di aiuto per la gestione delle transazioni (possono essere spostate in un modulo condiviso se usate altrove)
+const beginTransaction = async (client) => client.query('BEGIN');
+const commitTransaction = async (client) => client.query('COMMIT');
+const rollbackTransaction = async (client) => client.query('ROLLBACK');
+
 // --- Operazioni CRUD per Utente ---
 
 /**
@@ -87,23 +92,47 @@ router.post('/', async (req, res) => {
         // Hash della password prima di salvarla nel DB (non cambiare parametro che i dati di test sono hashati su questo peso )
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        //inserimento nel DB
-        const newUser = await pool.query(
-            'INSERT INTO utente (username, nome, cognome, email, password, indirizzo, tipologia, piva, artigianodescrizione) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-            [username, nome, cognome, email, hashedPassword, indirizzo, tipologia, pivaValue, artigianoDescrizioneValue]
-        );
-        //preparazione della risposta, escludendo la password importante per la sicurezza
-        const userResponse = { ...newUser.rows[0] };
-        delete userResponse.password;
-        res.status(201).json(userResponse);
 
-    } catch (error) {
-       // console.error('Errore nella creazione dell utente:', error);
+        const client = await pool.connect(); // Ottieni un client dal pool per la transazione
+        try {
+            await beginTransaction(client);
+
+            // Inserimento nel DB della tabella Utente
+            // Modificato RETURNING * per escludere esplicitamente la password
+            const newUserResult = await client.query(
+                'INSERT INTO utente (username, nome, cognome, email, password, indirizzo, tipologia, piva, artigianodescrizione) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING idutente, username, nome, cognome, email, indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione, deleted',
+            [username, nome, cognome, email, hashedPassword, indirizzo, tipologia, pivaValue, artigianoDescrizioneValue]
+            );
+            const newUser = newUserResult.rows[0];
+
+            // Se l'utente è un Artigiano, crea un record iniziale in StoricoApprovazioni
+            if (newUser.tipologia === 'Artigiano') {
+                await client.query(
+                    'INSERT INTO StoricoApprovazioni (IDArtigiano, Esito) VALUES ($1, $2)',
+                    [newUser.idutente, 'In lavorazione']
+                );
+                console.log(`[User Creation] Created initial 'In lavorazione' approval record for new artisan user ID: ${newUser.idutente}`);
+            }
+
+            await commitTransaction(client);
+
+            // La clausola RETURNING ora esclude la password, quindi non è necessario eliminarla.
+            res.status(201).json(newUser);
+
+        } catch (dbError) {
+            await rollbackTransaction(client);
+            // console.error('Errore nella creazione dell utente e/o record approvazione:', dbError);
         // errore di postgres, che corrisponde a un conflitto di chiavi uniche
-        if (error.code === '23505') {
+            if (dbError.code === '23505') {
             return res.status(409).json({ message: 'Username o Email già esistente.' });
         }
-        res.status(500).json({ message: 'Errore del server durante la creazione dell utente.' });
+            res.status(500).json({ message: 'Errore del server durante la creazione dell utente.' });
+        } finally {
+            client.release(); // Rilascia sempre il client al pool
+        }
+    } catch (error) { // Questo catch esterno è per errori come bcrypt.genSalt o bcrypt.hash
+        console.error('Errore generale prima della transazione DB:', error);
+        res.status(500).json({ message: 'Errore del server durante la preparazione della creazione utente.' });
     }
 });
 

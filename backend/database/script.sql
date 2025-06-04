@@ -134,10 +134,11 @@ CREATE TABLE IF NOT EXISTS StoricoApprovazioni (
     IDArtigiano INTEGER NOT NULL REFERENCES Utente(IDUtente)
         ON DELETE CASCADE 
         ON UPDATE CASCADE,
+    Esito VARCHAR(50) NOT NULL CHECK (Esito IN ('Approvato', 'Rifiutato','In lavorazione')),
     IDAdmin INTEGER REFERENCES Utente(IDUtente)
         ON DELETE RESTRICT  -- Blocca cancellazioni fisiche, gli admin non possono essere cancellati
         ON UPDATE CASCADE,
-    DataApprovazione TIMESTAMP 
+    DataEsito TIMESTAMP 
 );
 
 -- ==================================================

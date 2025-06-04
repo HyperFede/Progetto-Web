@@ -21,6 +21,7 @@ const cartRoutes = require('./routes/cartRoutes'); // Importa le route del carre
 const subOrderRoutes = require('./routes/subOrderRoutes'); // Importa le route degli ordini secondaris
 const reviewRoutes = require('./routes/reviewRoutes'); // Importa le route delle recensioni
 const problemRoutes = require('./routes/problemRoutes'); // Importa le route dei problemi
+const approvalsRoutes = require('./routes/artigianoApproveRoutes'); // Importa le route delle approvazioni
 
 const app = express();
 app.use(cors()); // Abilita CORS per tutte le richieste
@@ -48,6 +49,8 @@ app.use('/api/cart', cartRoutes); // Monta le route del carrello
 app.use('/api/suborders', subOrderRoutes); // Monta le route degli ordini secondari
 app.use('/api/reviews', reviewRoutes); // Monta le route delle recensioni
 app.use('/api/problems', problemRoutes); // Monta le route dei problemi
+app.use('/api/approvals', approvalsRoutes); // Monta le route delle approvazioni
+
 
 // Endpoint di root per un semplice check
 app.get('/', (req, res) => {

@@ -1,0 +1,266 @@
+Approvazioni Artigiani API Documentation (con Query Filters)
+
+Schema di Funzionalità:
+  #1 Create      – POST /api/approvals
+  #2 Read        – GET /api/approvals, GET /api/approvals/me, GET /api/approvals/:idstorico
+  #3 Update      – PUT /api/approvals/:idstorico/decide
+  #4 Delete      – (non previsto, audit log mantenuto)
+
+--------------------------------------------------------------------------------
+#1 Create Richiesta di Approvazione
+(Deprecato, non usare, è già gestito quando si crea un utente)
+
+Endpoint:
+  POST /api/approvals
+
+Descrizione:
+  - Un Artigiano invia una richiesta di approvazione (“In attesa”) per diventare utente approvato.
+  - Verifica che non esista già una richiesta “In attesa” o approvata per lo stesso Artigiano.
+
+Accesso:
+  - isAuthenticated
+  - hasPermission(['Artigiano'])
+
+Regole di Business:
+  - Ogni Artigiano può avere al massimo una richiesta con `Esito = 'In attesa'` o già approvata.
+  - Se esiste già → 409 Conflict.
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Nessun body richiesto (l’Artigiano è identificato dal token).
+
+
+Output:
+  - 201 Created:
+    ```json
+    {
+      "idstorico": 101,
+      "idartigiano": 45,
+      "idadmin": null,
+      "esito": "In attesa",
+      "dataesito": "2025-06-04T12:34:56.789Z",
+      "datadecisione": null,
+      "noteadmin": null
+    }
+    ```
+  - 409 Conflict: `{ "error": "You already have a pending or approved application." }`
+  - 403 Forbidden: `{ "error": "User is not an artisan or does not exist." }`
+  - 500 Internal Server Error: `{ "error": "Failed to create approvazione request." }`
+
+--------------------------------------------------------------------------------
+#2 Read Approvazioni
+
+## 2.1 GET Tutte le Richieste (Admin, con filtri)
+Endpoint:
+  GET /api/approvals
+
+Descrizione:
+  - L’Admin visualizza l’elenco di tutte le richieste di approvazione, con filtri e ordinamento.
+  - Include `username_artigiano`, `email_artigiano`, `username_admin` (se assegnato).
+
+Accesso:
+  - isAuthenticated
+  - hasPermission(['Admin'])
+
+Configurazione dei Filtri (query string, esempi):
+  - `?idstorico=10`  
+  - `?idartigiano=45`  
+  - `?username_artigiano_like=pippo`  (corrisponde a `%pippo%`)  
+  - `?email_artigiano_like=@gmail.com`  
+  - `?idadmin=2`  
+  - `?esito=In attesa`  (oppure “Approvato”, “Rifiutato”)  
+  - `?dataesito_gte=2025-06-01T00:00:00.000Z`  
+  - `?dataesito_lte=2025-06-05T23:59:59.999Z`
+
+Ordinamento (query string, esempi):
+  - `?sort=DataEsito,ASC`  
+  - `?sort=IDArtigiano,DESC`  
+  - `?sort=Esito`  (default ASC se non specificato)
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Query string (opzionale):  
+    • idstorico=<num>  
+    • idartigiano=<num>  
+    • username_artigiano_like=<string>  
+    • email_artigiano_like=<string>  
+    • idadmin=<num>  
+    • esito=<string>  
+    • dataesito_gte=<ISO string>  
+    • dataesito_lte=<ISO string>  
+    • sort=<campo>[,ASC|DESC]
+
+
+Output (200 OK):
+  ```json
+  [
+    {
+      "idstorico": 101,
+      "idartigiano": 45,
+      "idadmin": null,
+      "esito": "In attesa",
+      "dataesito": "2025-06-04T12:34:56.789Z",
+      "datadecisione": null,
+      "noteadmin": null,
+      "username_artigiano": "mariorossi",
+      "email_artigiano": "mario@esempio.com",
+      "username_admin": null
+    },
+    {
+      "idstorico": 99,
+      "idartigiano": 32,
+      "idadmin": 2,
+      "esito": "Approvato",
+      "dataesito": "2025-05-30T09:15:00.000Z",
+      "datadecisione": "2025-05-31T11:00:00.000Z",
+      "noteadmin": "Tutto ok",
+      "username_artigiano": "giabianchi",
+      "email_artigiano": "gia@esempio.com",
+      "username_admin": "adminuser"
+    }
+  ]
+2.2 GET Richieste “Me” (Artigiano)
+Endpoint:
+GET /api/approvals/me
+
+Descrizione:
+
+Un Artigiano autenticato visualizza tutte le sue richieste di approvazione, ordinate per DataEsito DESC.
+
+
+Accesso:
+isAuthenticaten
+Nessun hasPermission (permette anche agli Artigiani non ancora approvati)
+
+Filtri base:
+Filtro automatico IDArtigiano = idutente (dal token)
+Filtri aggiuntivi (query string, esempi):
+?esito=In attesa
+?dataesito_gte=2025-06-01T00:00:00.000Z
+?dataesito_lte=2025-06-05T23:59:59.999Z
+?sort=DataEsito,DESC
+
+Input:
+
+Header:
+Authorization: Bearer <token_JWT>
+
+Query string (opzionale):
+• esito=<string>
+• dataesito_gte=<ISO string>
+• dataesito_lte=<ISO string>
+• sort=<campo>[,ASC|DESC]
+
+Output:
+[
+  {
+    "idstorico": 101,
+    "idartigiano": 45,
+    "idadmin": null,
+    "esito": "In attesa",
+    "dataesito": "2025-06-04T12:34:56.789Z",
+    "datadecisione": null,
+    "noteadmin": null,
+    "username_artigiano": "mariorossi",  // non incluso perché si assume da token
+    "email_artigiano": null,            // non incluso
+    "username_admin": null
+  }
+]
+
+
+2.3 GET Singola Richiesta (Admin)
+Endpoint:
+GET /api/approvals/:idstorico
+
+Descrizione:
+
+L’Admin visualizza i dettagli di una specifica richiesta di approvazione (IDStorico).
+Include username_artigiano, email_artigiano, nome_artigiano, cognome_artigiano, username_admin.
+
+Accesso:
+isAuthenticated
+hasPermission(['Admin'])
+
+Input:
+
+Header:
+Authorization: Bearer <token_JWT>
+
+Path Param:
+:idstorico (IDStorico, intero)
+
+Validazioni:
+Se nessun record → 404 Not Found: { "error": "Approvazione request not found." }
+
+Output (200 OK):
+{
+  "idstorico": 99,
+  "idartigiano": 32,
+  "idadmin": 2,
+  "esito": "Approvato",
+  "dataesito": "2025-05-30T09:15:00.000Z",
+  "datadecisione": "2025-05-31T11:00:00.000Z",
+  "noteadmin": "Procedura completata",
+  "username_artigiano": "giabianchi",
+  "email_artigiano": "gia@esempio.com",
+  "nome_artigiano": "Gianni",
+  "cognome_artigiano": "Bianchi",
+  "username_admin": "adminuser"
+}
+
+
+#3 Update Decisione di Approvazione
+Endpoint:
+PUT /api/approvals/:idstorico/decide
+
+Descrizione:
+
+L’Admin approva o rifiuta una richiesta “In attesa” di un Artigiano.
+(Approvato o Rifiutato)
+
+Accesso:
+isAuthenticated
+hasPermission(['Admin'])
+
+Validazioni:
+:idstorico intero → 400 Bad Request se NaN.
+
+Body JSON deve essere:
+{ "esito": "<string>", }
+con esito in [“Approvato”, “Rifiutato”].
+
+Se esito non valido → 400 Bad Request:
+{ "error": "Invalid status. Must be 'Approvato' or 'Rifiutato'." }
+
+Se record non esiste → 404 Not Found:
+{ "error": "Approval history record not found." }
+
+Se record già non “In attesa” → 400 Bad Request:
+{ "error": "Request is already '<Esito>' and cannot be changed." }
+
+
+Input:
+
+Header:
+Authorization: Bearer <token_JWT>
+
+Path Param:
+:idstorico (IDStorico, intero)
+
+Body (JSON):
+{
+"esito": "Approvato", // oppure "Rifiutato"
+}
+
+Output:
+
+200 OK:
+{
+  "idstorico": 99,
+  "idartigiano": 32,
+  "idadmin": 2,
+  "esito": "Approvato",
+  "dataesito": "2025-05-30T09:15:00.000Z",
+}

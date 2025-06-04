@@ -35,10 +35,8 @@ async function getUserFromToken(token) {
             [userId]
         );
 
-        if (userQuery.rows.length === 0) {
-            return null; // Utente non trovato o non attivo
-        }
-        return userQuery.rows[0]; // Restituisce l'utente
+        const user = userQuery.rows.length === 0 ? null : userQuery.rows[0];
+        return user; // Restituisce l'utente o null
     } catch (error) {
         // Se l'errore è un errore JWT (es. scaduto, malformato), lo rilanciamo
         // così il chiamante può gestirlo specificamente se necessario.
@@ -111,6 +109,7 @@ async function isAuthenticated(req, res, next) {
         next();
     } catch (error) {
         // --- DEBUGGING BLOCK FOR EXPIRED TOKEN TEST ---
+
         if (process.env.NODE_ENV === 'test') {
             console.log('[AUTH_MIDDLEWARE_DEBUG] Error during jwt.verify:', error.name, error.message);
         }
@@ -157,10 +156,10 @@ async function isAuthenticated(req, res, next) {
  *        { message: 'Errore: utente non definito nella richiesta dopo autenticazione.' }
  */
 function hasPermission(requiredPermissions) {
-    return (req, res, next) => {
+    return async (req, res, next) => { // Make the returned function async
         // Controlla se l'oggetto utente e la sua tipologia sono stati correttamente impostati da un middleware precedente (es. isAuthenticated).
         if (!req.user || !req.user.tipologia) {
-            // Questo errore indica un problema nella catena dei middleware, probabilmente isAuthenticated non ha funzionato come previsto.
+            // This indicates a middleware chain issue (isAuthenticated didn't run or failed)
             return res.status(500).json({ message: 'Errore: utente non definito nella richiesta dopo autenticazione.' });
         }
 
@@ -168,32 +167,53 @@ function hasPermission(requiredPermissions) {
         const userTipologia = req.user.tipologia; // Tipologia dell'utente autenticato.
         const targetResourceId = parseInt(req.params.id, 10); // ID della risorsa dalla rotta, parseInt gestisce undefined/null/non-numerici restituendo NaN.
 
-        const isAuthorized = requiredPermissions.some(permission => {
-            // Controllo per ruoli specifici
-            if (['Admin', 'Cliente', 'Artigiano'].includes(permission)) {
-                return permission === userTipologia;
-            }
-            // Controllo per 'Self' generico
-            if (permission === 'Self') {
-                return !isNaN(targetResourceId) && authenticatedUserId === targetResourceId;
-            }
-            // Se il permesso non è riconosciuto, ritorna false per questo permesso.
-            return false;
-        });
+        let isArtigianoApproved = false;
+        // Check approval status ONCE if the user is an Artigiano and 'Artigiano' permission is required
+        if (userTipologia === 'Artigiano' && requiredPermissions.includes('Artigiano')) {
+             try {
+                const approvalQuery = await pool.query(
+                    'SELECT 1 FROM StoricoApprovazioni WHERE IDArtigiano = $1 AND Esito = $2 LIMIT 1',
+                    [authenticatedUserId, 'Approvato']
+                );
+                isArtigianoApproved = approvalQuery.rows.length > 0;
+             } catch (dbError) {
+                 console.error('[hasPermission] DB Error checking artisan approval:', dbError);
+                 return res.status(500).json({ message: 'Errore del server durante la verifica dei permessi.' });
+             }
+        }
+
+        const isAuthorized = requiredPermissions.some(permission =>
+            (permission === 'Admin' && userTipologia === 'Admin') ||
+            (permission === 'Cliente' && userTipologia === 'Cliente') ||
+            (permission === 'Artigiano' && userTipologia === 'Artigiano' && isArtigianoApproved) || // Artigiano permission requires approval
+            (permission === 'Self' && !isNaN(targetResourceId) && authenticatedUserId === targetResourceId)
+        );
 
         if (isAuthorized) {
-            // L'utente soddisfa almeno uno dei permessi richiesti.
             next();
         } else {
-            // L'utente non ha il permesso, restituisce un errore 403 Forbidden.
-            res.status(403).json({ message: 'Accesso negato. Non hai i permessi necessari per questa risorsa.' });
+            // If the user is an Artigiano, and 'Artigiano' was a required permission,
+            // and they are NOT approved, provide a specific message.
+            // Otherwise, provide a generic forbidden message.
+            const requiresArtigianoPermission = requiredPermissions.includes('Artigiano');
+
+            if (userTipologia === 'Artigiano' && requiresArtigianoPermission && !isArtigianoApproved) {
+                 // This specific case: Artigiano needed, user is Artigiano, but not approved.
+                 return res.status(403).json({ message: 'Accesso negato. Il tuo account Artigiano non è ancora stato approvato.' });
+            } else {
+                 // All other cases where isAuthorized is false:
+                 // - Wrong role (e.g., Cliente trying to access Admin route)
+                 // - Not 'Self' when 'Self' is required
+                 // - Any other combination where none of the requiredPermissions were met.
+                 return res.status(403).json({ message: 'Accesso negato. Non hai i permessi necessari per questa risorsa.' });
+            }
         }
     };
 }
 
-// Esporta i middleware per renderli utilizzabili in altre parti dell'applicazione.
+// Esporta i middleware e le funzioni helper per renderli utilizzabili in altre parti dell'applicazione.
 module.exports = {
     isAuthenticated,
     hasPermission,
-    getUserFromToken, // Esporta la nuova funzione
+    getUserFromToken,
 };

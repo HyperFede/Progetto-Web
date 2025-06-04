@@ -128,11 +128,11 @@ BEGIN
         (7, 8, 'Decora perfettamente il mio salotto', 4, '2025-03-10', '16:45:00');
 
         -- 8. Insert Approvals
-        INSERT INTO StoricoApprovazioni (IDArtigiano, IDAdmin, DataApprovazione)
+        INSERT INTO StoricoApprovazioni (IDArtigiano, IDAdmin, Esito, DataEsito)
         VALUES
-        (2, 1, '2024-11-01 09:00:00'),
-        (3, 1, '2024-11-01 10:30:00'),
-        (4, 1, '2024-11-02 11:15:00');
+        (2, 1, 'Approvato', '2024-11-01 09:00:00'),
+        (3, 1, 'Approvato', '2024-11-01 10:30:00'),
+        (4, 1, 'Approvato', '2024-11-02 11:15:00');
 
         -- 9. Insert Cart Items
         INSERT INTO DettagliCarrello (IDCliente, IDProdotto, Quantita, TotaleParziale)
