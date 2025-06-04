@@ -1,3 +1,8 @@
+:root {
+    /* Assumendo che --dark-moss-green non sia definito in global.css */
+    --dark-moss-green: #556B2F; /* Definisci il colore */
+}
+
 body {
     background-color: var(--background-color);
     color: var(--text-color);
@@ -39,4 +44,20 @@ header .nav-link:hover {
 .form-check-input{
     border-color: var(--secondary-color); 
     background-color: var(--background-color);
+}
+
+/* Focus style for interactive elements in the filter bar */
+.filter-bar .form-control:focus,
+.filter-bar .form-select:focus,
+.filter-bar .form-check-input:focus {
+    border-color:var(--primary-color); /* Colore del bordo quando l'input è selezionato */
+    box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.1);
+}
+
+/* Hover per tutti i bottoni della pagina, sovrascrive stili inline se necessario */
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover {
+    background-color: var(--dark-moss-green) !important; /* Usa !important per sovrascrivere lo stile inline */
 }
