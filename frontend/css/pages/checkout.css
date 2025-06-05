@@ -5,7 +5,7 @@ body {
 
 /* Header Checkout */
 .custom-header {
-    background-color: var(--background-color);
+    background-color: var(--border-color);
     border-bottom: 1px solid var(--border-color);
 }
 .logo-text {
@@ -21,6 +21,15 @@ body {
 .header-nav .nav-link-cart {
     color: var(--primary-color);
 }
+
+/* Stili per il menu a discesa dell'utente */
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    text-decoration: none; /* Rimuove la sottolineatura */
+}
+
 /* Box Sezioni Checkout */
 .checkout-section-box {
     background-color: var(--border-color);
@@ -53,45 +62,6 @@ body {
 }
 .change-link:hover {
     text-decoration: underline;
-}
-
-
-/* Metodi di Pagamento */
-.payment-method-option {
-    border: 1px solid var(--divider-color);
-    border-radius: 0.375rem;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    cursor: pointer;
-}
-.payment-method-option:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.1rem rgba(221, 161, 94, 0.25);
-}
-.payment-method-option .form-check-input.payment-radio {
-    margin: 0 0.5em 0 0;
-    border-color: var(--secondary-color);
-    padding: 0;
-}
-.payment-method-option .form-check-input.payment-radio:checked {
-    margin: 0 0.5em 0 0;
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    padding: 0;
-}
-.payment-method-option .form-check-label {
-    cursor: pointer;
-    width: 100%;
-}
-.payment-method-option .payment-icon {
-    color: var(--primary-color);
-}
-.payment-method-option .payment-details {
-    color: var(--text-dark);
-    font-weight: 500;
-}
-.payment-method-option .payment-description {
-    font-size: 0.85rem;
-    color: var(--secondary-color);
 }
 
 /* Riepilogo Articoli */
@@ -161,6 +131,22 @@ body {
     border-color: var(--tigers-eye);
     color: var(--text-light);
 }
+
+.delete-order-btn {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    border: 1px solid var(--primary-color);
+    padding: 0.85rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.15rem;
+}
+.delete-order-btn:hover {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    color: var(--text-light);
+}
+
+/* Footer */
 
 .footer-text {
     color: var(--text-dark);

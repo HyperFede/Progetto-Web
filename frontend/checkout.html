@@ -16,10 +16,18 @@
                 <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
             </a>
             <ul class="nav nav-pills align-items-center header-nav">
-                <li class="nav-item"><a href="#" class="nav-link nav-link-custom">ACCEDI</a></li>
-                <li class="nav-item"><a href="#" class="nav-link nav-link-custom">REGISTRATI</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-3 me-2"></i> Username
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                        <li><a class="dropdown-item" href="dashboardUtente.html"><i class="bi bi-person-fill me-2"></i>IL MIO PROFILO</a></li>
+                        <li><a class="dropdown-item" href="dashboardStoricoOrdini.html"><i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                    </ul>
+                </li>
                 <li class="nav-item">
-                    <a href="carrelloUtente.html" class="nav-link nav-link-cart">
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart" style="color: var(--secondary-color);">
                         <i class="bi bi-cart fs-3"></i>
                     </a>
                 </li>
@@ -33,42 +41,6 @@
                     <h5 class="box-title mb-2">In consegna a:</h5>
                     <p class="user-name-shipping mb-1"><strong>Nome Utente Esempio</strong></p>
                     <p class="user-address-shipping mb-0">Via Roma 123, Appartamento 4B, 00100 Città (RM), Italia</p>
-                </div>
-
-                <div class="checkout-section-box p-3 mb-4">
-                    <h5 class="box-title mb-3">Pagamento con...</h5>
-                    <div class="payment-methods">
-                        <div class="form-check payment-method-option p-3 mb-2">
-                            <input class="form-check-input payment-radio" type="radio" name="paymentMethod" id="payCard" value="card" checked>
-                            <label class="form-check-label d-flex align-items-center w-100" for="payCard">
-                                <i class="bi bi-credit-card-fill fs-2 me-3 payment-icon"></i>
-                                <span class="payment-details">
-                                    Carta di Credito/Debito
-                                    <small class="d-block payment-description">Visa, Mastercard, Amex, etc.</small>
-                                </span>
-                            </label>
-                        </div>
-                        <div class="form-check payment-method-option p-3 mb-2">
-                            <input class="form-check-input payment-radio" type="radio" name="paymentMethod" id="payPayPal" value="paypal">
-                            <label class="form-check-label d-flex align-items-center w-100" for="payPayPal">
-                                <i class="bi bi-paypal fs-2 me-3 payment-icon"></i>
-                                <span class="payment-details">
-                                    PayPal
-                                    <small class="d-block payment-description">Paga in modo sicuro con il tuo account PayPal.</small>
-                                </span>
-                            </label>
-                        </div>
-                        <div class="form-check payment-method-option p-3">
-                            <input class="form-check-input payment-radio" type="radio" name="paymentMethod" id="payBank" value="bank">
-                            <label class="form-check-label d-flex align-items-center w-100" for="payBank">
-                                <i class="bi bi-bank2 fs-2 me-3 payment-icon"></i>
-                                <span class="payment-details">
-                                    Bonifico Bancario
-                                    <small class="d-block payment-description">Riceverai i dettagli dopo la conferma.</small>
-                                 </span>
-                            </label>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="checkout-section-box p-3">
@@ -102,8 +74,9 @@
                 <div class="order-summary-checkout-box p-3">
                     <h4 class="summary-title-checkout mb-3">TOTALE ORDINE:</h4>
                     <p class="total-amount-checkout display-6 fw-bold my-3">€105.00</p>
-                    <hr class="summary-divider my-3">
-                    <button class="btn buy-now-btn w-100 rounded-pill">ACQUISTA ORA</button>
+                    <hr class="summary-divider my-3">                    
+                    <button class="btn buy-now-btn w-100 rounded-pill mb-3">ACQUISTA ORA</button>
+                    <button class="btn delete-order-btn w-100 rounded-pill">ANNULLA ORDINE</button>
                 </div>
             </div>
         </div>

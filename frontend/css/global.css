@@ -105,3 +105,31 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+/* Stili per il menu a discesa dell'utente */
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    text-decoration: none; /* Rimuove la sottolineatura */
+}
+
+/* Stile Header */
+.custom-header {
+    background-color: var(--border-color) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-link-custom {
+    color: var(--secondary-color);
+}
+
+.nav-link-custom:hover,
+.nav-link-custom:focus {
+    color: var(--primary-color);
+}
+
+.dropdown-item.active {
+    color: var(--pakistan-green);
+    background-color: var(--primary-color);
+}
