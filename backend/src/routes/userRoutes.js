@@ -124,6 +124,7 @@ router.post('/', async (req, res) => {
             // console.error('Errore nella creazione dell utente e/o record approvazione:', dbError);
         // errore di postgres, che corrisponde a un conflitto di chiavi uniche
             if (dbError.code === '23505') {
+            console.warn('Conflitto di chiavi uniche durante la creazione dell utente:', dbError.detail);
             return res.status(409).json({ message: 'Username o Email già esistente.' });
         }
             res.status(500).json({ message: 'Errore del server durante la creazione dell utente.' });
@@ -131,7 +132,7 @@ router.post('/', async (req, res) => {
             client.release(); // Rilascia sempre il client al pool
         }
     } catch (error) { // Questo catch esterno è per errori come bcrypt.genSalt o bcrypt.hash
-        console.error('Errore generale prima della transazione DB:', error);
+        console.log('Errore generale prima della transazione DB:', error);
         res.status(500).json({ message: 'Errore del server durante la preparazione della creazione utente.' });
     }
 });

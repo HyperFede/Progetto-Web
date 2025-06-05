@@ -337,10 +337,10 @@ router.get('/artisan/:artisanId', isAuthenticated, async (req, res) => {
 // We now use both orderId and artisanId to identify the specific SubOrdine.
 router.put('/order/:orderId/artisan/:artisanId/status', isAuthenticated, async (req, res) => {
     const { newStatus } = req.body; // Expecting { newStatus: 'Spedito' } or similar
-    const client = await pool.connect();
 
     // Define allowed status transitions (optional but good practice)
     // This is a simplified example; real-world might need more complex logic
+    // This validation can stay outside the try/finally as it doesn't use the client.
     const allowedStatuses = ['In attesa', 'Da spedire', 'Spedito', 'Consegnato'];
     
     if (!allowedStatuses.includes(newStatus)) {
@@ -355,8 +355,9 @@ router.put('/order/:orderId/artisan/:artisanId/status', isAuthenticated, async (
         return res.status(400).json({ message: 'Invalid Order ID or Artisan ID format.' });
     }
 
+    const client = await pool.connect(); // Acquire client
     // Use a single try-catch block for the entire request processing
-    try {
+    try { //NOSONAR
         // Authorization check: Fetch the suborder first to get the assigned artisan ID
         const subOrderCheckQuery = await client.query(
             'SELECT IDArtigiano FROM SubOrdine WHERE IDOrdine = $1::INTEGER AND IDArtigiano = $2::INTEGER FOR UPDATE', // Lock the row for update
@@ -405,11 +406,20 @@ router.put('/order/:orderId/artisan/:artisanId/status', isAuthenticated, async (
         });
 
     } catch (error) { // This catch block now handles errors from the initial check, transaction start, or the update query
-        if (client) await rollbackTransaction(client); // Ensure rollback if client exists
+        if (client) { // Ensure client exists before trying to rollback
+            try {
+                await rollbackTransaction(client);
+            } catch (rollbackError) {
+                console.error('Error during rollback:', rollbackError);
+            }
+        }
         console.error(`Error updating status for suborder (Order: ${orderId}, Artisan: ${artisanId}):`, error);
         res.status(500).json({ message: 'Error updating suborder status.', error: error.message });
+    } finally {
+        if (client) {
+            client.release(); // Ensure client is always released
+        }
     }
-
 });
 
 // --- Delete Endpoint ---

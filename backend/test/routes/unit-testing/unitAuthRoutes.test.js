@@ -89,7 +89,7 @@ describe('POST /api/auth/login - Unit Tests', () => {
             });
 
         expect(response.statusCode).toBe(200);
-        expect(response.body.message).toBe('Login effettuato con successo.');
+        expect(response.body.message).toBe('Accesso effettuato con successo.');
         expect(response.body.user).toBeDefined();
         expect(response.body.user.username).toBe(testUserCredentials.username);
         expect(response.body.user.password).toBeUndefined();
@@ -143,7 +143,7 @@ describe('POST /api/auth/login - Unit Tests', () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body.message).toBe('Username e Password sono obbligatori.');
+        expect(response.body.message).toBe('Username e password sono obbligatori.');
     });
 
     it('should return 400 if password is missing', async () => {
@@ -154,6 +154,6 @@ describe('POST /api/auth/login - Unit Tests', () => {
             });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body.message).toBe('Username e Password sono obbligatori.');
+        expect(response.body.message).toBe('Username e password sono obbligatori.');
     });
 });
