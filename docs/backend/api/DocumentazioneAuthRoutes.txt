@@ -60,3 +60,9 @@ restituisce un token che scade entro 10 minuti che si puo utilizzare esclusivame
 -POST api/auth/recover-password/reset
 
 Richiede il token di autorizzazione, e il campo nuovapassword, resetta la password
+
+
+
+-GET api/auth/check-session
+
+-GET api/auth/user-type
