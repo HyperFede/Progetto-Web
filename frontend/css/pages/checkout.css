@@ -1,0 +1,153 @@
+body {
+    background-color: var(--background-color);
+    color: var(--text-dark);
+}
+
+/* Header Checkout */
+.custom-header {
+    background-color: var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+.logo-text {
+    color: var(--primary-color);
+}
+.header-nav .nav-link-custom {
+    color: var(--secondary-color);
+}
+.header-nav .nav-link-custom:hover,
+.header-nav .nav-link-custom:focus {
+    color: var(--primary-color);
+}
+.header-nav .nav-link-cart {
+    color: var(--primary-color);
+}
+
+/* Stili per il menu a discesa dell'utente */
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    text-decoration: none; /* Rimuove la sottolineatura */
+}
+
+/* Box Sezioni Checkout */
+.checkout-section-box {
+    background-color: var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    box-shadow: var(--shadow);
+}
+
+.checkout-section-box .box-title {
+    color: var(--text-dark);
+    font-weight: 600;
+    border-bottom: 1px solid var(--divider-color);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.user-name-shipping strong,
+.user-address-shipping {
+    color: var(--text-dark);
+    line-height: 1.5;
+}
+.user-address-shipping {
+    font-size: 0.95rem;
+    color: var(--secondary-color);
+}
+.change-link {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+.change-link:hover {
+    text-decoration: underline;
+}
+
+/* Riepilogo Articoli */
+.order-review-item {
+    border-bottom: 1px solid var(--divider-color);
+}
+.order-review-item:last-child {
+    border-bottom: none;
+}
+
+.order-review-item-image {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+}
+
+.order-review-item-info .item-name-checkout {
+    color: var(--text-dark);
+    font-size: 1rem;
+    font-weight: 500;
+}
+.order-review-item-info .item-quantity-checkout {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+.order-review-item-price .item-price-value-checkout {
+    color: var(--text-dark);
+    font-size: 1rem;
+}
+
+/* Riepilogo Ordine Sidebar */
+.order-summary-checkout-box {
+    background-color: var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 20px;
+}
+
+.order-summary-checkout-box .summary-title-checkout {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.order-summary-checkout-box .total-amount-checkout {
+    color: var(--primary-color);
+}
+
+.order-summary-checkout-box .summary-divider {
+    border-top: 2px solid var(--divider-color);
+}
+
+.buy-now-btn {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    border: 1px solid var(--primary-color);
+    padding: 0.85rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.15rem;
+}
+.buy-now-btn:hover {
+    background-color: var(--tigers-eye);
+    border-color: var(--tigers-eye);
+    color: var(--text-light);
+}
+
+.delete-order-btn {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    border: 1px solid var(--primary-color);
+    padding: 0.85rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.15rem;
+}
+.delete-order-btn:hover {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    color: var(--text-light);
+}
+
+/* Footer */
+
+.footer-text {
+    color: var(--text-dark);
+}

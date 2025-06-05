@@ -1,0 +1,135 @@
+:root {
+    --dark-moss-green: #606c38ff;
+    --pakistan-green: #283618ff;
+    --cornsilk: #e9d3ae;
+    --earth-yellow: #dda15eff;
+    --tigers-eye: #bc6c25ff;
+    
+    /* Variabili applicative */
+    --primary-color: var(--earth-yellow);
+    --secondary-color: var(--tigers-eye);
+    --background-color: var(--cornsilk);
+    --text-dark: var(--pakistan-green);
+    --text-light: var(--cornsilk);
+    --border-color: #ffffffe6;
+    --shadow: 0 10px 30px rgba(0,0,0,0.1);
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --divider-color: #9a9a9a; 
+}
+
+/* Stili globali comuni */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    background-color: var(--background-color);
+    color: var(--text-dark);
+}
+
+.container-rel {
+    background: white;
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem auto;
+    box-sizing: border-box;
+}
+
+.title-center {
+    text-align: center;
+    color: var(--text-dark);
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--dark-moss-green);
+    font-weight: 500;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border-color: #dee2e6;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.1);
+}
+
+button, .btn {
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.primary-btn:hover {
+     background-color: var(--dark-moss-green);
+}
+
+a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Stili per il menu a discesa dell'utente */
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    text-decoration: none; /* Rimuove la sottolineatura */
+}
+
+/* Stile Header */
+.custom-header {
+    background-color: var(--border-color) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-link-custom {
+    color: var(--secondary-color);
+}
+
+.nav-link-custom:hover,
+.nav-link-custom:focus {
+    color: var(--primary-color);
+}
+
+.dropdown-item.active {
+    color: var(--pakistan-green);
+    background-color: var(--primary-color);
+}

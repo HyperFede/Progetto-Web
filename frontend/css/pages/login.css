@@ -1,0 +1,134 @@
+/* Stili base per il corpo della pagina di login */
+body {
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.container-rel {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px; /* Larghezza massima per il form di login */
+    text-align: center;
+}
+
+.title-center {
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+/* Stile per le label, simile a .form-label di Bootstrap */
+.input-group > label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057; /* Colore standard per le label */
+}
+
+/* Stili per gli input, simili a .form-control di Bootstrap */
+.input-group input[type="text"],
+.input-container input[type="password"] {
+    width: 100%;
+    padding: 0.5rem 0.75rem; /* Leggermente più alto per un aspetto migliore */
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da; /* Bordo standard Bootstrap */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.375rem; /* Bordo arrotondato standard Bootstrap */
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    box-sizing: border-box; /* Importante per width: 100% e padding */
+}
+
+/* Stili per il focus, presi da registrati.css */
+.input-group input[type="text"]:focus,
+.input-container input[type="password"]:focus {
+    border-color: var(--primary-color); /* Assicurati che --primary-color sia definita in global.css */
+    box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.1); /* Ombra specifica da registrati.css */
+    outline: 0;
+}
+
+/* Stili per il contenitore della password e il pulsante toggle */
+.input-container {
+    position: relative;
+    display: flex; /* Permette all'input di riempire lo spazio e al bottone di posizionarsi */
+    align-items: center;
+}
+
+.input-container input[type="password"] {
+    /* Il padding-right è gestito dal posizionamento assoluto del bottone se necessario,
+       ma con flex e il bottone posizionato correttamente, potrebbe non servire. */
+    flex-grow: 1;
+}
+
+#toggle-password {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    color: #6c757d;
+    z-index: 2; /* Assicura che sia sopra l'input */
+}
+
+#toggle-password .toggle-icon {
+    font-size: 1.25rem; /* Dimensione icona */
+    vertical-align: middle;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+    background-color: var(--primary-color); /* Usa il colore primario per il bottone */
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color .15s ease-in-out;
+    margin-top: 1rem; /* Spazio sopra il bottone */
+}
+
+.submit-btn:hover {
+    background-color: var(--dark-moss-green); /* Un colore per l'hover, se definito */
+}
+
+.signup-text {
+    display: block;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.signup-text a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.signup-text a:hover {
+    text-decoration: underline;
+}

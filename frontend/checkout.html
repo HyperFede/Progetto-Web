@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/pages/checkout.css">
+</head>
+<body>
+    <header class="py-3 mb-4 border-bottom custom-header">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <a href="index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+                <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
+            </a>
+            <ul class="nav nav-pills align-items-center header-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-3 me-2"></i> Username
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                        <li><a class="dropdown-item" href="dashboardUtente.html"><i class="bi bi-person-fill me-2"></i>IL MIO PROFILO</a></li>
+                        <li><a class="dropdown-item" href="dashboardStoricoOrdini.html"><i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart" style="color: var(--secondary-color);">
+                        <i class="bi bi-cart fs-3"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container my-4">
+        <div class="row g-4"> <div class="col-lg-8">
+                <div class="checkout-section-box p-3 mb-4">
+                    <h5 class="box-title mb-2">In consegna a:</h5>
+                    <p class="user-name-shipping mb-1"><strong>Nome Utente Esempio</strong></p>
+                    <p class="user-address-shipping mb-0">Via Roma 123, Appartamento 4B, 00100 Città (RM), Italia</p>
+                </div>
+
+                <div class="checkout-section-box p-3">
+                    <h5 class="box-title mb-3">Riepilogo Articoli</h5>
+                    <div class="order-review-items-list">
+                        <div class="order-review-item d-flex align-items-start py-3">
+                            <img src="https://via.placeholder.com/80x80?text=IMG" alt="Nome Prodotto Artigianale Uno" class="order-review-item-image me-3">
+                            <div class="order-review-item-info flex-grow-1">
+                                <h6 class="item-name-checkout mb-1">Nome Prodotto Artigianale Uno</h6>
+                                <p class="item-quantity-checkout mb-0">Q.tà: 1</p>
+                            </div>
+                            <div class="order-review-item-price text-end ms-3">
+                                <span class="item-price-value-checkout fw-bold">€45.00</span>
+                            </div>
+                        </div>
+                        <div class="order-review-item d-flex align-items-start py-3">
+                            <img src="https://via.placeholder.com/80x80?text=IMG" alt="Fantastico Prodotto Artigianale Due" class="order-review-item-image me-3">
+                            <div class="order-review-item-info flex-grow-1">
+                                <h6 class="item-name-checkout mb-1">Fantastico Prodotto Artigianale Due</h6>
+                                <p class="item-quantity-checkout mb-0">Q.tà: 2</p>
+                            </div>
+                            <div class="order-review-item-price text-end ms-3">
+                                <span class="item-price-value-checkout fw-bold">€60.00</span>
+                            </div>
+                        </div>
+                        </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="order-summary-checkout-box p-3">
+                    <h4 class="summary-title-checkout mb-3">TOTALE ORDINE:</h4>
+                    <p class="total-amount-checkout display-6 fw-bold my-3">€105.00</p>
+                    <hr class="summary-divider my-3">                    
+                    <button class="btn buy-now-btn w-100 rounded-pill mb-3">ACQUISTA ORA</button>
+                    <button class="btn delete-order-btn w-100 rounded-pill">ANNULLA ORDINE</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

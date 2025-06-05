@@ -1,0 +1,165 @@
+/* product-review.css */
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-dark);
+}
+
+/* Header styles (se non già in un file css specifico per header importato da global.css o style.css) */
+.custom-header {
+    background-color: var(--background-color); /* o un altro colore se l'header è diverso */
+    border-bottom: 1px solid var(--border-color);
+}
+.logo-text {
+    color: var(--primary-color);
+}
+.header-nav .nav-link-custom {
+    color: var(--secondary-color);
+}
+.header-nav .nav-link-custom:hover,
+.header-nav .nav-link-custom:focus {
+    color: var(--primary-color);
+}
+.header-nav .nav-link-cart {
+    color: var(--primary-color);
+}
+
+
+.page-title {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.back-link-review {
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+.back-link-review:hover {
+    color: var(--primary-color);
+}
+
+.review-form-container {
+    background-color: var(--background-color); /* Potrebbe essere uguale al body o leggermente diverso */
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    box-shadow: var(--shadow);
+}
+
+.product-review-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+}
+
+.product-question {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+.product-name-placeholder {
+    font-weight: normal;
+    color: var(--secondary-color);
+}
+
+.rating-label,
+.photo-upload-label,
+.review-title-label,
+.review-text-label {
+    color: var(--text-dark);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.star-rating > i {
+    font-size: 2.2rem; /* Dimensione stelle */
+    color: var(--secondary-color); /* Colore stelle non selezionate */
+    cursor: pointer;
+    margin: 0 0.2rem;
+    transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+.star-rating > i:hover,
+.star-rating > i.selected,
+.star-rating > i.hovered {
+    color: var(--primary-color); /* Colore stelle al hover o selezionate */
+    transform: scale(1.1);
+}
+
+
+.photo-upload-box {
+    border: 2px dashed var(--border-color);
+    padding: 2rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    background-color: var(--background-color); /* Sfondo leggermente diverso se necessario */
+    border-radius: 0.25rem;
+}
+.photo-upload-box:hover {
+    border-color: var(--primary-color);
+}
+.photo-upload-box i {
+    color: var(--secondary-color);
+    display: block; /* Per far funzionare margin bottom */
+}
+.photo-upload-box p {
+    margin-bottom: 0;
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+#photoPreview img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    margin: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+}
+
+.review-input,
+.review-textarea {
+    background-color: var(--background-color);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+}
+.review-input:focus,
+.review-textarea:focus {
+    background-color: var(--background-color);
+    color: var(--text-dark);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color), 0.25); /* Assicurati di avere --primary-color-rgb in global.css o usa un valore esplicito */
+}
+/* Placeholder color se necessario */
+.review-input::placeholder,
+.review-textarea::placeholder {
+    color: var(--secondary-color);
+    opacity: 0.7;
+}
+
+
+.submit-review-btn {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green); /* Testo scuro per contrasto con --earth-yellow */
+    border: 1px solid var(--primary-color);
+    padding: 0.6rem 2rem;
+    font-weight: 600;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.submit-review-btn:hover {
+    background-color: var(--tigers-eye); /* Usa secondary per hover, o una versione più scura di primary */
+    border-color: var(--tigers-eye);
+    color: var(--text-light); /* Testo chiaro su --tigers-eye */
+}
+
+.footer-text{
+    color: var(--text-dark);
+}
+
+/* Se --primary-color-rgb non è definito, usa un fallback per box-shadow
+   Per esempio, se --primary-color è #dda15e, il suo RGB è 221, 161, 94 */
+.review-input:focus,
+.review-textarea:focus {
+    box-shadow: 0 0 0 0.25rem rgba(221, 161, 94, 0.25); /* Fallback esplicito se var non può essere usato qui */
+}
