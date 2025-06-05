@@ -1,0 +1,28 @@
+Middleware per gestire le autorizzazioni ed i permessi
+
+Contiene 2 funzioni:
+
+isAuthenticated
+hasPermission
+
+-isAuthenticated controlla se uno user si è già autenticato, (ha fatto login):
+estra il suo header di autorizzazione,
+controlla tramite la verify di JWT che il token sia un vero token (usando la SECRET_KEY)
+controlla se l'utente non è stato markato come deleted,
+e restituisce vero/falso a seconda di queste operazioni (assieme allo status 200 o 401)
+
+
+
+-hasPermission è una altra funzione che prende in input un array di permessi 
+e controlla se la tipologia di quello user è tra le valide:
+
+es in una rotta API 
+GET api/test/:id isAuthenticated, hasPermission, ["Admin", "Self"]
+
+significa che tutti gli utenti di tipo admin possono accedere all'endpoint, oppure tutti gli utenti che hanno id corrispondente a quello della richiesta
+tutti gli altri (Artigiani e Clienti che non sono autorizzati), non proseguiranno nella richiesta
+
+
+In caso di successo, chiama la funzione next(), che corrisponde all'endpoint vero e proprio e può proseguire la richiesta
+altrimenti, la richiesta
+In caso fallito restituisce uno status 401 (se fallisce l'Authorization) o 403 (se l'utente non ha il permesso)
