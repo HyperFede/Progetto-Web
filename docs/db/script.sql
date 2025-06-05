@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS Utente (
     Cognome VARCHAR(255) NOT NULL,
     Email VARCHAR(255) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
+    Indirizzo VARCHAR(255) NOT NULL,
     Tipologia VARCHAR(20) NOT NULL CHECK (Tipologia IN ('Admin','Cliente','Artigiano')),
     PIVA VARCHAR(50),
     AdminTimeStampCreazione TIMESTAMP,
@@ -25,16 +26,6 @@ CREATE TABLE IF NOT EXISTS Utente (
 	)
 );
 
-
--- ==================================================
--- 2. Tabella Carrello 
--- ==================================================
-CREATE TABLE IF NOT EXISTS Carrello (
-    IDCarrello SERIAL PRIMARY KEY,
-    IDUtente INTEGER NOT NULL UNIQUE REFERENCES Utente(IDUtente) 
-        ON DELETE CASCADE 
-        ON UPDATE CASCADE
-);
 
 -- ==================================================
 -- 3. Tabella Prodotto (con soft delete)
@@ -64,6 +55,8 @@ CREATE TABLE IF NOT EXISTS Ordine (
     Data DATE NOT NULL,
     Ora TIME NOT NULL,
     ImportoTotale NUMERIC(10,2) NOT NULL,
+    Status VARCHAR(50) NOT NULL CHECK (Status IN ('In attesa', 'Da spedire', 'Scaduto', 'Spedito', 'Consegnato')) DEFAULT 'In attesa',
+    StripeCheckOutSessionID VARCHAR(255) UNIQUE, -- Added UNIQUE constraint
     Deleted BOOLEAN NOT NULL DEFAULT FALSE -- Soft delete
 );
 
@@ -76,6 +69,20 @@ CREATE TABLE IF NOT EXISTS DettagliOrdine (
     Quantita INTEGER NOT NULL,
     PrezzoStoricoUnitario NUMERIC(10,2) NOT NULL,
     PRIMARY KEY (IDOrdine, IDProdotto)
+);
+
+-- ==================================================
+-- New table: SubOrdine (sub-order per Artigiano)
+-- ==================================================
+-- Questa tabella permette di gestire gli ordini suddivisi per Artigiano
+-- e lo stato di avanzamento di ciascun Artigiano per un determinato Ordine.
+
+
+CREATE TABLE IF NOT EXISTS SubOrdine (
+    IDOrdine INTEGER NOT NULL REFERENCES Ordine(IDOrdine) ON DELETE CASCADE ON UPDATE CASCADE,
+    IDArtigiano INTEGER NOT NULL REFERENCES Utente(IDUtente) ON DELETE CASCADE ON UPDATE CASCADE,
+    SubOrdineStatus VARCHAR(50) NOT NULL CHECK (SubOrdineStatus IN ('In attesa', 'Da spedire', 'Scaduto', 'Spedito', 'Consegnato')) DEFAULT 'In attesa',
+    PRIMARY KEY (IDOrdine, IDArtigiano) -- assicura che un Artigiano non possa avere più SubOrdini per lo stesso Ordine
 );
 
 -- ==================================================
@@ -113,6 +120,7 @@ CREATE TABLE IF NOT EXISTS Problema (
         ON UPDATE CASCADE,
     Descrizione TEXT NOT NULL,
     Status VARCHAR(50) NOT NULL CHECK (Status IN ('Aperto', 'Risolto', 'In lavorazione')),
+    Immagine BYTEA,
 	TimeStampSegnalazione TIMESTAMP NOT NULL,
 	
     CHECK (IDCliente IS NOT NULL OR IDArtigiano IS NOT NULL)
@@ -126,17 +134,18 @@ CREATE TABLE IF NOT EXISTS StoricoApprovazioni (
     IDArtigiano INTEGER NOT NULL REFERENCES Utente(IDUtente)
         ON DELETE CASCADE 
         ON UPDATE CASCADE,
+    Esito VARCHAR(50) NOT NULL CHECK (Esito IN ('Approvato', 'Rifiutato','In lavorazione')),
     IDAdmin INTEGER REFERENCES Utente(IDUtente)
         ON DELETE RESTRICT  -- Blocca cancellazioni fisiche, gli admin non possono essere cancellati
         ON UPDATE CASCADE,
-    DataApprovazione TIMESTAMP 
+    DataEsito TIMESTAMP 
 );
 
 -- ==================================================
 -- 9. Tabella DettagliCarrello 
 -- ==================================================
 CREATE TABLE IF NOT EXISTS DettagliCarrello (
-    IDCarrello INTEGER REFERENCES Carrello(IDCarrello)
+    IDCliente INTEGER REFERENCES Utente(IDUtente)
         ON DELETE CASCADE 
         ON UPDATE CASCADE,
     IDProdotto INTEGER NOT NULL REFERENCES Prodotto(IDProdotto)
@@ -144,7 +153,7 @@ CREATE TABLE IF NOT EXISTS DettagliCarrello (
         ON UPDATE CASCADE,
     Quantita INTEGER NOT NULL CHECK (Quantita > 0),
     TotaleParziale NUMERIC(10,2) NOT NULL,
-    PRIMARY KEY (IDCarrello, IDProdotto)
+    PRIMARY KEY (IDCliente, IDProdotto)
 );
 
 -- ==================================================
@@ -153,11 +162,12 @@ CREATE TABLE IF NOT EXISTS DettagliCarrello (
 CREATE TABLE IF NOT EXISTS Pagamento (
     IDPagamento SERIAL PRIMARY KEY,
     IDOrdine INTEGER UNIQUE NOT NULL REFERENCES Ordine(IDOrdine)
-        ON DELETE CASCADE 
+        ON DELETE CASCADE
         ON UPDATE CASCADE,
-    StripePaymentIntentID VARCHAR(255) NOT NULL,
+    StripePaymentIntentID VARCHAR(255) NOT NULL UNIQUE, -- Added UNIQUE
     StripeStatus VARCHAR(50) NOT NULL,
-    Modalita VARCHAR(50) NOT NULL CHECK (Modalita IN ('Carta', 'PayPal', 'Bonifico')), --Da cambiare vedendo Stripe integration
+    Modalita VARCHAR(255) NOT NULL, -- Removed CHECK constraint, increased length for flexibility
     ImportoTotale NUMERIC(10,2) NOT NULL,
-    Timestamp TIMESTAMP NOT NULL
+    Valuta VARCHAR(3) NOT NULL, -- Necessary column for currency
+    TimestampCreazione TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP -- Added DEFAULT
 );

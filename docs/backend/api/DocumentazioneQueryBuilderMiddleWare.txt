@@ -1,0 +1,120 @@
+======================================
+Middleware per la Costruzione Dinamica di Query SQL
+======================================
+
+Scopo:
+------
+Il file `queryBuilderMiddleware.js` espone una funzione factory, `createQueryBuilderMiddleware(config)`, che genera un middleware Express.
+Questo middleware è progettato per costruire dinamicamente clausole SQL `WHERE` (per il filtraggio) e `ORDER BY` (per l'ordinamento)
+basandosi sui parametri di query (`req.query`) di una richiesta HTTP GET.
+
+Come Funziona:
+-------------
+1.  **Funzione Factory (`createQueryBuilderMiddleware(config)`)**:
+    *   Si invoca `createQueryBuilderMiddleware` con un oggetto `config` per ottenere la funzione middleware effettiva, personalizzata in base alla configurazione.
+
+2.  **Funzione Middleware (`queryBuilder(req, res, next)`)**:
+    *   Quando una richiesta HTTP raggiunge una rotta su cui è applicato, il middleware generato:
+        *   Ispeziona `req.query`.
+        *   Costruisce le clausole SQL in base alla `config` fornita alla factory.
+        *   Aggiunge le seguenti proprietà all'oggetto `req` per l'uso nel gestore della rotta successivo:
+            *   `req.sqlWhereClause`: Stringa della clausola `WHERE` (es. `WHERE colonna = $1 AND altra_colonna > $2`). Può includere una `baseWhereClause` dalla configurazione.
+            *   `req.sqlQueryValues`: Array di valori per le query parametrizzate (es. `['valore', 10]`).
+            *   `req.sqlOrderByClause`: Stringa della clausola `ORDER BY` (es. `ORDER BY nome ASC`).
+    *   Chiama `next()` per passare il controllo al gestore successivo.
+
+    
+Configurazione (oggetto `config`):
+----------------------------------
+L'oggetto `config` passato a `createQueryBuilderMiddleware` è cruciale. Definisce come il middleware si comporta per una rotta specifica.
+
+{
+    allowedFilters: [
+        // Array di oggetti filtro
+        {
+            queryParam: 'nome_parametro_query_url', // es., 'categoria'
+            dbColumn: 'nome_effettivo_colonna_database', // es., 'categoria'
+            type: 'tipo_filtro', // 'exact', 'like', 'gte', 'lte', 'boolean'
+            dataType: 'tipo_dato_atteso' // 'string', 'number', 'integer', 'boolean' (per validazione/casting)
+        },
+        // ... altri oggetti filtro
+    ],
+    allowedSortFields: ['colonna_db1', 'colonna_db2'], // Array di nomi di colonne DB consentite per l'ordinamento
+    defaultSortField: 'colonna_db_per_ordinamento_default', // es., 'idprodotto'
+    defaultSortOrder: 'ASC', // o 'DESC' (Opzionale, default 'ASC')
+    baseWhereClause: 'stringa_condizione_SQL' // (Opzionale) es., 'deleted = FALSE'
+}
+
+Dettagli degli elementi di 2`config.allowedFilters`:
+  * `queryParam`: (Stringa)2 Il nome del parametro di query nell'URL (es., se `?status=active`, allora `queryParam` è `'status'`).
+  * `dbColumn`: (Stringa) Il nome della colonna corrispondente nella tua tabella di database.
+  * `type`: (Stringa) Il tipo di confronto SQL da eseguire:
+      * `'exact'`: Genera `dbColumn = $N`.
+      * `'like'`: Genera `dbColumn ILIKE $N` (LIKE case-insensitive con caratteri jolly '%' aggiunti automaticamente).
+      * `'gte'`: Genera `dbColumn >= $N` (maggiore o uguale a).
+      * `'lte'`: Genera `dbColumn <= $N` (minore o uguale a).
+      * `'boolean'`: Genera `dbColumn = $N` (si aspetta 'true' o 'false' come valore del parametro di query).
+  * `dataType`: (Stringa, Opzionale) Il tipo di dato atteso per il valore del parametro di query. Usato per validazione e casting di base:
+      * `'string'`: Nessun casting specifico (default se non specificato per 'exact' o 'like').
+      * `'number'`: Analizzato usando `parseFloat()`. I numeri non validi vengono saltati.
+      * `'integer'`: Analizzato usando `parseInt()`. Gli interi non validi vengono saltati.
+      * `'boolean'`: Converte 'true' in `true` e 'false' in `false`. Altri valori vengono saltati.
+
+Dettagli delle altre proprietà di `config`:
+  * `allowedSortFields`: (Array di Stringhe) Una whitelist di nomi di colonne del database per cui i client sono autorizzati a ordinare (es., `['name', 'price']`). Questo previene SQL injection nella clausola `ORDER BY`.
+  * `defaultSortField`: (Stringa) Il nome della colonna del database da usare per l'ordinamento se il client non fornisce un parametro di query `sort` o ne fornisce uno non valido.
+  * `defaultSortOrder`: (Stringa, Opzionale) La direzione di ordinamento predefinita ('ASC' o 'DESC'). Default 'ASC' se non fornita.
+  * `baseWhereClause`: (Stringa, Opzionale) Una stringa di condizione SQL che sarà *sempre* inclusa nella clausola `WHERE`. Utile per cose come filtrare sempre i record eliminati tramite soft-delete (es., `'deleted = FALSE'`). Se vengono applicati altri filtri, questa sarà combinata con `AND`.
+
+Output (Aggiunto all'oggetto `req`):
+------------------------------------
+Il middleware aggiunge le seguenti proprietà all'oggetto `req`, che sono quindi disponibili nel tuo gestore di rotta:
+
+*   `req.sqlWhereClause`: (Stringa) La clausola WHERE completamente costruita (es., `WHERE (deleted = FALSE) AND categoria = $1`) o una stringa vuota se non vengono applicati filtri (inclusa la base).
+*   `req.sqlQueryValues`: (Array) Un array di valori corrispondenti ai segnaposto (`$1`, `$2`, ecc.) in `req.sqlWhereClause`. Questo array dovrebbe essere passato come secondo argomento a `pool.query()`.
+*   `req.sqlOrderByClause`: (Stringa) La clausola ORDER BY completamente costruita (es., `ORDER BY nome ASC`).
+
+Esempio di Utilizzo:
+--------------------
+Supponiamo di avere un file `productRoutes.js`.
+
+**1. Definire la configurazione per il filtraggio/ordinamento dei prodotti:**
+
+```javascript
+// In productRoutes.js
+const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js');
+
+const productQueryConfig = {
+    allowedFilters: [
+        { queryParam: 'categoria', dbColumn: 'categoria', type: 'exact', dataType: 'string' },
+        { queryParam: 'idartigiano', dbColumn: 'idartigiano', type: 'exact', dataType: 'integer' },
+        { queryParam: 'prezzounitario_gte', dbColumn: 'prezzounitario', type: 'gte', dataType: 'number' },
+        { queryParam: 'prezzounitario_lte', dbColumn: 'prezzounitario', type: 'lte', dataType: 'number' },
+        { queryParam: 'nome_like', dbColumn: 'nome', type: 'like', dataType: 'string' },
+        { queryParam: 'quantitadisponibile_lte', dbColumn: 'quantitadisponibile', type: 'lte', dataType: 'integer' }
+    ],
+    allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto'],
+    defaultSortField: 'idprodotto',
+    defaultSortOrder: 'ASC'
+};
+
+Esempio:
+l'endpoint chimato con:
+
+GET api/products/?categoria=frutta&prezzounitario_lte=2&prezzounitario_gte=10&nome_like=p&sort=-nome
+
+
+Restituirà i prodotti con:
+
+WHERE categoria = 'Frutta' AND prezzounitario <=2 AND prezzounitario >= 10 AND nome ILIKE '%p%'
+ORDER BY nome DESC
+
+quindi tutti i prodotti di tipo Frutta, che costano tra i 2 e 10 euro, con la lettera p nel nome ordinati per nome in ordine discendente
+
+
+Attenzione alla sintassi:
+
+? segue i filtri
+& aggiunge un filtro
+- indica il contrario di un filtro ORDER BY (quindi significa ordine decrescente)
+Non mettere spazi nella request

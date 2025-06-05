@@ -1,0 +1,125 @@
+Payments API Documentation
+
+
+--------------------------------------------------------------------------------
+#3 Verify Stripe Checkout Session
+Endpoint:
+  POST /api/payments/verify-session
+
+Descrizione:
+    Metodo che serve per aggiornare il nostro DB quando un pagamento è andato a buon fine
+    E' responsabilità del client chiamarlo nel momento in cui si è eseguita la redirect verso la nostra pagina di Payment-success
+
+    (La nostra pagina di Pyament-Annullato può essere il carrello)
+
+  - Riceve il `sessionid` di Stripe dopo che l’utente è stato reindirizzato dalla Checkout Page.
+   (può essere preso dal link. visto che non ho controllo sulla pagina di Stripe)
+  - Recupera la sessione Stripe corrispondente (`stripe.checkout.sessions.retrieve`).
+  - Estrae `orderId` (da `client_reference_id` o `metadata.orderId`).
+  - Verifica che l’ordine esista nel database (`Ordine`), altrimenti 404.
+  - Se `payment_status === "paid"`:
+      1. Avvia transazione su PostgreSQL.
+      2. Aggiorna `Ordine.Status` a “Da spedire” (solo se era “In attesa” o “Pagamento fallito”).
+      3. Inserisce un record in `Pagamento` con campi:
+         - IDOrdine
+         - StripePaymentIntentID
+         - ImportoTotale (da `session.amount_total` /100)
+         - Valuta (es. “EUR”)
+         - StripeStatus = “succeeded”
+         - Modalita = tipo di pagamento (ottenuto da `PaymentIntent.payment_method.type`)
+         (usa `ON CONFLICT (StripePaymentIntentID) DO NOTHING`)
+      4. Chiama la funzione `createSubOrdiniForOrder(orderId, client)` per popolare `SubOrdine` per ciascun artigiano coinvolto.
+      5. Commit transazione, rilascia client e risponde 200:
+         ```
+         {
+           "success": true,
+           "message": "Payment verified and order updated.",
+           "orderStatus": "Da spedire",
+           "paymentStatus": "paid"
+         }
+         ```
+  - Altrimenti (`payment_status !== "paid"`):
+  (questo caso non dovrebbe mai succedere, Stripe previene questa cosa facendo fallire prima nella pagina di pagamento)
+      1. Se `status === 'In attesa'` E `session.status === 'complete'` E `payment_status === 'unpaid'`:
+         - Avvia transazione e aggiorna `Ordine.Status` a “Pagamento fallito”.
+         - Commit e risponde 200 con:
+           ```
+           {
+             "success": false,
+             "message": "Payment status for session <sessionId> is 'unpaid'. Order status: Pagamento fallito.",
+             "orderStatus": "Scaduto",
+             "paymentStatus": "unpaid"
+           }
+           ```
+      2. In altri casi, non modifica `Ordine.Status` e risponde 200:
+         ```
+         {
+           "success": false,
+           "message": "Payment status for session <sessionId> is '<payment_status>'. Order status: <currentStatus>.",
+           "orderStatus": "<currentStatus>",
+           "paymentStatus": "<payment_status>"
+         }
+         ```
+
+Accesso:
+  - Richiede autorizzazione con token
+  - Richiede che il sessionId fornito sia corrispondente al Cliente che è in accesso in quel momento
+
+Input:
+  - Header:
+      Content-Type: application/json
+  - Body (JSON):
+      {
+        "sessionId": "<string, ID della Checkout Session Stripe>"
+      }
+  - Validazione:
+      - Se manca `sessionId` → 400 Bad Request: `{ "error": "Session ID is required." }`
+
+Output (codici e JSON):
+  - 200 OK:  
+    - Se pagamento verificato con “paid”:  
+      `{ success: true, message: "...", orderStatus: "Da spedire", paymentStatus: "paid" }`
+    - Se sessione “complete” ma “unpaid”:  
+      `{ success: false, message: "...", orderStatus: "Scaduto", paymentStatus: "unpaid" }`
+    - In tutti gli altri casi “non paid”:  
+      `{ success: false, message: "...", orderStatus: "<currentStatus>", paymentStatus: "<payment_status>" }`
+  - 400 Bad Request:
+    - Se `sessionId` non presente:  
+      `{ "error": "Session ID is required." }`
+    - Se `orderId` estratto non è un numero valido:  
+      `{ "error": "Invalid orderId in paid Stripe session data." }`
+    - Se Stripe restituisce errore di tipo `StripeInvalidRequestError` (es. session non esiste):  
+      - 404 Not Found se `code === "resource_missing"`:  
+        `{ "error": "Checkout Session not found on Stripe." }`
+      - 400 Bad Request per altri errori di richiesta:  
+        `{ "error": "Invalid request to Stripe." }`
+  - 404 Not Found:
+    - Se la sessione Stripe non esiste:  
+      `{ "error": "Checkout Session not found on Stripe." }`
+    - Se l’ordine corrispondente non si trova nel DB:  
+      `{ "error": "Order <id> associated with the payment was not found in our system." }`
+  - 500 Internal Server Error:
+    - Se errore nel recuperare la sessione da Stripe:  
+      `{ "error": "Failed to retrieve session from Stripe.", "details": "<stripeError.message>" }`
+    - Se errore DB durante transazione (update Ordine, insert Pagamento, createSubOrdini):  
+      `{ "error": "Database processing error." }`
+
+--------------------------------------------------------------------------------
+Note Aggiuntive:
+- Il router importa e inizializza Stripe con `process.env.STRIPE_SECRET_KEY` e 
+  `process.env.STRIPE_WEBHOOK_SECRET` (può essere anche setuppato con una stringa fake, ma per sicurezza meglio setupparlo). Se mancano, l’applicazione termina all’avvio.
+- Le funzioni di transazione:
+    - `beginTransaction(client)`: esegue `BEGIN`
+    - `commitTransaction(client)`: esegue `COMMIT`
+    - `rollbackTransaction(client)`: esegue `ROLLBACK`
+- `createSubOrdiniForOrder(orderId, client)`:  
+    - Inserisce in `SubOrdine (IDOrdine, IDArtigiano, SubOrdineStatus)` per ogni 
+      artigiano trovato in `DettagliOrdine` di quell’ordine, con `SubOrdineStatus = 'Da spedire'`.  
+    - Usa `ON CONFLICT (IDOrdine, IDArtigiano) DO NOTHING` per evitare duplicati.
+- Il webhook Stripe è presente nel file ma commentato (richiede `express.raw({ type: 'application/json' })` e `webhookSecret`). Se attivato:
+    - Riceve eventi come `checkout.session.completed`.
+    - Verifica la firma: `stripe.webhooks.constructEvent(req.body, sig, webhookSecret)`.
+    - Su `checkout.session.completed`, aggiorna `Ordine.Status` a “Pagato” e crea record in `Pagamento`.  
+    - Al momento è commentato e non esposto.
+
+
