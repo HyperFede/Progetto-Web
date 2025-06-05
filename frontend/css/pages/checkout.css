@@ -18,8 +18,8 @@ body {
 .header-nav .nav-link-custom:focus {
     color: var(--primary-color);
 }
-.header-nav .nav-link-cart {
-    color: var(--primary-color);
+.nav-link-cart { /* Selettore reso più generico */
+    color: var(--secondary-color); /* Colore modificato come da richiesta */
 }
 
 /* Stili per il menu a discesa dell'utente */
