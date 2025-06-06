@@ -177,3 +177,7 @@ min-height: 400px;
 .nav-link-cart { /* Selettore reso più generico */
     color: var(--secondary-color) !important; /* Colore modificato come da richiesta */
 }
+
+.invisible{
+    display: none;
+}

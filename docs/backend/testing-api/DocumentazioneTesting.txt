@@ -1,0 +1,9 @@
+Ogni modulo .js va testato:
+
+il testing lo divido in:
+-logic testing, che testa la logica delle singole funzioni mockando tutto ciò che è necessario (connessione al db, middleware bypassati)
+
+-unit testing, testa le singole funzioni di ogni modulo
+
+-module-integration testing testa l'interazione di piu moduli
+

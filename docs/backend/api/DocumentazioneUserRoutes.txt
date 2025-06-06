@@ -1,0 +1,172 @@
+Elenco di route API per la gestione degli utenti (`/api/users`):
+
+POST /api/users
+GET /api/users/
+GET /api/users/notdeleted
+GET /api/users/:id
+PUT /api/users/:id
+DELETE /api/users/:id
+
+Alcune API sono protette da un middleware che gestisce autorizzazione e permessi (vedi dettagli in AuthMiddleWare)
+In Postman basta usare la funzione Bearer token, o comunque il token dovrà andare nei cookies
+
+#######
+# 1. Creare un nuovo utente (registrazione)
+
+1.1 POST /api/users
+
+@Access Accesso: libero, chiunque può effettuare una richiesta di questo tipo
+
+@Descr Dividiamo gli utenti in 3 Tipologie: Cliente,Artigiano ed Admin.
+Per motivi di sicurezza abbiamo deciso che non è possibile creare un admin attraverso API, presumiamo che
+l'owner del DB crei gli Admin quando ce ne è bisogno.
+
+Per gli altri utenti, l'endpoint funziona in questo modo:
+
+Input: Oggetto JSON nel corpo della richiesta (req.body) con i seguenti campi:
+     {
+       "username": "String (obbligatorio)",
+       "nome": "String (obbligatorio)",
+       "cognome": "String (obbligatorio)",
+       "email": "String (obbligatorio)",
+       "password": "String (obbligatorio)",
+       "indirizzo": "String (obbligatorio)",
+       "tipologia": "String (obbligatorio, 'Cliente' o 'Artigiano')",
+       "piva": "String (opzionale, ma obbligatoria se tipologia='Artigiano')",
+       "artigianodescrizione": "String (opzionale, obbligatoria se tipologia='Artigiano')"
+     }
+ Output:
+     - Successo (201 Created): Oggetto JSON con i dati dell'utente creato (esclusa la password).
+       { "idutente": Number, "username": String, ..., "tipologia": String }
+
+     - Errore (400 Bad Request): Se i campi obbligatori mancano o la tipologia non è valida,
+                                o se per 'Artigiano' mancano PIVA/descrizione.
+       { "message": "Stringa di errore" }
+     - Errore (403 Forbidden): Se si tenta di creare un utente 'Admin'.
+       { "message": "La creazione di utenti Admin tramite API non è permessa." }
+     - Errore (409 Conflict): Se username o email esistono già.
+       { "message": "Username o Email già esistente." }
+     - Errore (500 Internal Server Error): In caso di errore del server.
+       { "message": "Errore del server durante la creazione dell utente." }
+
+#2 Ottenere informazioni dagli utenti
+
+2.1 GET /api/users/
+
+@Descr ottiene tutti gli utenti, compresi i non cancellati
+
+@Access Accesso: richiede isAuthenticated (più dettagli in AuthMiddleWare)
+Permesso: richiede hasPermission di tipo Admin (più dettagli in AuthMiddleWare)
+Richiesto il permesso di tipo "Admin", solo gli admin che si sono autenticati possono visualizzare tutti gli utenti
+
+Input:
+- Header HTTP `Authorization`: Stringa nel formato "Bearer <token_jwt>" (necessario per il middleware `isAuthenticated`).
+ Esempio: `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+Output:
+   - Successo (200 OK): Array JSON di oggetti utente.
+     [ { "idutente": Number, "username": String, ..., "deleted": Boolean }, ... ]
+   - Errore (500 Internal Server Error): In caso di errore del server.
+     { "message": "Errore del server durante il recupero degli utenti." }
+
+2.2 GET /api/users/:id
+
+Accesso: richiede isAuthenticated
+Permesso: Libero, non restituisce mai la password
+
+Richiesto il permesso di tipo "Admin", oppure di tipo "Self".
+esclusivamente gli admin possono accedere oppure il proprio utente può accedere a questo endpoint. (sia Cliente sia Artigiano)
+
+Input:
+     - Parametro di rotta `id`: ID numerico dell'utente.
+Output:
+    - Successo (200 OK): Oggetto JSON con i dati dell'utente.
+      { "idutente": Number, "username": String, ..., "deleted": Boolean } // NB: deleted è inutile in quanto è sempre false
+    - Errore (404 Not Found): Se l'utente con l'ID specificato non esiste Oppure è marcato come deleted.
+      { "message": "Utente non trovato." }
+    - Errore (500 Internal Server Error): In caso di errore del server.
+      { "message": "Errore del server durante il recupero dell utente." }
+
+
+2.3 GET api/users/notdeleted
+
+Accesso: richiede isAuthenticated
+Permesso: richiede hasPermission di tipo Admin
+
+Richiesto il permesso di tipo "Admin", gli admin possono visualizzare tutti gli utenti
+
+
+
+Input: (nessuno, oltre all'header Authorization)
+Output:
+    - Successo (200 OK): Array JSON di oggetti utente, escludento tutti gli utenti marcati come deleted.
+    -  - Errore (500 Internal Server Error): In caso di errore del server.
+       { "message": "Errore del server durante il recupero degli utenti." }
+
+
+# 3 Aggiornare informazioni
+
+3.1 PUT /api/users/:id
+
+Accesso: richiede isAuthenticated
+Permesso: richiede hasPermission di tipo Admin oppure di tipo Self
+
+Un admin può modificare i dati di tutti, mentre un utente di tipo Artigiano/Cliente può modificare se stesso
+
+Aggiorna i dati di un utente esistente.
+-Non permette la modifica della password o della tipologia.
+-Non permette la modifica di utenti Admin.
+
+Input:
+    - Parametro di rotta `id`: ID numerico dell'utente da aggiornare.
+    - header di Autorizzazione HTTP
+    - Oggetto JSON nel corpo della richiesta (req.body) con i dati aggiornati dell'utente.
+    {
+          "username": "String (opzionale)",
+          "nome": "String (opzionale)",
+          "cognome": "String (opzionale)",
+          "email": "String (opzionale)",
+          "indirizzo": "String (opzionale)",
+          "piva": "String (opzionale, rilevante per Artigiano)",
+          "artigianodescrizione": "String (opzionale, rilevante per Artigiano)"
+    }
+Output:
+    - Successo (200 OK): Oggetto JSON con i dati dell'utente aggiornato.
+          { "idutente": Number, "username": String, ... }
+        - Errore (400 Bad Request): Se username/email sono vuoti, o se PIVA/descrizione sono vuoti per un Artigiano.
+          { "message": "Stringa di errore" }
+        - Errore (403 Forbidden): Se si tenta di modificare un utente Admin.
+          { "message": "Non puoi modificare un utente Admin." }
+        - Errore (404 Not Found): Se l'utente da aggiornare non esiste.
+          { "message": "Utente non trovato per l aggiornamento." }
+        - Errore (409 Conflict): Se l'aggiornamento causa un conflitto di username o email.
+          { "message": "Username o Email già esistente." }
+        - Errore (500 Internal Server Error): In caso di errore del server.
+          { "message": "Errore del server durante l aggiornamento dell utente." }
+
+#4 Eliminare un utente
+
+4.1 DELETE api/users/:id
+
+
+Accesso: richiede isAuthenticated
+Permesso: richiede hasPermission di tipo Admin oppure di tipo Self
+
+
+Un admin può eliminare altri tipi di utente mentre un utente di tipo Artigiano/Cliente può eliminare se stesso
+Un admin non può eliminare un altro admin (assumiamo che sia il DB owner ad occuparsene)
+
+Elimina un utente esistente.
+
+Input:
+    - Parametro di rotta `id`: ID numerico dell'utente da eliminare.
+    - Header HTTP `Authorization'
+Output:
+     - Successo (200 OK): Messaggio di conferma.
+       { "message": "Utente con ID X eliminato." }
+     - Errore (403 Forbidden): Se si tenta di eliminare un utente Admin.
+       { "message": "Non puoi eliminare un utente Admin." }
+     - Errore (404 Not Found): Se l'utente da eliminare non esiste.
+       { "message": "Utente non trovato per l eliminazione." }
+     - Errore (500 Internal Server Error): In caso di errore del server.
+       { "message": "Errore del server durante l eliminazione dell utente." }
