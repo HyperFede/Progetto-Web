@@ -132,31 +132,29 @@
                             <div class="col-md-6">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control dashboard-input" id="username" value="">
-                            </div>
-                             <div class="col-md-6">
-                                <label for="currentPassword" class="form-label">Password Attuale (per modifiche sensibili)</label>
-                                <input type="password" class="form-control dashboard-input" id="currentPassword">
-                            </div>
-                        </div>
-                         <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="newPassword" class="form-label">Nuova Password (opzionale)</label>
-                                <input type="password" class="form-control dashboard-input" id="newPassword" placeholder="Lascia vuoto per non modificare">
+
                             </div>
                             <div class="col-md-6">
-                                <label for="confirmNewPassword" class="form-label">Conferma Nuova Password</label>
-                                <input type="password" class="form-control dashboard-input" id="confirmNewPassword">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control dashboard-input" id="email">
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control dashboard-input" id="email" value="">
                         </div>
                         <div class="mb-3">
                             <label for="address" class="form-label">Indirizzo</label>
                             <input type="text" class="form-control dashboard-input" id="address" value="">
                         </div>
                         <div class="text-center mt-4">
+                            <div class = "text-center mt-4">
+                                <!-- Caso in cui la PUT restituisca un errore di UNIQUE (email/username gia esistenti, a quel punto cambia lo stile delle checkbox corrispondenti)-->
+                                <!--
+                                <span class="error-text" id="error">Errore: almeno uno dei campi è già esistente</span>  
+                                -->
+
+                                <!-- Caso in cui la PUT è andato a buon fine -->
+                                <!--
+                                <span class="success-text" id="success">Modifica avvenuta con successo</span>
+                                -->
+                            </div>
                             <button type="submit" class="btn rounded-pill save-changes-btn">SALVA CAMBIAMENTI</button>
                         </div>
                     </form>

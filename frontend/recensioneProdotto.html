@@ -40,7 +40,7 @@
 
     <!-- Navbar per schermi < lg -->
     <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none"> <!-- Mantenuto fixed-top come richiesto in precedenza -->
-         <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
             <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -51,10 +51,10 @@
             <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Il Mio Account</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
-                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                    <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
                         <ul class="nav nav-pills flex-column mb-auto">
                         <li class="nav-item">
                             <a class="nav-link" href="dashboardUtente.html">
@@ -62,8 +62,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                             <a class="nav-link" aria-current="page" href="dashboardStoricoOrdini.html"> <i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
-                             </a>
+                            <a class="nav-link" aria-current="page" href="dashboardStoricoOrdini.html"> <i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
+                            </a>
                         </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#"> <i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI
@@ -77,7 +77,7 @@
                     </div>
                 </div>
             </div>
-           <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
+            <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
                 <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
                     <a href="carrelloUtente.html" class="nav-link nav-link-cart">
                         <i class="bi bi-cart fs-3"></i>
@@ -116,6 +116,11 @@
                         <i class="bi bi-star" data-value="5"></i>
                     </div>
                     <input type="hidden" name="rating" id="ratingValue" required>
+
+                    <!-- Caso in cui utente non selezione la valutazione-->
+                    <!--
+                    <div id="ratingError" class="text-danger mt-2">Per favore, seleziona una valutazione.</div>
+                    -->
                 </div>
 
                 <div class="mb-4">
@@ -137,6 +142,15 @@
                     <label for="reviewTextInput" class="form-label review-text-label">Scrivi una recensione:</label>
                     <textarea class="form-control review-textarea" id="reviewTextInput" name="reviewText" rows="5" placeholder="Cosa ti è piaciuto o non ti è piaciuto? Come hai usato questo prodotto?"></textarea>
                 </div>
+
+
+                <div class = "text-center">
+                    <!-- caso in cui alla recensione va tutto bene-->
+                    <!--
+                    <div id="successMessage" class="alert alert-success" role="alert">
+                        Grazie per la tua recensione! Sarà pubblicata dopo la revisione.
+                    -->
+                    </div>
 
                 <div class="text-center">
                     <button type="submit" class="btn rounded-pill submit-review-btn">INVIA</button>

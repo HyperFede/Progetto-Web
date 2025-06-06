@@ -177,3 +177,15 @@ min-height: 400px;
     border-color: var(--tigers-eye);
     color: var(--text-light);
 }
+
+.error-text {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.success-text {
+    color: green;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}

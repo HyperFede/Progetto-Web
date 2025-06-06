@@ -40,3 +40,9 @@ body {
        ad esempio: max-width: 600px;
        Questo farebbe sì che il contenuto non diventi eccessivamente largo. */
 }
+
+.error-text {
+    color: red;    /* Text color for errors */
+    font-size: 0.875em; /* Optional: makes the error text a bit smaller */
+    margin-top: 0.25rem; /* Optional: adds a little space above the error message */
+}
