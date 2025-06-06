@@ -307,14 +307,45 @@ router.post('/recover-password/reset', async (req, res) => {
  *      - Errore (401 Unauthorized): Se il token è mancante, invalido o scaduto (gestito da `isAuthenticated`).
  *        { "message": "Stringa di errore relativa all'autenticazione" }
  */
-router.get('/session-info', isAuthenticated, (req, res) => {
+
+router.get('/session-info', isAuthenticated, async (req, res) => { // Added async
     // Se il middleware isAuthenticated passa, significa che req.user è popolato
     // e il token JWT è valido.
     if (req.user && req.user.tipologia) {
-        res.status(200).json({
+        const responsePayload = {
             isAuthenticated: true,
-            tipologia: req.user.tipologia
-        });
+            tipologia: req.user.tipologia,
+            username: req.user.username,
+            nome: req.user.nome,
+            cognome: req.user.cognome,
+            indirizzo: req.user.indirizzo,
+            email: req.user.email,
+            idutente: req.user.idutente,
+
+
+        };
+        //console.log(responsePayload);
+        // Check the user's actual tipologia from req.user, case-insensitively.
+        // Crucially, ensure that 'piva' and 'artigianodescrizione' are being selected
+        // and populated into req.user by your isAuthenticated middleware for artisan users.
+        if (req.user.tipologia && req.user.tipologia.toLowerCase() === 'artigiano') {
+            try {
+                const artigianoDetailsQuery = await pool.query(
+                    'SELECT piva, artigianodescrizione FROM utente WHERE idutente = $1',
+                    [req.user.idutente] // or responsePayload.idutente
+                );
+                if (artigianoDetailsQuery.rows.length > 0) {
+                    responsePayload.piva = artigianoDetailsQuery.rows[0].piva;
+                    responsePayload.artigianodescrizione = artigianoDetailsQuery.rows[0].artigianodescrizione;
+                }
+            } catch (dbError) {
+                console.error('[session-info] Error fetching artigiano details from DB:', dbError);
+                // Decide if you want to fail the request or send partial data
+                // For now, we'll send the data without piva/descrizione if DB query fails
+            }
+        }
+
+        res.status(200).json(responsePayload);
     } else {
         // Questo caso non dovrebbe verificarsi se isAuthenticated funziona correttamente
         // e popola sempre req.user con tipologia per utenti validi.
