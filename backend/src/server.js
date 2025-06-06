@@ -53,9 +53,11 @@ app.use('/api/approvals', approvalsRoutes); // Monta le route delle approvazioni
 
 
 // Endpoint di root per un semplice check
-app.get('/', (req, res) => {
+app.get('/test', (req, res) => {
     res.send('Server is running. Database initialization attempted.');
 });
+
+app.use(express.static('../frontend/'))
 
 async function startServer() {
     try {
