@@ -9,29 +9,86 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/pages/dashboardArtigiano.css"> </head>
 <body>
-    <header class="py-3 mb-4 border-bottom custom-header">
+    <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">
-            <a href="index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-                <span class="fs-4 logo-text">Logo</span>
-            </a>
-            <div class="header-actions-artisan ms-md-auto">
-                <a href="#" class="btn add-product-btn">
-                    <i class="bi bi-plus-circle-fill me-1"></i> Inserisci Prodotto
-                </a>
-            </div>
-            <ul class="nav nav-pills align-items-center header-nav">
-                <li class="nav-item"><a href="#" class="nav-link nav-link-custom">ACCEDI</a></li>
-                <li class="nav-item"><a href="#" class="nav-link nav-link-custom">REGISTRATI</a></li>
+            <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
+
+            <ul class="nav nav-pills align-items-center">
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-3 me-2"></i> Username
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                        <li><a class="dropdown-item" href="dashboardArtigiano.html"><i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO</a></li>
+                        <li><a class="dropdown-item" href="prodottiArtigiano.html"><i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI</a></li>
+                        <li><a class="dropdown-item" href="ordiniRicevuti.html"><i class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
+                    </ul>
+                </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link nav-link-cart">
-                        <i class="bi bi-cart fs-4"></i>
+                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Inserisci Prodotto
                     </a>
                 </li>
             </ul>
         </div>
-    </header>
-    
-    <main class="container my-4">
+    </header>
+
+    <!-- Navbar per schermi < lg -->
+    <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none"> <!-- Mantenuto fixed-top come richiesto in precedenza -->
+         <div class="container-fluid d-flex justify-content-between align-items-center">
+            <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
+
+            <div class="ms-auto"></div> <!-- Spacer to push toggler and logo to the left -->
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Dashboard Artigiano</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                        <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="dashboardArtigiano.html">
+                                <i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                             <a class="nav-link" aria-current="page" href="prodottiArtigiano.html"> <i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI
+                             </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="ordiniRicevuti.html"> <i class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"> <i class="bi bi-flag-fill me-2"></i>SEGNALAZIONI
+                            </a>
+                        </li>
+                        </ul>
+                        <hr class="sidebar-divider">
+                        <button class="btn logout-btn w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                        </button>
+                    </div>
+                </div>
+            </div>
+           <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
+                <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
+                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
+                        <i class="bi bi-plus-circle-fill"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container my-4 pt-lg-0">
         <div class="row">
             <div class="col-md-3">
                 <div class="dashboard-sidebar d-flex flex-column">
@@ -75,39 +132,23 @@
                                 <input type="text" class="form-control dashboard-input" id="artisanLastName" value="">
                             </div>
                         </div>
+                        
                         <div class="mb-3">
                             <label for="artisanEmail" class="form-label">Email</label>
                             <input type="email" class="form-control dashboard-input" id="artisanEmail" value="">
                         </div>
+
                         <div class="mb-3">
                             <label for="artisanAddress" class="form-label">Indirizzo Attività</label>
                             <input type="text" class="form-control dashboard-input" id="artisanAddress" value="">
                         </div>
 
-                        <h4 class="password-change-title mt-4 mb-3 pt-3 border-top">Cambia Password</h4>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="currentPassword" class="form-label">Password Attuale</label>
-                                <input type="password" class="form-control dashboard-input" id="currentPassword" placeholder="">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="newPassword" class="form-label">Nuova Password</label>
-                                <input type="password" class="form-control dashboard-input" id="newPassword" placeholder="">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="confirmNewPassword" class="form-label">Conferma Nuova Password</label>
-                                <input type="password" class="form-control dashboard-input" id="confirmNewPassword">
-                            </div>
-                        </div>
-
-                        <div class="mb-3 mt-4 pt-3 border-top">
+                        <div class="mb-3">
                             <label for="artisanDescription" class="form-label">Descrizione Attività/Artigiano</label>
                             <textarea class="form-control dashboard-input" id="artisanDescription" rows="5" placeholder=""></textarea>
                         </div>
 
-                        <div class="text-end mt-4">
+                        <div class="text-center mt-4">
                             <button type="submit" class="btn rounded-pill save-changes-btn">SALVA CAMBIAMENTI</button>
                         </div>
                     </form>
