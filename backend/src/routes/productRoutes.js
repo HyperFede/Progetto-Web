@@ -814,4 +814,57 @@ router.get('/:id/image_content', async (req, res) => {
     }
 });
 
+/**
+ * @route GET /api/products/:id/average-rating
+ * @description Recupera la valutazione media di un singolo prodotto.
+ * @access Public
+ *
+ * Interazione Black-Box:
+ *  Input:
+ *      - Parametro di rotta `id`: ID numerico del prodotto.
+ *  Output:
+ *      - Successo (200 OK): Oggetto JSON con l'ID del prodotto e la sua valutazione media.
+ *        { "idprodotto": Number, "average_rating": Number (può essere null se non ci sono recensioni) }
+ *      - Errore (400 Bad Request): Se l'ID del prodotto fornito non è un numero valido.
+ *        { "error": "Invalid product ID format." }
+ *      - Errore (404 Not Found): Se il prodotto con l'ID specificato non esiste (per coerenza con GET /:id, anche se qui potremmo solo non trovare recensioni).
+ *        { "error": "Product not found." } // O un messaggio specifico per "nessuna recensione"
+ *      - Errore (500 Internal Server Error): In caso di errore del server.
+ *        { "error": "Stringa di errore" }
+ */
+router.get('/:id/average-rating', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const productId = parseInt(id, 10);
+
+        if (isNaN(productId)) {
+            return res.status(400).json({ error: "Formato ID prodotto non valido." });
+        }
+
+        const avgRatingQuery = await pool.query(
+            "SELECT AVG(Valutazione) as average_rating FROM Recensione WHERE IDProdotto = $1",
+            [productId]
+        );
+        
+        let averageRating = null;
+        if (avgRatingQuery.rows[0].average_rating !== null) {
+            const rawAverage = parseFloat(avgRatingQuery.rows[0].average_rating);
+            // Round up to the nearest 0.5
+            const roundedAverage = Math.ceil(rawAverage * 2) / 2;
+
+            averageRating = roundedAverage.toFixed(1); // Format to one decimal place (e.g., 3.0, 3.5)
+        }
+        else{
+            averageRating = 0;
+        }
+
+
+
+        res.status(200).json({ idprodotto: productId, average_rating: averageRating });
+    } catch (err) {
+        console.error(`Errore durante il recupero della valutazione media per il prodotto ID ${req.params.id}:`, err.message, err.stack);
+        res.status(500).json({ error: "Errore del server durante il recupero della valutazione media." });
+    }
+});
+
 module.exports = router;
