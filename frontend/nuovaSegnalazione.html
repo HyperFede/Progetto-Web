@@ -111,12 +111,10 @@
             </div>
 
             <form id="problemForm">
-                <div class = "mb-4">
-                    <label class="form-label d-block idordine-problem"> Dacci il tuo idOrdine</label>
-                    <div class = "idordine-input">
-                        <input type="text" class="form-control"  >
-                    </div>
-
+                <div class="mb-4">
+                    <label for="reviewTextInput" class="form-label review-text-label">Id ordine di riferimento:
+                        <input type = "text" class="form-control review-textarea" id="reviewTextInput" name="reviewText" rows="5" placeholder="Cosa è andato storto?"></input>
+                    </label>
                 </div>
 
                 <div class="mb-4">
@@ -129,14 +127,11 @@
                     <div id="photoPreview" class="mt-2 d-flex flex-wrap"></div>
                 </div>
 
-
-
                 <div class="mb-4">
                     <label for="reviewTextInput" class="form-label review-text-label">Dacci una descrizione del problema</label>
                     <textarea class="form-control review-textarea" id="reviewTextInput" name="reviewText" rows="5" placeholder="Cosa è andato storto?"></textarea>
                 </div>
-
-
+                
                 <div class = "text-center">
                     <!-- caso in cui alla recensione va tutto bene-->
                     <!--
