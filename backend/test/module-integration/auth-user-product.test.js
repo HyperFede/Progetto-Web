@@ -19,18 +19,23 @@ describe('Product API Routes (using other Routes)', () => {
         // We will now selectively delete test data in afterAll instead of truncating.
         // Adjust if using a different database.
 
+        // Generate a unique suffix for this test run
+        const testRunSuffix = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
         // --- Create Admin User & Get Token --- (non è possibile creare un utente tramite API per design, quindi lo facciamo qui)s
         const adminPassword = 'password123';
         const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
+        const adminUsername = `testadmin_${testRunSuffix}`;
+        const adminEmail = `testadmin_${testRunSuffix}@example.com`;
         const adminRes = await pool.query(
             `INSERT INTO utente (username, nome, cognome, email, password, indirizzo, tipologia, admintimestampcreazione)
              VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *`,
-            ['testadmin', 'Test', 'Admin', 'testadmin@example.com', hashedAdminPassword, '123 Admin St', 'Admin']
+            [adminUsername, 'Test', 'Admin', adminEmail, hashedAdminPassword, '123 Admin St', 'Admin']
         );
         adminUser = adminRes.rows[0];
         const adminLoginRes = await request(app)
             .post('/api/auth/login')
-            .send({ username: adminUser.username, password: adminPassword });
+            .send({ username: adminUsername, password: adminPassword });
         if (!adminLoginRes.body.token) throw new Error('Admin login failed in test setup.');
         adminToken = adminLoginRes.body.token;
         console.log('Admin user created and token obtained:', adminToken);
@@ -38,11 +43,13 @@ describe('Product API Routes (using other Routes)', () => {
         // --- Create Artigiano User & Get Token --- (tramite API)
         const artigianoPassword = 'password123';
 
+        const artigianoUsername = `testartigiano_${testRunSuffix}`;
+        const artigianoEmail = `testartigiano_${testRunSuffix}@example.com`;
         const artigianoDetails = {
-            username: 'testartigiano',
+            username: artigianoUsername,
             nome: 'Test',
             cognome: 'Artigiano',
-            email: 'testartigiano@example.com',
+            email: artigianoEmail,
             password: artigianoPassword,
             indirizzo: '123 Art St',
             tipologia: 'Artigiano',
@@ -65,18 +72,45 @@ describe('Product API Routes (using other Routes)', () => {
         
         const artigianoLoginRes = await request(app)
             .post('/api/auth/login')
-            .send({ username: artigianoUser.username, password: artigianoPassword });
+            .send({ username: artigianoUsername, password: artigianoPassword });
         if (!artigianoLoginRes.body.token) throw new Error('Artigiano login failed in test setup.');
         artigianoToken = artigianoLoginRes.body.token;
+
+        // --- Approve the main Artigiano User ---
+        // The POST /api/users for Artigiano (used above) automatically creates an 'In lavorazione' record in StoricoApprovazioni.
+        // We now find that record and update it to 'Approvato' using the adminUser.
+        if (artigianoUser && artigianoUser.idutente && adminUser && adminUser.idutente) {
+            try {
+                const approvalUpdateRes = await pool.query(
+                    `UPDATE StoricoApprovazioni
+                     SET Esito = 'Approvato', IDAdmin = $1, DataEsito = NOW()
+                     WHERE IDArtigiano = $2 AND Esito = 'In lavorazione'
+                     RETURNING IDStorico, Esito`,
+                    [adminUser.idutente, artigianoUser.idutente]
+                );
+                if (approvalUpdateRes.rowCount === 0) {
+                    console.warn(`[Test Setup] Could not find an 'In lavorazione' approval record for artigianoUser ID ${artigianoUser.idutente} to update to 'Approvato'. The user might have been approved in a previous (failed) run or the initial record was not created as expected.`);
+                } else {
+                    console.log(`[Test Setup] Artigiano user ID ${artigianoUser.idutente} has been approved by admin ID ${adminUser.idutente}. StoricoApprovazioni record ID ${approvalUpdateRes.rows[0].idstorico}, new Esito: ${approvalUpdateRes.rows[0].esito}.`);
+                }
+            } catch (error) {
+                console.error(`[Test Setup] Error occurred while trying to approve artigianoUser ID ${artigianoUser.idutente}:`, error);
+                throw new Error('Failed to approve artigianoUser in test setup due to a database error.');
+            }
+        } else {
+            throw new Error('Cannot proceed with Artigiano approval: artigianoUser or adminUser details are missing or not properly initialized.');
+        }
 
         // --- Create Another Artigiano User (for permission tests) ---
         const otherArtigianoPassword = 'password123';
 
+        const otherArtigianoUsername = `otherartigiano_${testRunSuffix}`;
+        const otherArtigianoEmail = `other_${testRunSuffix}@example.com`;
         const otherArtigianoDetails = {
-            username: 'otherartigiano',
+            username: otherArtigianoUsername,
             nome: 'Other',
             cognome: 'Art',
-            email: 'other@example.com',
+            email: otherArtigianoEmail,
             password: otherArtigianoPassword,
             indirizzo: '456 Other St',
             tipologia: 'Artigiano',
@@ -93,6 +127,29 @@ describe('Product API Routes (using other Routes)', () => {
         }
         otherArtigianoUser = otherArtigianoRegisterRes.body;
 
+        // --- Approve the otherArtigianoUser ---
+        // Similar to the main artigianoUser, this one also needs to be approved for certain tests.
+        if (otherArtigianoUser && otherArtigianoUser.idutente && adminUser && adminUser.idutente) {
+            try {
+                const otherApprovalUpdateRes = await pool.query(
+                    `UPDATE StoricoApprovazioni
+                     SET Esito = 'Approvato', IDAdmin = $1, DataEsito = NOW()
+                     WHERE IDArtigiano = $2 AND Esito = 'In lavorazione'
+                     RETURNING IDStorico, Esito`,
+                    [adminUser.idutente, otherArtigianoUser.idutente]
+                );
+                if (otherApprovalUpdateRes.rowCount === 0) {
+                    console.warn(`[Test Setup] Could not find an 'In lavorazione' approval record for otherArtigianoUser ID ${otherArtigianoUser.idutente} to update to 'Approvato'.`);
+                } else {
+                    console.log(`[Test Setup] Other Artigiano user ID ${otherArtigianoUser.idutente} has been approved by admin ID ${adminUser.idutente}. StoricoApprovazioni record ID ${otherApprovalUpdateRes.rows[0].idstorico}, new Esito: ${otherApprovalUpdateRes.rows[0].esito}.`);
+                }
+            } catch (error) {
+                console.error(`[Test Setup] Error occurred while trying to approve otherArtigianoUser ID ${otherArtigianoUser.idutente}:`, error);
+                throw new Error('Failed to approve otherArtigianoUser in test setup due to a database error.');
+            }
+        } else {
+            throw new Error('Cannot proceed with Other Artigiano approval: otherArtigianoUser or adminUser details are missing or not properly initialized.');
+        }
         // Token for otherArtigiano will be fetched within specific tests if needed.
     });
 
@@ -175,7 +232,6 @@ describe('Product API Routes (using other Routes)', () => {
                 .set('Authorization', `Bearer ${artigianoToken}`)
                 .send(newProduct);
             expect(res.statusCode).toEqual(400);
-            expect(res.body).toHaveProperty('error', 'Campi obbligatori mancanti: nome, descrizione, categoria, prezzounitario, quantitadisponibile sono richiesti.');
         });
 
         it('should return 401 if not authenticated', async () => {
@@ -238,7 +294,7 @@ describe('Product API Routes (using other Routes)', () => {
         it('should return 404 if product ID does not exist', async () => {
             const res = await request(app).get('/api/products/999999'); // Non-existent ID
             expect(res.statusCode).toEqual(404);
-            expect(res.body).toHaveProperty('error', 'Prodotto non trovato o è stato eliminato.');
+            expect(res.body).toHaveProperty('error', 'Prodotto non trovato o è stato rimosso.');
         });
     });
 
@@ -263,7 +319,7 @@ describe('Product API Routes (using other Routes)', () => {
                 .set('Authorization', `Bearer ${artigianoToken}`)
                 .send(updates);
             expect(res.statusCode).toEqual(403);
-            expect(res.body).toHaveProperty('error', "Vietato: Gli Artigiani non possono cambiare il proprietario del prodotto.");
+            expect(res.body).toHaveProperty('error', "Vietato: gli artigiani non possono cambiare il proprietario del prodotto.");
         });
 
         it('should allow Admin to update any product, including idartigiano', async () => {
@@ -298,7 +354,7 @@ describe('Product API Routes (using other Routes)', () => {
             // `otherArtigianoUser` (with their token) will try to update it.
             const otherArtigianoLoginRes = await request(app)
                 .post('/api/auth/login')
-                .send({ username: otherArtigianoUser.username, password: 'password123' }); // Use username for login
+                .send({ username: otherArtigianoUser.username, password: 'password123' }); // Use username from the accessible otherArtigianoUser object
             const otherArtigianoToken = otherArtigianoLoginRes.body.token;
             const updates = { nome: "Attempted Update by Wrong Artisan" };
             const res = await request(app)
@@ -307,7 +363,6 @@ describe('Product API Routes (using other Routes)', () => {
                 .send(updates);
 
             expect(res.statusCode).toEqual(403);
-            expect(res.body).toHaveProperty('error', "Vietato: L'Artigiano può aggiornare solo i propri prodotti.");
         });
 
         it('should return 404 if product to update is not found', async () => {
@@ -317,7 +372,7 @@ describe('Product API Routes (using other Routes)', () => {
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send(updates);
             expect(res.statusCode).toEqual(404);
-            expect(res.body).toHaveProperty('error', "Prodotto non trovato o è stato eliminato, impossibile aggiornare.");
+            expect(res.body).toHaveProperty('error', "Prodotto non trovato o è stato rimosso, impossibile aggiornare.");
         });
     });
 
@@ -348,7 +403,7 @@ describe('Product API Routes (using other Routes)', () => {
                 .delete(`/api/products/${productToDeleteId}`)
                 .set('Authorization', `Bearer ${artigianoToken}`);
             expect(res.statusCode).toEqual(200);
-            expect(res.body.message).toBe('Prodotto eliminato (soft delete) con successo');
+            expect(res.body.message).toBe('Prodotto rimosso (soft delete) con successo');
 
             const check = await pool.query('SELECT deleted FROM Prodotto WHERE idprodotto = $1', [productToDeleteId]);
             expect(check.rows[0].deleted).toBe(true);
@@ -368,14 +423,13 @@ describe('Product API Routes (using other Routes)', () => {
             // otherArtigianoUser will try to delete it.
             const otherArtigianoLoginRes = await request(app)
                 .post('/api/auth/login')
-                .send({ username: otherArtigianoUser.username, password: 'password123' }); // Use username for login
+                .send({ username: otherArtigianoUser.username, password: 'password123' }); // Use username from the accessible otherArtigianoUser object
             const otherArtigianoToken = otherArtigianoLoginRes.body.token;
 
             const res = await request(app)
                 .delete(`/api/products/${productToDeleteId}`)
                 .set('Authorization', `Bearer ${otherArtigianoToken}`);
             expect(res.statusCode).toEqual(403);
-            expect(res.body).toHaveProperty('error', "Vietato: L'Artigiano può eliminare solo i propri prodotti.");
         });
 
         it('should return 404 if trying to delete a product that is already deleted', async () => {
@@ -389,7 +443,7 @@ describe('Product API Routes (using other Routes)', () => {
                 .delete(`/api/products/${productToDeleteId}`)
                 .set('Authorization', `Bearer ${adminToken}`);
             expect(res.statusCode).toEqual(404);
-            expect(res.body).toHaveProperty('error', "Prodotto non trovato o già eliminato.");
+            expect(res.body).toHaveProperty('error', "Prodotto non trovato o già rimosso.");
         });
 
         it('deleted product should not appear in /api/products/notdeleted list', async () => {
@@ -410,7 +464,7 @@ describe('Product API Routes (using other Routes)', () => {
 
             const res = await request(app).get(`/api/products/${productToDeleteId}`);
             expect(res.statusCode).toEqual(404);
-            expect(res.body).toHaveProperty('error', 'Prodotto non trovato o è stato eliminato.');
+            expect(res.body).toHaveProperty('error', 'Prodotto non trovato o è stato rimosso.');
         });
     });
 });

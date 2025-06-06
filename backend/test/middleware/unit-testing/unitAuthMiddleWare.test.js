@@ -16,6 +16,9 @@ if (!jwtSecret) {
 const app = express();
 app.use(express.json()); // Needed if your middleware/routes process JSON bodies
 
+// Global counter for generating unique suffixes for test users
+let testUserCreationCounter = 0;
+
 // A test route that uses the isAuthenticated middleware
 app.get('/protected', isAuthenticated, (req, res) => {
     // If isAuthenticated passes, req.user should be populated
@@ -63,22 +66,50 @@ const testUserData = {
 async function setupTestUserAndToken(userProps = {}, dbClient = pool) {
         let createdTestUserId;
 
-        // Ensure currentUserData has all necessary fields, defaulting from testUserData
-        const currentUserData = { ...testUserData, ...userProps };
+        // Generate a more robust unique suffix for this specific user creation call
+        testUserCreationCounter++;
+        const uniqueSuffix = `${Date.now()}_${testUserCreationCounter}_${Math.random().toString(36).substring(2, 7)}`;
 
-        // Use username and email directly from currentUserData
-        const finalUsername = currentUserData.username;
-        const finalEmail = currentUserData.email;
+        // Determine username: use from userProps if provided, otherwise generate a unique one from testUserData.username
+        const finalUsername = userProps.username || `${testUserData.username}_${uniqueSuffix}`;
+
+        // Determine email: use from userProps if provided, otherwise generate a unique one from testUserData.email
+        let finalEmail;
+        if (userProps.email) {
+            finalEmail = userProps.email;
+        } else {
+            const [baseEmailUser, baseEmailDomain] = testUserData.email.split('@');
+            // Ensure base email parts are valid and construct unique email
+            if (baseEmailUser && baseEmailDomain) {
+                finalEmail = `${baseEmailUser}_${uniqueSuffix}@${baseEmailDomain}`;
+            } else {
+                // Fallback if testUserData.email is not in a typical format (e.g., missing '@' or parts).
+                // Use the base of the username (e.g., 'testuser' from 'testuser_base_int') for a more relevant email.
+                const usernameForEmail = userProps.username || testUserData.username; // Use provided username if available for base
+                const usernameBase = usernameForEmail.split('_')[0]; // Takes the part before the first underscore
+                finalEmail = `${usernameBase}_${uniqueSuffix}@example.com`;
+            }
+        }
+
+        // Ensure currentUserData has all necessary fields, defaulting from testUserData,
+        // then applying userProps, and finally ensuring our unique username/email are set.
+        const currentUserData = {
+            ...testUserData,          // Load defaults
+            ...userProps,             // Apply overrides from caller
+            username: finalUsername,  // Ensure username is the one we decided (explicit or generated unique)
+            email: finalEmail,        // Ensure email is the one we decided (explicit or generated unique)
+        };
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(currentUserData.password, salt);
-
+        
         // Step 1: Prepare data that will be parameterized
+        // This should use the final determined username and email from currentUserData
         const paramData = {
-            username: finalUsername,
+            username: currentUserData.username, 
             nome: currentUserData.nome,
             cognome: currentUserData.cognome,
-            email: finalEmail,
+            email: currentUserData.email, 
             password: hashedPassword,
             indirizzo: currentUserData.indirizzo,
             tipologia: currentUserData.tipologia,
@@ -117,7 +148,7 @@ async function setupTestUserAndToken(userProps = {}, dbClient = pool) {
 
         for (const item of valueItemsForSql) {
             if (item === 'NOW()') { // Check for our special SQL function string
-                sqlValuePlaceholders.push('NOW()'); // Embed directly (inutile, tanto viene cancellato subito)
+                sqlValuePlaceholders.push('NOW()'); // Embed directly
             } else {
                 actualQueryValues.push(item); // This is a value to be parameterized
                 sqlValuePlaceholders.push(`$${placeholderIndex++}`); // Add placeholder and increment
@@ -133,7 +164,7 @@ async function setupTestUserAndToken(userProps = {}, dbClient = pool) {
         );
 
         if (!userQuery.rows || userQuery.rows.length === 0 || !userQuery.rows[0].idutente) {
-            console.error(`Failed to create test user or retrieve ID. Attempted username: ${finalUsername}, email: ${finalEmail}. UserQuery result:`, userQuery);
+            console.error(`Failed to create test user or retrieve ID. Attempted username: ${currentUserData.username}, email: ${currentUserData.email}. UserQuery result:`, userQuery);
             throw new Error('Failed to create test user in setupTestUserAndToken: No ID returned from INSERT.');
         }
         createdTestUserId = userQuery.rows[0].idutente;
@@ -141,15 +172,15 @@ async function setupTestUserAndToken(userProps = {}, dbClient = pool) {
         // Step 5: Sign the JWT
         const payload = { user: { id: createdTestUserId } };
         const createdValidToken = jwt.sign(payload, jwtSecret, { expiresIn: '1h' });
-        return { userId: createdTestUserId, token: createdValidToken, username: finalUsername, tipologia: currentUserData.tipologia };
+        return { userId: createdTestUserId, token: createdValidToken, username: currentUserData.username, tipologia: currentUserData.tipologia };
     }
 // Helper function to delete a test user by ID using the main pool
 async function deleteTestUserById(userId) {
-    let result;
+    // let result; // result was not used
     if (userId) {
-        result = await pool.query('DELETE FROM utente WHERE idutente = $1', [userId]);
+        await pool.query('DELETE FROM utente WHERE idutente = $1', [userId]);
     } else {
-        console.err('deleteTestUserById called without a userId.');
+        console.error('deleteTestUserById called without a userId.');
         return;
     }
 }
@@ -244,35 +275,67 @@ describe('Unit test: isAuthenticated Middleware', () => {
 });
 
 describe('Integration Test: hasPermission Middleware', () => {
-    let adminUser, clienteUser, artigianoUser;
+    let adminUser, clienteUser, approvedArtigianoUser, unapprovedArtigianoUser;
 
     beforeAll(async () => {
         // Create users with different roles once for all tests in this describe block
-        // These users will be committed to the DB.
+        // Generate a unique suffix for this batch of permission test users
+        // to ensure uniqueness even for these "named" users across test suite runs.
+        const permTestRunSuffix = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
         adminUser = await setupTestUserAndToken({
-            username: 'perm_admin_user_v2', // Updated for clarity
-            email: 'perm.admin@example.com',
+            username: `perm_admin_user_${permTestRunSuffix}`,
+            email: `perm.admin_${permTestRunSuffix}@example.com`,
             tipologia: 'Admin'
         });
         clienteUser = await setupTestUserAndToken({
-            username: 'perm_cliente_user_v2', // Updated for clarity
-            email: 'perm.cliente@example.com',
+            username: `perm_cliente_user_${permTestRunSuffix}`,
+            email: `perm.cliente_${permTestRunSuffix}@example.com`,
             tipologia: 'Cliente'
         });
-        artigianoUser = await setupTestUserAndToken({
-            username: 'perm_artigiano_user_v2',
-            email: 'perm.artigiano@example.com',
+        // This Artigiano user will be "approved" for testing scenarios that require an approved Artigiano
+        approvedArtigianoUser = await setupTestUserAndToken({
+            username: `perm_approved_artigiano_${permTestRunSuffix}`,
+            email: `perm.approved.artigiano_${permTestRunSuffix}@example.com`,
             tipologia: 'Artigiano',
-            piva: `01234567890`, // Example PIVA
-            artigianodescrizione: 'Descrizione Artigiano di Test' // Example description
+            piva: `1111111${permTestRunSuffix.slice(-4)}`, 
+            artigianodescrizione: `Descrizione Artigiano Approvato Test ${permTestRunSuffix}`
         });
+
+        // This Artigiano user will remain "unapproved"
+        unapprovedArtigianoUser = await setupTestUserAndToken({
+            username: `perm_unapproved_artigiano_${permTestRunSuffix}`,
+            email: `perm.unapproved.artigiano_${permTestRunSuffix}@example.com`,
+            tipologia: 'Artigiano',
+            piva: `2222222${permTestRunSuffix.slice(-4)}`, // Ensure PIVA is unique if constrained
+            artigianodescrizione: `Descrizione Artigiano Non Approvato Test ${permTestRunSuffix}`
+        });
+
+        // Simulate approval for approvedArtigianoUser by adminUser
+        // This assumes your hasPermission middleware checks StoricoApprovazioni for Artigiano approval
+        if (adminUser && approvedArtigianoUser) {
+            try {
+                await pool.query(
+                    'INSERT INTO StoricoApprovazioni (idartigiano, idadmin, esito,dataesito) VALUES ($1, $2, $3, NOW())',
+                    [approvedArtigianoUser.userId, adminUser.userId,'Approvato']
+                );
+            } catch (error) {
+                console.error("Failed to insert into StoricoApprovazioni during test setup:", error);
+                // Potentially throw error or handle as needed if this setup is critical
+            }
+        }
     });
 
     afterAll(async () => {
-        // Clean up all created users
+        // IMPORTANT: Clean up StoricoApprovazioni before deleting users to avoid FK violations
+        if (adminUser && approvedArtigianoUser) { // Only if the approval was attempted
+            await pool.query('DELETE FROM StoricoApprovazioni WHERE idartigiano = $1 AND idadmin = $2', [approvedArtigianoUser.userId, adminUser.userId]);
+        }
+        // Clean up all created users from utente table
         if (adminUser) await deleteTestUserById(adminUser.userId);
         if (clienteUser) await deleteTestUserById(clienteUser.userId);
-        if (artigianoUser) await deleteTestUserById(artigianoUser.userId);
+        if (approvedArtigianoUser) await deleteTestUserById(approvedArtigianoUser.userId);
+        if (unapprovedArtigianoUser) await deleteTestUserById(unapprovedArtigianoUser.userId);
     });
 
     // Test cases for /admin-only route (requires 'Admin')
@@ -282,7 +345,7 @@ describe('Integration Test: hasPermission Middleware', () => {
         const scenarios = [
             { getUser: () => adminUser, expectedStatus: 200, description: 'Admin user' },
             { getUser: () => clienteUser, expectedStatus: 403, description: 'Cliente user' },
-            { getUser: () => artigianoUser, expectedStatus: 403, description: 'Artigiano user' },
+            { getUser: () => approvedArtigianoUser, expectedStatus: 403, description: 'Approved Artigiano user (not Admin)' },
         ];
 
         test.each(scenarios)('should return $expectedStatus for $description', async ({ getUser, expectedStatus }) => {
@@ -307,8 +370,9 @@ describe('Integration Test: hasPermission Middleware', () => {
         const successMessage = 'Artigiano or Admin access granted';
         const scenarios = [
             { getUser: () => adminUser, expectedStatus: 200, description: 'Admin user' },
-            { getUser: () => artigianoUser, expectedStatus: 200, description: 'Artigiano user' },
+            { getUser: () => approvedArtigianoUser, expectedStatus: 200, description: 'Approved Artigiano user' },
             { getUser: () => clienteUser, expectedStatus: 403, description: 'Cliente user' },
+            { getUser: () => unapprovedArtigianoUser, expectedStatus: 403, description: 'Unapproved Artigiano user' },
         ];
 
         test.each(scenarios)('should return $expectedStatus for $description', async ({ getUser, expectedStatus }) => {
@@ -322,7 +386,11 @@ describe('Integration Test: hasPermission Middleware', () => {
                 expect(response.body.message).toBe(successMessage);
                 expect(response.body.user.tipologia).toBe(currentUser.tipologia);
             } else if (expectedStatus === 403) {
-                expect(response.body.message).toBe('Accesso negato. Non hai i permessi necessari per questa risorsa.');
+                if (currentUser.tipologia === 'Artigiano') { // Specifically for the unapproved Artigiano
+                    expect(response.body.message).toBe('Accesso negato. Il tuo account Artigiano non è ancora stato approvato.');
+                } else { // For other users like Cliente who don't have permission
+                    expect(response.body.message).toBe('Accesso negato. Non hai i permessi necessari per questa risorsa.');
+                }
             }
         });
     });
@@ -345,13 +413,13 @@ describe('Integration Test: hasPermission Middleware', () => {
 
         test('Artigiano user should access their own resource ID', async () => {
             const response = await request(app)
-                .get(`${routeBase}/${artigianoUser.userId}`)
-                .set('Authorization', `Bearer ${artigianoUser.token}`)
+                .get(`${routeBase}/${approvedArtigianoUser.userId}`)
+                .set('Authorization', `Bearer ${approvedArtigianoUser.token}`)
                 .expect(200);
 
             expect(response.body.message).toBe(successMessage);
-            expect(response.body.user.idutente).toBe(artigianoUser.userId);
-            expect(response.body.params.id).toBe(String(artigianoUser.userId));
+            expect(response.body.user.idutente).toBe(approvedArtigianoUser.userId);
+            expect(response.body.params.id).toBe(String(approvedArtigianoUser.userId));
         });
 
         test('Admin user should access their own resource ID (as "Self" applies to any user type)', async () => {

@@ -8,6 +8,7 @@ const express = require('express');
 const userRoutes = require('../../../src/routes/userRoutes');
 const pool = require('../../../src/config/db-connect');
 
+
 // Mocking the authentication and authorization middleware
 // This should be done before any modules that use it (like userRoutes) are required.
 const mockAuthenticatedUser = {
@@ -90,21 +91,33 @@ const baseUserArtigiano = {
     piva: '12345678901',
     artigianodescrizione: 'Descrizione artigiano di prova'
 };
+
+// Helper function to generate unique user data
+const generateUniqueUserData = (baseData, customSuffix = '') => {
+    const suffix = customSuffix || Date.now().toString() + Math.random().toString(36).substring(2, 7);
+    return {
+        ...baseData,
+        username: `${baseData.username}${suffix}`,
+        email: `${baseData.email}${suffix}`
+    };
+};
+
 describe('User API Unit Tests', () => {
 
     // TEST POST 
-    describe('POST /api/users', () => { 
+    describe('POST /api/users', () => {
         // Test per la creazione di un utente di tipo Cliente
         test('Crea utente Cliente correttamente', async () => {
+            const uniqueClienteData = generateUniqueUserData(baseUserCliente);
             const res = await request(app)
                 .post('/api/users')
-                .send(baseUserCliente);
+                .send(uniqueClienteData);
             // si aspetta che la risposta sia 201 (creato)
             expect(res.statusCode).toBe(201);
             // Verifica che la risposta contenga le proprietà corrette (quelle principali, posso metterle tutte volendo)
             expect(res.body).toMatchObject({
                 idutente: expect.any(Number),
-                username: baseUserCliente.username,
+                username: uniqueClienteData.username,
                 tipologia: 'Cliente'
             });
 
@@ -114,19 +127,21 @@ describe('User API Unit Tests', () => {
             // Verifica se l'utente esiste davvero nel DB
             const dbCheck = await testClient.query('SELECT * FROM utente WHERE idutente = $1', [res.body.idutente]);
             expect(dbCheck.rows.length).toBe(1);
-            expect(dbCheck.rows[0].username).toBe(baseUserCliente.username);
+            expect(dbCheck.rows[0].username).toBe(uniqueClienteData.username);
         });
 
-        
+
         // Test per la creazione di un utente di tipo Artigiano
         test('Crea utente Artigiano correttamente', async () => {
+            const uniqueArtigianoData = generateUniqueUserData(baseUserArtigiano);
             const res = await request(app)
                 .post('/api/users')
-                .send(baseUserArtigiano);
+                .send(uniqueArtigianoData);
+
             expect(res.statusCode).toBe(201);
             expect(res.body).toMatchObject({
                 idutente: expect.any(Number),
-                username: baseUserArtigiano.username,
+                username: uniqueArtigianoData.username,
                 tipologia: 'Artigiano',
                 piva: baseUserArtigiano.piva,
                 artigianodescrizione: baseUserArtigiano.artigianodescrizione
@@ -135,7 +150,7 @@ describe('User API Unit Tests', () => {
             // Verifica se l'utente esiste davvero nel DB
             const dbCheck = await testClient.query('SELECT * FROM utente WHERE idutente = $1', [res.body.idutente]);
             expect(dbCheck.rows.length).toBe(1);
-            expect(dbCheck.rows[0].username).toBe(baseUserArtigiano.username);
+            expect(dbCheck.rows[0].username).toBe(uniqueArtigianoData.username);
             expect(dbCheck.rows[0].piva).toBe(baseUserArtigiano.piva);
             expect(dbCheck.rows[0].artigianodescrizione).toBe(baseUserArtigiano.artigianodescrizione);
         });
@@ -144,12 +159,12 @@ describe('User API Unit Tests', () => {
             // Prova a creare un utente con una tipologia non valida
             const res = await request(app)
                 .post('/api/users')
-                .send({ ...baseUserCliente, tipologia: 'InvalidType' });
+                .send({ ...generateUniqueUserData(baseUserCliente), tipologia: 'InvalidType' });
             expect(res.statusCode).toBe(400);
             expect(res.body).toHaveProperty('message', 'Tipologia non valida. Deve essere "Cliente", "Artigiano" o "Admin".');
         });
 
-        
+
         test('Errore 400 per campi mancanti', async () => {
             // Prova a creare un utente senza i campi obbligatori
             const res = await request(app)
@@ -174,25 +189,49 @@ describe('User API Unit Tests', () => {
         );
 
         test('Errore 409 per username o email già esistente', async () => {
-            // 1. Crea il cliente di base tramite POST .
-            await request(app)
+            // Generate unique base data for this specific test run
+            const uniqueInitialUserData = generateUniqueUserData(baseUserCliente, `initial_${Date.now()}`);
+
+            // 1. Crea il primo utente con dati unici per questo test.
+            const createRes = await request(app)
                 .post('/api/users')
-                .send(baseUserCliente);
+                .send(uniqueInitialUserData);
+            expect(createRes.statusCode).toBe(201);
 
-            // 2. Tenta di creare un altro utente con lo stesso username.
-            // L'errore 23505 (violazione del vincolo UNIQUE, ha username uguali)
-            const conflictingUser = { ...baseUserCliente, email: 'conflict@example.com', nome: 'Conflicting', cognome: 'User' };
+            // 2. Tenta di creare un altro utente con lo STESSO username del primo utente, ma email diversa.
+            const conflictingUsernameAttempt = {
+                ...baseUserCliente, // Start with base structure
+                username: uniqueInitialUserData.username, // Crucial: use the username just created
+                email: `conflict_email_${Date.now()}${Math.random()}@example.com`, // Ensure this email is different and unique for this attempt
+                nome: 'ConflictingUser',
+                cognome: 'Name'
+            };
 
-            const res = await request(app)
+            const resUsernameConflict = await request(app)
                 .post('/api/users')
-                .send(conflictingUser);
+                .send(conflictingUsernameAttempt);
 
-            expect(res.statusCode).toBe(409);
-            expect(res.body).toHaveProperty('message', 'Username o Email già esistente.');
+            expect(resUsernameConflict.statusCode).toBe(409);
+            expect(resUsernameConflict.body).toHaveProperty('message', 'Username o Email già esistente.');
+
+            // 3. Tenta di creare un altro utente con la STESSA email del primo utente, ma username diverso.
+            const conflictingEmailAttempt = {
+                ...baseUserCliente, // Start with base structure
+                username: `conflict_user_${Date.now()}${Math.random()}`, // Ensure this username is different and unique for this attempt
+                email: uniqueInitialUserData.email, // Crucial: use the email just created
+                nome: 'ConflictingUser',
+                cognome: 'Email'
+            };
+            const resEmailConflict = await request(app)
+                .post('/api/users')
+                .send(conflictingEmailAttempt);
+
+            expect(resEmailConflict.statusCode).toBe(409);
+            expect(resEmailConflict.body).toHaveProperty('message', 'Username o Email già esistente.');
         }
         );
     });
-    
+
     // TEST GET
     describe('GET /api/users', () => {
         //NB, se non ci sono utenti nel DB, la risposta sarà un array vuoto, non passa il test
@@ -206,14 +245,16 @@ describe('User API Unit Tests', () => {
             ]));
         });
     });
-    
+
     // TEST GET SINGOLO
     describe('GET /api/users/:id', () => {
         test('Recupera utente esistente (Admin visualizza Cliente)', async () => {
+            const uniqueClienteForGet = generateUniqueUserData(baseUserCliente, `get_${Date.now()}`);
+
             // 1. Crea un utente tramite API per ottenere un ID valido
             const createUserRes = await request(app)
                 .post('/api/users')
-                .send(baseUserCliente);
+                .send(uniqueClienteForGet);
             const userId = createUserRes.body.idutente;
             expect(createUserRes.statusCode).toBe(201); // Ensure user was created
 
@@ -228,7 +269,7 @@ describe('User API Unit Tests', () => {
 
             expect(res.statusCode).toBe(200);
             expect(res.body).toHaveProperty('idutente', userId);
-            expect(res.body.username).toBe(baseUserCliente.username);
+            expect(res.body.username).toBe(uniqueClienteForGet.username);
             expect(res.body.tipologia).toBe('Cliente');
             expect(res.body).not.toHaveProperty('password');
 
@@ -236,7 +277,8 @@ describe('User API Unit Tests', () => {
 
         test('Unauthenticated user fetches Artigiano profile successfully', async () => {
             // 1. Create an Artigiano user
-            const artigianoRes = await request(app).post('/api/users').send(baseUserArtigiano);
+            const uniqueArtigiano = generateUniqueUserData(baseUserArtigiano, `getart_${Date.now()}`);
+            const artigianoRes = await request(app).post('/api/users').send(uniqueArtigiano);
             expect(artigianoRes.statusCode).toBe(201);
             const artigianoId = artigianoRes.body.idutente;
 
@@ -250,12 +292,14 @@ describe('User API Unit Tests', () => {
             expect(res.statusCode).toBe(200);
             expect(res.body.idutente).toBe(artigianoId);
             expect(res.body.tipologia).toBe('Artigiano');
-            
+
         });
 
         test('Unauthenticated user gets 401 for Cliente profile', async () => {
             // 1. Create a Cliente user
-            const clienteRes = await request(app).post('/api/users').send(baseUserCliente);
+            const uniqueCliente = generateUniqueUserData(baseUserCliente, `getcli_auth_${Date.now()}`);
+            const clienteRes = await request(app).post('/api/users').send(uniqueCliente);
+
             expect(clienteRes.statusCode).toBe(201);
             const clienteId = clienteRes.body.idutente;
 
@@ -271,8 +315,9 @@ describe('User API Unit Tests', () => {
         });
 
         test('Cliente fetches their own profile successfully', async () => {
+            const clienteDetails = generateUniqueUserData(baseUserCliente, `selfcli_${Date.now()}`);
+
             // 1. Create a Cliente user
-            const clienteDetails = { ...baseUserCliente, username: 'selfcliente', email: 'selfcliente@example.com' };
             const createRes = await request(app).post('/api/users').send(clienteDetails);
             expect(createRes.statusCode).toBe(201);
             const clienteId = createRes.body.idutente;
@@ -294,9 +339,9 @@ describe('User API Unit Tests', () => {
 
         test('Cliente gets 403 trying to fetch another Cliente profile', async () => {
             // 1. Create two Cliente users
-            const cliente1Details = { ...baseUserCliente, username: 'cliente1', email: 'cliente1@example.com' };
-            const cliente2Details = { ...baseUserCliente, username: 'cliente2', email: 'cliente2@example.com' };
-            
+            const cliente1Details = generateUniqueUserData(baseUserCliente, `cli1_${Date.now()}`);
+            const cliente2Details = generateUniqueUserData(baseUserCliente, `cli2_${Date.now()}`);
+
             const create1Res = await request(app).post('/api/users').send(cliente1Details);
             expect(create1Res.statusCode).toBe(201);
             const cliente1Id = create1Res.body.idutente;
@@ -321,7 +366,7 @@ describe('User API Unit Tests', () => {
 
         test('Admin fetches a deleted user profile successfully', async () => {
             // 1. Create a user and then soft-delete them directly in DB for this test
-            const userToCreate = { ...baseUserCliente, username: 'deletedUserTest', email: 'deleted@example.com' };
+            const userToCreate = generateUniqueUserData(baseUserCliente, `del_admin_${Date.now()}`);
             const createRes = await request(app).post('/api/users').send(userToCreate);
             expect(createRes.statusCode).toBe(201);
             const userId = createRes.body.idutente;
@@ -344,7 +389,7 @@ describe('User API Unit Tests', () => {
         });
 
         test('Non-Admin user gets 404 for a deleted user profile', async () => {
-            const userToCreate = { ...baseUserCliente, username: 'deletedUserTest2', email: 'deleted2@example.com' };
+            const userToCreate = generateUniqueUserData(baseUserCliente, `del_nonadmin_${Date.now()}`);
             const createRes = await request(app).post('/api/users').send(userToCreate);
             expect(createRes.statusCode).toBe(201);
             const userId = createRes.body.idutente;
@@ -368,13 +413,16 @@ describe('User API Unit Tests', () => {
         });
     });
 
-        //TEST GET ALL NOT DELETED
-        describe('GET /api/users/notdeleted', () => {
+    //TEST GET ALL NOT DELETED
+    describe('GET /api/users/notdeleted', () => {
         test('Recupera lista utenti non cancellati', async () => {
+
+            const uniqueUserForNotDeleted = generateUniqueUserData(baseUserCliente, `notdel_${Date.now()}`);
+
             // Crea almeno un utente non cancellato per assicurarti che la lista non sia vuota
             const createUserRes = await request(app)
-            .post('/api/users')
-            .send(baseUserCliente);
+                .post('/api/users')
+                .send(uniqueUserForNotDeleted);
             expect(createUserRes.statusCode).toBe(201);
 
             const res = await request(app).get('/api/users/notdeleted');
@@ -382,20 +430,20 @@ describe('User API Unit Tests', () => {
             expect(res.statusCode).toBe(200);
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toEqual(expect.arrayContaining([
-            expect.objectContaining({ idutente: expect.any(Number), deleted: false })
+                expect.objectContaining({ idutente: expect.any(Number), deleted: false })
             ]));
             res.body.forEach(user => {
-            expect(user.deleted).toBe(false);
+                expect(user.deleted).toBe(false);
             });
         });
-        });
-    
+    });
+
     // TEST DELETE
     describe('DELETE /api/users/:id', () => {
         test('Elimina utente correttamente', async () => {
 
             // 1. Crea un utente da eliminare (di base ha il cliente, cambio solo username e email)
-            const userToDeleteData = { ...baseUserCliente, username: 'todelete', email: 'todelete@example.com' };
+            const userToDeleteData = generateUniqueUserData(baseUserCliente, `del_${Date.now()}`);
             const createUserRes = await request(app)
                 .post('/api/users')
                 .send(userToDeleteData);
@@ -411,7 +459,7 @@ describe('User API Unit Tests', () => {
 
             // Verifica che l'utente sia stato effettivamente (soft) eliminato nel DB, controlliamo il suo valore
             const dbCheck = await testClient.query('SELECT deleted FROM utente WHERE idutente = $1', [userIdToDelete]);
-            
+
             expect(dbCheck.rows.length).toBe(1); // La riga dovrebbe esistere per un soft delete
             if (dbCheck.rows.length > 0) {
                 expect(dbCheck.rows[0].deleted).toBe(true);
@@ -433,7 +481,7 @@ describe('User API Unit Tests', () => {
             if (adminUserQuery.rows.length === 0) {
                 // Se non esiste un Admin, creane uno per il test (NON SUCCEDE, ASSUNZIONE CHE CI SIA SEMPRE UN ADMIN)
             }
-            else{
+            else {
                 // Se esiste, prendi il suo ID
                 adminUserId = adminUserQuery.rows[0].idutente;
                 //console.log('Admin ID:', adminUserId);
@@ -444,27 +492,42 @@ describe('User API Unit Tests', () => {
             expect(res.body).toHaveProperty('message', 'Non puoi eliminare un utente Admin.');
         }
         );
-        
+
     });
 
     // TEST PUT
     describe('PUT /api/users/:id', () => {
         let createdClienteId;
         let createdArtigianoId;
+        let uniqueArtigianoUsernameForPut; // To store the unique username of the artigiano for conflict tests
+        let uniqueArtigianoEmailForPut;    // To store the unique email of the artigiano for conflict tests
 
         // Dati utente per i test di PUT
-        const clienteToCreate = { ...baseUserCliente, username: 'putcliente', email: 'putcliente@example.com' };
-        const artigianoToCreate = { ...baseUserArtigiano, username: 'putartigiano', email: 'putartigiano@example.com' };
+        const baseClienteForPut = { ...baseUserCliente, username: 'putcliente', email: 'putcliente@example.com' };
+        const baseArtigianoForPut = { ...baseUserArtigiano, username: 'putartigiano', email: 'putartigiano@example.com' };
 
         beforeEach(async () => {
+            const uniqueSuffix = Date.now().toString() + Math.random().toString(36).substring(2, 7);
+
+            const clienteToCreate = generateUniqueUserData(baseClienteForPut, `cli_${uniqueSuffix}`);
+            const artigianoToCreate = generateUniqueUserData(baseArtigianoForPut, `art_${uniqueSuffix}`);
+
+            uniqueArtigianoUsernameForPut = artigianoToCreate.username; // Store for conflict tests
+            uniqueArtigianoEmailForPut = artigianoToCreate.email;       // Store for conflict tests
+
+
             // Crea utenti di test prima di ogni test PUT per avere ID validi
             const clienteRes = await request(app).post('/api/users').send(clienteToCreate);
+            expect(clienteRes.statusCode).toBe(201); // Ensure creation
+
             createdClienteId = clienteRes.body.idutente;
 
             const artigianoRes = await request(app).post('/api/users').send(artigianoToCreate);
+            expect(artigianoRes.statusCode).toBe(201); // Ensure creation
+
             createdArtigianoId = artigianoRes.body.idutente;
         });
-        
+
         test('Aggiorna utente Cliente correttamente', async () => {
             const updateData = {
                 username: 'updatedcliente',
@@ -492,7 +555,7 @@ describe('User API Unit Tests', () => {
             expect(dbCheck.rows[0].nome).toBe(updateData.nome);
             expect(dbCheck.rows[0].email).toBe(updateData.email);
         });
-        
+
         test('Aggiorna utente Artigiano correttamente con solo PIVA e descrizione', async () => {
             const updateData = {
                 piva: '09876543210',
@@ -516,7 +579,7 @@ describe('User API Unit Tests', () => {
             expect(dbCheck.rows[0].piva).toBe(updateData.piva);
             expect(dbCheck.rows[0].artigianodescrizione).toBe(updateData.artigianodescrizione);
         });
-        
+
         test('Errore 404 se utente da aggiornare non esiste', async () => {
             const nonExistentId = 99999;
             const res = await request(app)
@@ -546,22 +609,19 @@ describe('User API Unit Tests', () => {
         });
 
         test('Errore 409 se aggiornamento causa conflitto di username', async () => {
-            // `createdClienteId` ha username 'putcliente'
-            // `createdArtigianoId` ha username 'putartigiano'
-            // Tentiamo di aggiornare `createdClienteId` con username 'putartigiano'
             const res = await request(app)
                 .put(`/api/users/${createdClienteId}`)
-                .send({ username: artigianoToCreate.username }); // username di createdArtigianoId
+                .send({ username: uniqueArtigianoUsernameForPut }); // Use the unique username of the artigiano created in beforeEach
+
 
             expect(res.statusCode).toBe(409);
             expect(res.body).toHaveProperty('message', 'Username o Email già esistente.');
         });
 
         test('Errore 409 se aggiornamento causa conflitto di email', async () => {
-            // Tentiamo di aggiornare `createdClienteId` con email 'putartigiano@example.com'
             const res = await request(app)
                 .put(`/api/users/${createdClienteId}`)
-                .send({ email: artigianoToCreate.email }); // email di createdArtigianoId
+                .send({ email: uniqueArtigianoEmailForPut }); // Use the unique email of the artigiano created in beforeEach
 
             expect(res.statusCode).toBe(409);
             expect(res.body).toHaveProperty('message', 'Username o Email già esistente.');
@@ -577,6 +637,6 @@ describe('User API Unit Tests', () => {
             const dbCheck = await testClient.query('SELECT tipologia FROM utente WHERE idutente = $1', [createdClienteId]);
             expect(dbCheck.rows[0].tipologia).toBe('Cliente');
         });
-        
+
     });
 });

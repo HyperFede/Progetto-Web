@@ -16,18 +16,45 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 
 
-// Mock del database
-jest.mock('../../../src/config/db-connect', () => ({
-    query: jest.fn()
+// 1. Create the actual mock function instances that your tests will interact with.
+const mockClientQueryFn = jest.fn();
+const mockClientReleaseFn = jest.fn();
+const mockPoolQueryFn = jest.fn(); // For direct pool.query calls
+const mockPoolConnectFn = jest.fn(); // This will be the mock for pool.connect
+
+// 2. Configure the default behavior of mockPoolConnectFn.
+//    When pool.connect() is called in the code under test, this mock implementation will be used.
+//    It returns a Promise resolving to a mock client object.
+//    The mock client's methods (query, release) delegate to our other specific mock functions.
+mockPoolConnectFn.mockImplementation(() => Promise.resolve({
+    query: (...args) => mockClientQueryFn(...args),
+    release: (...args) => mockClientReleaseFn(...args)
 }));
 
+// 3. Mock the 'db-connect' module.
+//    The factory function returns an object representing the mocked module.
+//    Its 'connect' and 'query' properties are arrow functions that simply
+//    call our pre-defined and pre-configured mock function instances.
+jest.mock('../../../src/config/db-connect', () => ({
+    connect: (...args) => mockPoolConnectFn(...args),
+    query: (...args) => mockPoolQueryFn(...args)
+}));
+
+// Mock bcryptjs
+jest.mock('bcryptjs', () => ({
+    genSalt: jest.fn(() => Promise.resolve('mockSaltValue')), // Mock genSalt to return a resolved promise
+    hash: jest.fn(() => Promise.resolve('mockedHashedPassword')), // Mock hash to return a resolved promise
+    compare: jest.fn(() => Promise.resolve(true)) // Mock compare to return a resolved promise
+    }
+));
+
 // Definisci l'utente mock che verrà usato sia da isAuthenticated che da getUserFromToken (mockato)
-const mockLogicUser = { 
-    idutente: 1, 
-    username: 'mockLogicUser', 
-    tipologia: 'Admin', 
-    deleted: false, 
-    email: 'mockadmin@example.com' 
+const mockLogicUser = {
+    idutente: 1,
+    username: 'mockLogicUser',
+    tipologia: 'Admin',
+    deleted: false,
+    email: 'mockadmin@example.com'
     // Aggiungi altri campi se necessari per la logica di req.user
 };
 
@@ -47,11 +74,19 @@ jest.mock('../../../src/middleware/authMiddleWare', () => ({
 }));
 // Pulizia del mock prima di ogni test
 beforeEach(() => {
-    pool.query.mockClear();
+    mockPoolQueryFn.mockClear();
+    mockPoolConnectFn.mockClear();
+    mockClientQueryFn.mockClear();
+    mockClientReleaseFn.mockClear();
+
+    const bcrypt = require('bcryptjs'); // Import here to access the mocked functions
+    bcrypt.hash.mockClear();
+    bcrypt.genSalt.mockClear(); // Clear genSalt mock as well
+
     // Accedi alla funzione mockata per resettarla
     const { getUserFromToken: mockedGetUserFromToken } = require('../../../src/middleware/authMiddleWare');
     mockedGetUserFromToken.mockReset();
-    jest.spyOn(console, 'error').mockImplementation(() => {}); // Sopprime console.error
+    jest.spyOn(console, 'error').mockImplementation(() => {}); // Suppress console.error
 });
 
 afterEach(() => {
@@ -85,7 +120,16 @@ describe('User API Logic Tests', () => {
         };
 
         test('Crea utente Cliente correttamente', async () => {
-            pool.query.mockResolvedValue({ rows: [{ idutente: 1, ...baseUser }] });
+            const bcrypt = require('bcryptjs');
+            bcrypt.genSalt.mockResolvedValue('someMockSaltForCliente'); // You can specify return values per test if needed
+            bcrypt.hash.mockResolvedValue('mockedHashedPasswordForCliente');
+            const { password, ...clientDataWithoutPassword } = baseUser;
+
+            mockClientQueryFn
+                .mockResolvedValueOnce({}) // For BEGIN
+                .mockResolvedValueOnce({ rows: [{ idutente: 1, ...clientDataWithoutPassword, tipologia: 'Cliente' }] }) // For INSERT utente
+                .mockResolvedValueOnce({}); // For COMMIT
+
 
             const res = await request(app)
                 .post('/api/users')
@@ -97,10 +141,19 @@ describe('User API Logic Tests', () => {
                 username: baseUser.username,
                 tipologia: 'Cliente'
             });
+            expect(res.body).not.toHaveProperty('password');
         });
 
         test('Crea utente Artigiano correttamente', async () => {
-            pool.query.mockResolvedValue({ rows: [{ idutente: 2, ...newUserArtigiano }] });
+            const bcrypt = require('bcryptjs');
+            bcrypt.genSalt.mockResolvedValue('someMockSaltForArtigiano');
+            bcrypt.hash.mockResolvedValue('mockedHashedPasswordForArtigiano');
+            const { password, ...artisanDataWithoutPassword } = newUserArtigiano;
+            mockClientQueryFn
+                .mockResolvedValueOnce({}) // For BEGIN
+                .mockResolvedValueOnce({ rows: [{ idutente: 2, ...artisanDataWithoutPassword }] }) // For INSERT utente
+                .mockResolvedValueOnce({}) // For INSERT StoricoApprovazioni
+                .mockResolvedValueOnce({}); // For COMMIT
 
             const res = await request(app)
                 .post('/api/users')
@@ -128,12 +181,13 @@ describe('User API Logic Tests', () => {
         );
        
         test('Errore 409 per username o email già esistente', async () => {
-            //siccome non ho la connessione al DB di test, simulo l'errore
-            pool.query.mockImplementationOnce(() => {
-                throw { code: '23505' }; // Simula un errore di violazione della chiave unica
-            }
-            );
-
+            // Simula l'errore durante l'INSERT utente all'interno della transazione
+            mockClientQueryFn
+                .mockResolvedValueOnce({}) // For BEGIN
+                .mockImplementationOnce(() => { // For INSERT utente
+                    throw { code: '23505', detail: 'Username or Email already exists.' }; 
+                })
+                .mockResolvedValueOnce({}); // For ROLLBACK
 
             const res = await request(app)
                 .post('/api/users')
@@ -150,7 +204,7 @@ describe('User API Logic Tests', () => {
         test('Recupera lista utenti', async () => {
             //simulo una lista di utenti esistenti
 
-            pool.query.mockResolvedValue({ rows: [{ idutente: 1, username: 'user1' },{ idutente: 2, username: 'user2' }] });
+            mockPoolQueryFn.mockResolvedValue({ rows: [{ idutente: 1, username: 'user1' },{ idutente: 2, username: 'user2' }] });
 
             const res = await request(app).get('/api/users');
 
@@ -176,7 +230,7 @@ describe('User API Logic Tests', () => {
                 // Aggiungi altri campi se la tua rotta li restituisce e vuoi verificarli
             };
             // Mock per la query che recupera il targetUser
-            pool.query.mockResolvedValueOnce({ rows: [targetCliente] });
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [targetCliente] });
 
             // Mock per getUserFromToken che simula un Admin autenticato
             const { getUserFromToken: mockedGetUserFromToken } = require('../../../src/middleware/authMiddleWare');
@@ -193,7 +247,7 @@ describe('User API Logic Tests', () => {
             // Verifica che getUserFromToken sia stato chiamato (perché c'è un header Authorization)
             expect(mockedGetUserFromToken).toHaveBeenCalledWith('faketoken');
             // Verifica che pool.query sia stato chiamato per ottenere il targetUser
-            expect(pool.query).toHaveBeenCalledWith(
+            expect(mockPoolQueryFn).toHaveBeenCalledWith(
                 'SELECT idutente, username, nome, cognome, email, indirizzo, tipologia, piva, artigianodescrizione, admintimestampcreazione, deleted FROM utente WHERE idutente = $1',
                 [targetCliente.idutente]
             );
@@ -201,7 +255,7 @@ describe('User API Logic Tests', () => {
 
         test('Errore 401 se utente non autenticato cerca di vedere un profilo Cliente', async () => {
             const targetCliente = { idutente: 2, username: 'anotherCliente', tipologia: 'Cliente', deleted: false, email: 'another@example.com' };
-            pool.query.mockResolvedValueOnce({ rows: [targetCliente] }); // Mock per SELECT del targetUser
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [targetCliente] }); // Mock per SELECT del targetUser
 
             // Non c'è header Authorization, quindi getUserFromToken non sarà chiamato dalla logica della rotta.
             // authenticatedUser rimarrà null.
@@ -229,7 +283,7 @@ describe('User API Logic Tests', () => {
                 piva: '11111111111',
                 artigianodescrizione: 'Sono visibile'
             };
-            pool.query.mockResolvedValueOnce({ rows: [targetArtigiano] });
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [targetArtigiano] });
 
             const { getUserFromToken: mockedGetUserFromToken } = require('../../../src/middleware/authMiddleWare');
             mockedGetUserFromToken.mockResolvedValue(null); // Simula nessun utente autenticato
@@ -245,7 +299,7 @@ describe('User API Logic Tests', () => {
 
 
         test('Errore 404 per utente inesistente (anche se Admin chiede)', async () => {
-            pool.query.mockResolvedValue({ rows: [] });
+            mockPoolQueryFn.mockResolvedValue({ rows: [] });
             const fakeId = 99999; // ID non esistente
             const res = await request(app).get(`/api/users/${fakeId}`);
             expect(res.statusCode).toBe(404);
@@ -260,7 +314,7 @@ describe('User API Logic Tests', () => {
     describe('GET /api/users/notdeleted', () => {
         test('Recupera lista utenti non cancellati', async () => {
             //simulo una lista di utenti esistenti
-            pool.query.mockResolvedValue({ rows: [{ idutente: 1, username: 'user1', deleted: false },{ idutente: 2, username: 'user2', deleted: false }] });
+            mockPoolQueryFn.mockResolvedValue({ rows: [{ idutente: 1, username: 'user1', deleted: false },{ idutente: 2, username: 'user2', deleted: false }] });
             const res = await request(app).get('/api/users/notdeleted');
             expect(res.statusCode).toBe(200);
             expect(res.body).toEqual(expect.arrayContaining([
@@ -272,7 +326,7 @@ describe('User API Logic Tests', () => {
         });
         test('Errore 500 se si verifica un errore del server', async () => {
             // Simula un errore del server
-            pool.query.mockImplementationOnce(() => {
+            mockPoolQueryFn.mockImplementationOnce(() => {
                 throw new Error('Errore del server');
             });
 
@@ -328,8 +382,8 @@ describe('User API Logic Tests', () => {
             };
             const expectedUpdatedUser = { ...clienteBase, ...updateData };
 
-            pool.query.mockResolvedValueOnce({ rows: [clienteBase] }); // Mock per SELECT
-            pool.query.mockResolvedValueOnce({ rows: [expectedUpdatedUser] }); // Mock per UPDATE
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [clienteBase] }); // Mock per SELECT
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [expectedUpdatedUser] }); // Mock per UPDATE
 
             const res = await request(app)
                 .put(`/api/users/${clienteBase.idutente}`)
@@ -355,8 +409,8 @@ describe('User API Logic Tests', () => {
             };
             const expectedUpdatedUser = { ...artigianoBase, ...updateData };
 
-            pool.query.mockResolvedValueOnce({ rows: [artigianoBase] }); // Mock per SELECT
-            pool.query.mockResolvedValueOnce({ rows: [expectedUpdatedUser] }); // Mock per UPDATE
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [artigianoBase] }); // Mock per SELECT
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [expectedUpdatedUser] }); // Mock per UPDATE
 
             const res = await request(app)
                 .put(`/api/users/${artigianoBase.idutente}`)
@@ -379,8 +433,8 @@ describe('User API Logic Tests', () => {
             // username, email, etc., dovrebbero rimanere quelli di clienteBase
             const expectedUpdatedUser = { ...clienteBase, nome: updateData.nome };
 
-            pool.query.mockResolvedValueOnce({ rows: [clienteBase] });
-            pool.query.mockResolvedValueOnce({ rows: [expectedUpdatedUser] });
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [clienteBase] });
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [expectedUpdatedUser] });
 
             const res = await request(app)
                 .put(`/api/users/${clienteBase.idutente}`)
@@ -405,8 +459,8 @@ describe('User API Logic Tests', () => {
                 nome: updateData.nome
             };
 
-            pool.query.mockResolvedValueOnce({ rows: [artigianoBase] });
-            pool.query.mockResolvedValueOnce({ rows: [expectedUpdatedUser] });
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [artigianoBase] });
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [expectedUpdatedUser] });
 
             const res = await request(app)
                 .put(`/api/users/${artigianoBase.idutente}`)
@@ -432,8 +486,8 @@ describe('User API Logic Tests', () => {
             const expectedUpdatedUser = { ...clienteBase, nome: updateData.nome };
 
 
-            pool.query.mockResolvedValueOnce({ rows: [clienteBase] });
-            pool.query.mockResolvedValueOnce({ rows: [expectedUpdatedUser] });
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [clienteBase] });
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [expectedUpdatedUser] });
 
             const res = await request(app)
                 .put(`/api/users/${clienteBase.idutente}`)
@@ -450,7 +504,7 @@ describe('User API Logic Tests', () => {
             // indicando una discrepanza con il comportamento desiderato.
             const updateData = { nome: 'Nuovo Nome Admin' };
 
-            pool.query.mockResolvedValueOnce({ rows: [adminBase] }); // Simula il fetch dell'admin
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [adminBase] }); // Simula il fetch dell'admin
 
             const res = await request(app)
                 .put(`/api/users/${adminBase.idutente}`)
@@ -463,7 +517,7 @@ describe('User API Logic Tests', () => {
 
 
         test('Errore 404 se utente da aggiornare non esiste', async () => {
-            pool.query.mockResolvedValueOnce({ rows: [] }); // Utente non trovato
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [] }); // Utente non trovato
 
             const res = await request(app)
                 .put(`/api/users/999999`) // ID non esistente
@@ -474,7 +528,7 @@ describe('User API Logic Tests', () => {
         });
 
         test('Errore 400 se username o email sono forniti come stringhe vuote durante l aggiornamento', async () => {
-            pool.query.mockResolvedValueOnce({ rows: [clienteBase] }); // Utente esiste
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [clienteBase] }); // Utente esiste
 
             const res = await request(app)
                 .put(`/api/users/${clienteBase.idutente}`)
@@ -485,7 +539,7 @@ describe('User API Logic Tests', () => {
         });
         
         test('Errore 400 se PIVA o ArtigianoDescrizione sono resi vuoti per un Artigiano durante l aggiornamento', async () => {
-            pool.query.mockResolvedValueOnce({ rows: [artigianoBase] }); // Artigiano esiste
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [artigianoBase] }); // Artigiano esiste
 
             const resPivaVuota = await request(app)
                 .put(`/api/users/${artigianoBase.idutente}`)
@@ -494,7 +548,7 @@ describe('User API Logic Tests', () => {
             expect(resPivaVuota.statusCode).toBe(400);
             expect(resPivaVuota.body).toHaveProperty('message', 'Per la tipologia "Artigiano", PIVA e ArtigianoDescrizione sono obbligatori.');
 
-            pool.query.mockResolvedValueOnce({ rows: [artigianoBase] }); // Mock di nuovo per il prossimo caso
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [artigianoBase] }); // Mock di nuovo per il prossimo caso
             const resDescrizioneNulla = await request(app)
                 .put(`/api/users/${artigianoBase.idutente}`)
                 .send({ artigianodescrizione: '' });
@@ -505,9 +559,9 @@ describe('User API Logic Tests', () => {
         
         
         test('Errore 409 se l aggiornamento causa un conflitto di username/email', async () => {
-            pool.query.mockResolvedValueOnce({ rows: [clienteBase] }); // Utente da aggiornare esiste
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [clienteBase] }); // Utente da aggiornare esiste
             // Mock per l'operazione di UPDATE che fallisce per unique constraint
-            pool.query.mockImplementationOnce(() => {
+            mockPoolQueryFn.mockImplementationOnce(() => {
                 throw { code: '23505' };
             });
 
@@ -525,8 +579,8 @@ describe('User API Logic Tests', () => {
     describe('DELETE /api/users/:id', () => {
         
         test('Elimina utente correttamente', async () => {
-            pool.query.mockResolvedValueOnce({ rows: [{ tipologia: 'Cliente' }] })
-                .mockResolvedValueOnce({ rows: [{}] }); // Mock per l'operazione di delete
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [{ tipologia: 'Cliente' }] }) // For SELECT
+                .mockResolvedValueOnce({ rows: [{}] }); // For UPDATE (soft delete)
 
             const res = await request(app).delete('/api/users/1');
 
@@ -535,7 +589,7 @@ describe('User API Logic Tests', () => {
         });
         
         test('Errore 404 se utente da eliminare non esiste', async () => {
-            pool.query.mockResolvedValueOnce({ rows: [] }); // Utente non trovato
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [] }); // Utente non trovato
 
             const res = await request(app).delete('/api/users/99999'); // ID non esistente
 
@@ -544,7 +598,7 @@ describe('User API Logic Tests', () => {
         });
         
         test('Errore 403 se tentativo di eliminare un Admin', async () => {
-            pool.query.mockResolvedValueOnce({ rows: [{ tipologia: 'Admin' }] }); // Simula fetch di un admin
+            mockPoolQueryFn.mockResolvedValueOnce({ rows: [{ tipologia: 'Admin' }] }); // Simula fetch di un admin
 
             const res = await request(app).delete('/api/users/1');
 

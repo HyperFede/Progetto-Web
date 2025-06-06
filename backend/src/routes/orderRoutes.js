@@ -10,7 +10,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware');
+const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js');
 
 // Funzioni di aiuto per la gestione delle transazioni
 const beginTransaction = async (client) => client.query('BEGIN');
@@ -46,7 +46,6 @@ const clientOrderQueryConfig = {
     defaultSortOrder: 'DESC',
 };
 
-//TODO immagini da recuperare all'endpoint dedicato
 // Funzione di aiuto per creare la sessione di checkout di Stripe
 const createStripeCheckoutSession = async (orderId, orderItems, customerEmail, expiryDurationSeconds = 30*60) => {
     const line_items = orderItems.map(item => ({
@@ -84,7 +83,7 @@ const createStripeCheckoutSession = async (orderId, orderItems, customerEmail, e
 router.get('/',
     isAuthenticated,
     hasPermission(['Admin']),
-    createQueryBuilderMiddleware(orderQueryConfig), 
+    createQueryBuilderMiddleware(orderQueryConfig),
     async (req, res) => {
     try {
         // La parte base della query, i join sono essenziali per filtrare/ordinare sui campi utente

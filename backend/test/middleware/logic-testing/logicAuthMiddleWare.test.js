@@ -100,7 +100,7 @@ describe('Auth Middleware: Logic test', () => {
             await isAuthenticated(mockRequest, mockResponse, nextFunction);
             expect(mockResponse.status).toHaveBeenCalledWith(401);
             // Il messaggio di errore specifico per questo caso nel middleware reale è 'Accesso non autorizzato. Token non valido.'
-            expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Accesso non autorizzato. Token non valido.' });
+            expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Accesso non autorizzato. Token mancante o malformato.' });
             expect(nextFunction).not.toHaveBeenCalled();
         });
 

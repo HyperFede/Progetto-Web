@@ -69,7 +69,7 @@ describe('Auth Routes - POST /api/auth/login', () => {
             .send({ username: 'testuser', password: 'password123' });
 
         expect(response.statusCode).toBe(200);
-        expect(response.body.message).toBe('Login effettuato con successo.');
+        expect(response.body.message).toBe('Accesso effettuato con successo.');
         expect(response.body.user).toBeDefined();
         expect(response.body.user.username).toBe('testuser');
         expect(response.body.user.password).toBeUndefined(); // Ensure password is not sent back
@@ -132,7 +132,7 @@ describe('Auth Routes - POST /api/auth/login', () => {
             .send({ password: 'password123' });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body.message).toBe('Username e Password sono obbligatori.');
+        expect(response.body.message).toBe('Username e password sono obbligatori.');
     });
 
     it('should return 400 if password is missing', async () => {
@@ -141,7 +141,7 @@ describe('Auth Routes - POST /api/auth/login', () => {
             .send({ username: 'testuser' });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body.message).toBe('Username e Password sono obbligatori.');
+        expect(response.body.message).toBe('Username e password sono obbligatori.');
     });
 
     it('should return 500 if database query fails', async () => {

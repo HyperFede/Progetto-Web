@@ -65,9 +65,6 @@ async function startServer() {
         // Return the server instance for potential use (e.g., graceful shutdown)
         return app.listen(serverport, () => {
             console.log(`Server running on http://localhost:${serverport}`);
-
-
-
         });
     } catch (error) {
         console.error('Failed to initialize database or start server:', error);
