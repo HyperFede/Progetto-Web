@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Gestione Accettazioni</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/pages/dashboardUtente.css">
+</head>
+
+<body>
+    <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <a href="index.html"
+                class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+                <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
+            </a>
+            <!-- NavBAR DA CAMBIARE QUANDO SEI IN RESPONSIVE-->
+            <ul class="nav nav-pills align-items-center">
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-3 me-2"></i> Username
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                        <li><a class="dropdown-item" href="segnalazioniAdmin.html"><i
+                                    class="bi bi-flag-fill me-2"></i>GESTIONE SEGNALAZIONI</a></li>
+                        <li><a class="dropdown-item active" href="accettazioniAdmin.html"><i
+                                    class="bi bi-patch-check-fill me-2"></i>GESTIONE ARTIGIANI</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>inutile</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart">
+                        <i class="bi bi-cart fs-3"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Navbar per schermi < lg -->
+    <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none">
+        <!-- Mantenuto fixed-top come richiesto in precedenza -->
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a href="index.html" class="d-flex align-items-center text-dark text-decoration-none">
+                <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
+            </a>
+            <div class="ms-auto"></div> <!-- Spacer to push toggler and logo to the left -->
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Admin Dashboard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                        <ul class="nav nav-pills flex-column mb-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="segnalazioniAdmin.html">
+                                    <i class="bi bi-flag-fill me-2"></i>GESTIONE SEGNALAZIONI
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="accettazioniAdmin.html"> <i
+                                        class="bi bi-patch-check-fill me-2"></i>GESTIONE ARTIGIANI
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#"> <i class="bi bi-flag-fill me-2"></i>inutile
+                                </a>
+                            </li>
+                        </ul>
+                        <hr class="sidebar-divider">
+                        <button class="btn logout-btn w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <ul class="nav nav-pills align-items-center">
+                <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
+                <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart">
+                        <i class="bi bi-cart fs-3"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container my-4 pt-5 pt-lg-0">
+        <h2 class="page-main-title mb-4">Pannello Admin</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="dashboard-sidebar d-flex flex-column">
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="segnalazioniAdmin.html">
+                                <i class="bi bi-flag-fill me-2"></i>GESTIONE SEGNALAZIONI
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="accettazioniAdmin.html"> <i
+                                    class="bi bi-patch-check-fill me-2"></i>GESTIONE ARTIGIANI
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"> <i class="bi bi-flag-fill me-2"></i>inutile
+                            </a>
+                        </li>
+                    </ul>
+                    <hr class="sidebar-divider">
+                    <button class="btn logout-btn w-100">
+                        <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                    </button>
+                </div>
+            </div>
+
+            <!-- === INIZIO BLOCCO SOSTITUITO === -->
+            <div class="col-md-9">
+                <div class="dashboard-content p-4">
+
+                    <!-- TITOLO -->
+                    <h3 class="content-title mb-4">Gestione Accettazioni Artigiani</h3>
+
+                    <!-- DETTAGLIO ARTIGIANO 1 (panel/detail) -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <!-- Nome Artigiano (colonna sinistra) -->
+                                <div class="col-md-6">
+                                    <h5 class="card-title mb-0">
+                                        Username: <strong>mario_rossi_arte</strong>
+                                    </h5>
+                                </div>
+                                <!-- P.IVA (colonna destra, allineata a destra su schermi medi+) -->
+                                <div class="col-md-6 text-md-end">
+                                    <p class="card-text mb-0">
+                                        <strong>P.IVA:</strong> 01234567890 <!-- Esempio P.IVA -->
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- DESCRIZIONE ARTIGIANO (sotto nome e P.IVA) -->
+                            <!-- Aggiunto mb-3 per spazio sotto la descrizione -->
+                            <!-- Rimosso mb-1 dalle p interne per compattare -->
+                            <!-- Aggiunto mt-3 per spazio sopra la descrizione -->
+                            <div class="mb-3">
+                                <p class="card-text mb-1">
+                                    <strong>Descrizione Artigiano:</strong>
+                                </p>
+                                <p class="card-text">
+                                    Mario Rossi è un artigiano con oltre 10 anni di esperienza nella
+                                    lavorazione del legno. È specializzato nella creazione di mobili
+                                    su misura e oggetti di design. Ha superato tutti i controlli di
+                                    qualità e possiede le certificazioni necessarie. I clienti lo
+                                    apprezzano per professionalità e tempi di consegna rapidi.
+                                </p>
+                            </div>
+
+                            <!-- PULSANTI “APPROVA” e “RIFIUTA” (sotto la descrizione) -->
+                            <!-- Aggiunto mt-3 per spazio sopra i pulsanti -->
+                            <div class="d-flex gap-2 justify-content-center mt-3">
+                                <button id="approva-mario_rossi_arte" class="btn btn-success btn-sm px-4" title="Approva Artigiano">
+                                    <i class="bi bi-check-lg me-1"></i>Approva
+                                </button>
+                                <button id="rifiuta-mario_rossi_arte" class="btn btn-danger btn-sm px-4" title="Rifiuta Artigiano">
+                                    <i class="bi bi-x-lg me-1"></i>Rifiuta
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /DETTAGLIO ARTIGIANO 1 -->
+
+                    <!-- DETTAGLIO ARTIGIANO 2 (Esempio) -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <!-- Nome Artigiano (colonna sinistra) -->
+                                <div class="col-md-6">
+                                    <h5 class="card-title mb-0">
+                                        Username: <strong>creazioni_uniche_gio</strong>
+                                    </h5>
+                                </div>
+                                <!-- P.IVA (colonna destra, allineata a destra su schermi medi+) -->
+                                <div class="col-md-6 text-md-end">
+                                    <p class="card-text mb-0">
+                                        <strong>P.IVA:</strong> 98765432100 <!-- Esempio P.IVA -->
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- DESCRIZIONE ARTIGIANO (sotto nome e P.IVA) -->
+                            <!-- Aggiunto mb-3 per spazio sotto la descrizione -->
+
+                            <!-- DESCRIZIONE ARTIGIANO -->
+                            <div class="mb-3">
+                                <p class="card-text mb-1">
+                                    <strong>Descrizione Artigiano:</strong>
+                                </p>
+                                <p class="card-text">
+                                    Giovanna Verdi è una talentuosa artigiana specializzata in ceramiche artistiche e gioielli fatti a mano.
+                                    Le sue creazioni sono note per l'originalità e la cura dei dettagli.
+                                    Utilizza materiali ecocompatibili e tecniche tradizionali.
+                                </p>
+                            </div>
+
+                            <!-- PULSANTI “APPROVA” e “RIFIUTA” (sotto la descrizione) -->
+                            <!-- Aggiunto mt-3 per spazio sopra i pulsanti -->
+                            <div class="d-flex gap-2 justify-content-center mt-3">
+                                <button id="approva-creazioni_uniche_gio" class="btn btn-success btn-sm px-4" title="Approva Artigiano">
+                                    <i class="bi bi-check-lg me-1"></i>Approva
+                                </button>
+                                <button id="rifiuta-creazioni_uniche_gio" class="btn btn-danger btn-sm px-4" title="Rifiuta Artigiano">
+                                    <i class="bi bi-x-lg me-1"></i>Rifiuta
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /DETTAGLIO ARTIGIANO 2 -->
+
+                    <!-- DETTAGLIO ARTIGIANO 3 (Esempio) -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <!-- Nome Artigiano (colonna sinistra) -->
+                                <div class="col-md-6">
+                                    <h5 class="card-title mb-0">
+                                        Username: <strong>legno_maestro</strong>
+                                    </h5>
+                                </div>
+                                <!-- P.IVA (colonna destra, allineata a destra su schermi medi+) -->
+                                <div class="col-md-6 text-md-end">
+                                    <p class="card-text mb-0"><strong>P.IVA:</strong> 11223344556</p>
+                                </div>
+                            </div>
+
+                            <!-- DESCRIZIONE ARTIGIANO (sotto nome e P.IVA) -->
+                            <!-- Aggiunto mb-3 per spazio sotto la descrizione -->
+                            <div class="mb-3">
+                                <p class="card-text mb-1"><strong>Descrizione Artigiano:</strong></p>
+                                <p class="card-text">
+                                    Esperto falegname con una passione per il restauro di mobili antichi e la creazione di pezzi unici in legno massello.
+                                    Ogni opera è frutto di anni di esperienza e dedizione all'arte della falegnameria.
+                                </p>
+                            </div>
+                            <!-- PULSANTI “APPROVA” e “RIFIUTA” (sotto la descrizione) -->
+                            <!-- Aggiunto mt-3 per spazio sopra i pulsanti -->
+                            <div class="d-flex gap-2 justify-content-center mt-3">
+                                <button id="approva-legno_maestro" class="btn btn-success btn-sm px-4" title="Approva Artigiano"><i class="bi bi-check-lg me-1"></i>Approva</button>
+                                <button id="rifiuta-legno_maestro" class="btn btn-danger btn-sm px-4" title="Rifiuta Artigiano"><i class="bi bi-x-lg me-1"></i>Rifiuta</button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /DETTAGLIO ARTIGIANO 3 -->
+                </div>
+            </div>
+            <!-- === FINE BLOCCO SOSTITUITO === -->
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Funzione generica per gestire l'azione e rimuovere la card
+            function handleArtisanAction(event, artisanName, action) {
+                console.log(`Azione: ${action}, Artigiano: ${artisanName}`);
+                alert(`Hai ${action.toLowerCase()} l'artigiano: ${artisanName}`);
+
+                // Trova l'elemento card più vicino al bottone cliccato
+                const cardElement = event.target.closest('.card');
+                if (cardElement) {
+                    cardElement.remove(); // Rimuove la card dal DOM
+                }
+
+                // Qui potresti aggiungere logica più complessa, come una chiamata API
+            }
+
+            // Artigiano 1: mario_rossi_arte
+            const approvaMario = document.getElementById('approva-mario_rossi_arte');
+            const rifiutaMario = document.getElementById('rifiuta-mario_rossi_arte');
+            
+            if (approvaMario) approvaMario.addEventListener('click', (event) => handleArtisanAction(event, 'mario_rossi_arte', 'Approvato'));
+            if (rifiutaMario) rifiutaMario.addEventListener('click', (event) => handleArtisanAction(event, 'mario_rossi_arte', 'Rifiutato'));
+
+            // Artigiano 2: creazioni_uniche_gio
+            const approvaGio = document.getElementById('approva-creazioni_uniche_gio');
+            const rifiutaGio = document.getElementById('rifiuta-creazioni_uniche_gio');
+
+            if (approvaGio) approvaGio.addEventListener('click', (event) => handleArtisanAction(event, 'creazioni_uniche_gio', 'Approvato'));
+            if (rifiutaGio) rifiutaGio.addEventListener('click', (event) => handleArtisanAction(event, 'creazioni_uniche_gio', 'Rifiutato'));
+
+            // Artigiano 3: legno_maestro
+            const approvaLegno = document.getElementById('approva-legno_maestro');
+            const rifiutaLegno = document.getElementById('rifiuta-legno_maestro');
+            
+            if (approvaLegno) approvaLegno.addEventListener('click', (event) => handleArtisanAction(event, 'legno_maestro', 'Approvato'));
+            if (rifiutaLegno) rifiutaLegno.addEventListener('click', (event) => handleArtisanAction(event, 'legno_maestro', 'Rifiutato'));
+
+            // Potresti rendere questo più dinamico se le card fossero generate da JavaScript
+            // Ad esempio, usando classi comuni per i bottoni e data-attributes per l'ID dell'artigiano.
+        });
+    </script>
+</body>
+
+</html>
