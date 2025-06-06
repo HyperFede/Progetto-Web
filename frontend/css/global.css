@@ -166,6 +166,21 @@ min-height: 400px;
     font-weight: 600;
 }
 
+@media (max-width: 991.98px) {
+    .dashboard-sidebar,
+    .dashboard-sidebar .nav-link {
+        display: none !important;
+    }
+    
+    .col-md-3{
+        width: 0 !important;
+    }
+
+    .col-md-9{
+        width: 100% !important;
+    }
+}
+
 .logout-btn {
     background-color: var(--secondary-color);
     color: var(--text-light);

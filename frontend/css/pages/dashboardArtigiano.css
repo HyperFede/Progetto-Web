@@ -145,3 +145,9 @@ body {
 .footer-text {
     color: var(--text-dark);
 }
+
+@media (max-width: 991.98px) { /* Il breakpoint 'lg' di Bootstrap è 992px */
+    main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
+        padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
+    }
+}
