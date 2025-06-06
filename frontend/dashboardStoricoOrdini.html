@@ -25,10 +25,12 @@
                         <li><a class="dropdown-item" href="dashboardUtente.html"><i class="bi bi-person-fill me-2"></i>IL MIO PROFILO</a></li>
                         <li><a class="dropdown-item active" href="dashboardStoricoOrdini.html"><i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI</a></li>
                         <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a href="carrelloUtente.html" class="nav-link" style="color: var(--secondary-color);">
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart">
                         <i class="bi bi-cart fs-3"></i>
                     </a>
                 </li>
@@ -49,10 +51,10 @@
             <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Il Mio Account</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
-                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                    <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
                         <ul class="nav nav-pills flex-column mb-auto">
                         <li class="nav-item">
                             <a class="nav-link" href="dashboardUtente.html">
@@ -60,8 +62,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                             <a class="nav-link active" aria-current="page" href="dashboardStoricoOrdini.html"> <i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
-                             </a>
+                            <a class="nav-link active" aria-current="page" href="dashboardStoricoOrdini.html"> <i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
+                            </a>
                         </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#"> <i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI
@@ -75,9 +77,9 @@
                     </div>
                 </div>
             </div>
-           <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
+            <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
                 <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
-                    <a href="carrelloUtente.html" class="nav-link" style="color: var(--secondary-color);">
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart">
                         <i class="bi bi-cart fs-3"></i>
                     </a>
                 </li>
@@ -131,7 +133,7 @@
                                     <h6 class="item-name mb-1">Nome Prodotto Alfa</h6>
                                     <p class="item-quantity mb-0">Q.tà: 1</p>
                                 </div>
-                                <a href="#" class="btn btn-sm write-review-btn ms-auto">Scrivi recensione</a>
+                                <a href="recensioneProdotto.html" class="btn btn-sm write-review-btn ms-auto">Scrivi recensione</a>
                             </div>
                             <div class="order-item d-flex align-items-center py-3">
                                 <img src="https://via.placeholder.com/80x80?text=IMG" alt="Immagine Prodotto Beta" class="order-item-image me-3">
@@ -139,7 +141,7 @@
                                     <h6 class="item-name mb-1">Nome Prodotto Beta</h6>
                                     <p class="item-quantity mb-0">Q.tà: 2</p>
                                 </div>
-                                <a href="#" class="btn btn-sm write-review-btn ms-auto">Scrivi recensione</a>
+                                <a href="recensioneProdotto.html" class="btn btn-sm write-review-btn ms-auto">Scrivi recensione</a>
                             </div>
                         </div>
 
@@ -162,7 +164,7 @@
                                     <h6 class="item-name mb-1">Nome Prodotto Gamma</h6>
                                     <p class="item-quantity mb-0">Q.tà: 1</p>
                                 </div>
-                                <a href="#" class="btn btn-sm write-review-btn ms-auto">Scrivi recensione</a>
+                                <a href="recensioneProdotto.html" class="btn btn-sm write-review-btn ms-auto">Scrivi recensione</a>
                             </div>
                         </div>
 

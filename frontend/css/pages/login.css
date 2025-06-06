@@ -132,3 +132,10 @@ body {
 .signup-text a:hover {
     text-decoration: underline;
 }
+
+.error-message {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    text-align: left; /* Allinea il testo a sinistra */
+}

@@ -143,7 +143,7 @@ min-height: 400px;
 }
 
 .dashboard-input {
-    background-color: var(--background-color);
+    background-color: #e9ecef;
     color: var(--text-dark);
     border: 1px solid var(--border-color);
 }
@@ -176,4 +176,16 @@ min-height: 400px;
     background-color: var(--tigers-eye);
     border-color: var(--tigers-eye);
     color: var(--text-light);
+}
+
+.error-text {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.success-text {
+    color: green;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }

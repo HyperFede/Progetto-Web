@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +9,11 @@
     <link rel="stylesheet" href="css/pages/registrati.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
     <title>Registrazione</title>
 </head>
+
 <body>
     <div class="container-rel">
         <a href="index.html" class="d-flex align-items-center mb-4 text-dark text-decoration-none">
@@ -41,6 +44,10 @@
                     <div class="form-group">
                         <label class="form-label">Username</label>
                         <input type="text" name="username" placeholder="Username" class="form-control" required>
+                        <!-- Quando l'esito di POST api/users/ è username già esistente, cambia display:none -->
+                        <!--
+                        <span class="error-text" id="username-error">Username già esistente</span>
+                        --> 
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -51,9 +58,13 @@
                 </div>
             </div>
 
-             <div class="form-group mb-4">
+            <div class="form-group mb-4">
                 <label class="form-label">Email</label>
                 <input type="email" name="email" placeholder="email@example.com" class="form-control" required>
+                <!-- Quando l'esito di POST api/users/ è email già esistente -->
+                <!--
+                <span class="error-text" id="email-error">Email già esistente</span>
+                -->
             </div>
 
             <!-- Terza Riga -->
@@ -95,4 +106,5 @@
     <script src="js/fetcher.js"></script>
     <script src="js/formRegistrazione.js"></script>
 </body>
+
 </html>

@@ -26,6 +26,8 @@
                         <li><a class="dropdown-item" href="dashboardUtente.html"><i class="bi bi-person-fill me-2"></i>IL MIO PROFILO</a></li>
                         <li><a class="dropdown-item" href="dashboardStoricoOrdini.html"><i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI</a></li>
                         <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown invisible-admin">
@@ -125,7 +127,7 @@
             </div>
            <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
                 <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
-                    <a href="carrelloUtente.html" class="nav-link" style="color: var(--secondary-color);">
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart">
                         <i class="bi bi-cart fs-3"></i>
                     </a>
                 </li>
@@ -146,9 +148,12 @@
                 <label for="categorySelect" class="form-label">Categoria</label>
                 <select class="form-select" id="categorySelect" style="border-color: var(--secondary-color);">
                     <option selected>Scegli...</option>
-                    <option value="1">Categoria 1</option>
-                    <option value="2">Categoria 2</option>
-                    <option value="3">Categoria 3</option>
+                    <option value="1">Quadri</option>
+                    <option value="2">Sculture</option>
+                    <option value="3">Erboristeria</option>
+                    <option value="4">Creme</option>
+                    <option value="5">Mobili e arredamento</option>
+                    <option value="6">Collane e bracciali</option>
                 </select>
             </div>
             <div class="col-md-2 d-flex">
@@ -170,9 +175,7 @@
             <div class="col">
                 <div class="card h-100" style="border-color: var(--secondary-color);">
                     <a href="dettaglioProdotto.html" class="text-decoration-none text-dark">
-                    <div class="product-image-placeholder d-flex align-items-center justify-content-center" style="background-color: #e9ecef; height: 200px; color: var(--secondary-color);">
-                        <img src="" alt="">
-                    </div>
+                    <img src="https://fastly.picsum.photos/id/498/200/300.jpg?hmac=bXQWW3hC6BsockY6hy-Rkoq3WSordZVoh4DIGJhXh7k" class="card-img-top" alt="Immagine Prodotto 1" style="height: 200px; object-fit: cover; width: 100%;">
                     </a>
                     <div class="card-body d-flex flex-column p-3">
                         <h5 class="card-title" style="color: var(--primary-color);">Nome Prodotto 1</h5>
@@ -196,13 +199,11 @@
             <div class="col">
                 <div class="card h-100" style="border-color: var(--secondary-color);">
                     <a href="dettaglioProdotto.html" class="text-decoration-none text-dark">
-                     <div class="product-image-placeholder d-flex align-items-center justify-content-center" style="background-color: #e9ecef; height: 200px; color: var(--secondary-color);">
-                        IMG
-                    </div>
+                    <img src="https://via.placeholder.com/400x200.png?text=Prodotto+2" class="card-img-top" alt="Immagine Prodotto 2" style="height: 200px; object-fit: cover; width: 100%;">
                     </a>
                     <div class="card-body d-flex flex-column p-3">
                         <h5 class="card-title" style="color: var(--primary-color);">Nome Prodotto 2</h5>
-                         <ul class="list-unstyled mt-2 mb-3 flex-grow-1">
+                        <ul class="list-unstyled mt-2 mb-3 flex-grow-1">
                             <li><small class="text-muted">Valutazioni: <i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star" style="color: var(--primary-color);"></i></small></li>
                             <li><small class="text-muted">Artigiano: Altro Artigiano</small></li>
                             <li><strong style="color: var(--primary-color);">Prezzo: €YY.YY</strong></li>
