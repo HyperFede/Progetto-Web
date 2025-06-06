@@ -123,10 +123,18 @@ router.post('/', async (req, res) => {
             await rollbackTransaction(client);
             // console.error('Errore nella creazione dell utente e/o record approvazione:', dbError);
         // errore di postgres, che corrisponde a un conflitto di chiavi uniche
-            if (dbError.code === '23505') {
-            console.warn('Conflitto di chiavi uniche durante la creazione dell utente:', dbError.detail);
-            return res.status(409).json({ message: 'Username o Email già esistente.' });
-        }
+            if (dbError.code === '23505') { // Unique violation
+                if (dbError.constraint === 'utente_username_key') {
+                    console.warn('Conflitto: Username già esistente.', dbError.detail);
+                    return res.status(409).json({ message: 'Username già esistente.' });
+                } else if (dbError.constraint === 'utente_email_key') {
+                    console.warn('Conflitto: Email già esistente.', dbError.detail);
+                    return res.status(409).json({ message: 'Email già esistente.' });
+                }
+                // Fallback for other unique constraints, if any
+                console.warn('Conflitto di chiavi uniche durante la creazione dell utente:', dbError.detail);
+                return res.status(409).json({ message: 'Valore duplicato non consentito.' });
+            }
             res.status(500).json({ message: 'Errore del server durante la creazione dell utente.' });
         } finally {
             client.release(); // Rilascia sempre il client al pool
