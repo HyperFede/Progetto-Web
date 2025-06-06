@@ -6,6 +6,8 @@ Routes API di tipo auth:
 -POST api/auth/recover-password/verify-identity
 -POST api/auth/recover-password/reset
 
+-GET api/auth/session-info (restitusice se l'utente è autentiacto e che tipo è)
+
 
 #1 login:
 
@@ -60,3 +62,6 @@ restituisce un token che scade entro 10 minuti che si puo utilizzare esclusivame
 -POST api/auth/recover-password/reset
 
 Richiede il token di autorizzazione, e il campo nuovapassword, resetta la password
+
+
+

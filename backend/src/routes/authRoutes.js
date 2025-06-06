@@ -4,6 +4,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db-connect'); // Assicurati che il percorso sia corretto
+const { isAuthenticated } = require('../middleware/authMiddleWare'); // Importa isAuthenticated
 
 // Assicurati che JWT_SECRET sia definito nelle variabili d'ambiente
 const jwtSecret = process.env.JWT_SECRET;
@@ -291,5 +292,35 @@ router.post('/recover-password/reset', async (req, res) => {
         res.status(500).json({ message: 'Errore del server durante il reset della password.' });
     }
 });
+
+/**
+ * @route GET /api/auth/session-info
+ * @description Verifica se l'utente ha una sessione valida (JWT valido nel cookie HttpOnly)
+ *              e restituisce la tipologia dell'utente.
+ * @access Authenticated (implicitamente, tramite il middleware isAuthenticated)
+ *
+ * Interazione Black-Box:
+ *  Input: Cookie HttpOnly 'accessToken' inviato dal browser.
+ *  Output:
+ *      - Successo (200 OK): Se il token è valido.
+ *        { "isAuthenticated": true, "tipologia": "String" } (es. "Cliente", "Artigiano", "Admin")
+ *      - Errore (401 Unauthorized): Se il token è mancante, invalido o scaduto (gestito da `isAuthenticated`).
+ *        { "message": "Stringa di errore relativa all'autenticazione" }
+ */
+router.get('/session-info', isAuthenticated, (req, res) => {
+    // Se il middleware isAuthenticated passa, significa che req.user è popolato
+    // e il token JWT è valido.
+    if (req.user && req.user.tipologia) {
+        res.status(200).json({
+            isAuthenticated: true,
+            tipologia: req.user.tipologia
+        });
+    } else {
+        // Questo caso non dovrebbe verificarsi se isAuthenticated funziona correttamente
+        // e popola sempre req.user con tipologia per utenti validi.
+        res.status(500).json({ message: "Errore: tipologia utente non trovata dopo l'autenticazione." });
+    }
+});
+
 
 module.exports = router;

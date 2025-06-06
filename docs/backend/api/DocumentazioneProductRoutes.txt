@@ -133,7 +133,12 @@ Output:
        { "error": "Stringa di errore" }
 
 
-2.3 GET /api/products/:id
+2.3 GET /api/products/categories
+
+Restituisce un elenco di tutte le categorie possibili (utili per ricerca con filtri, inserimento di nuovo prodotto)
+Assunzione: un admin crea una nuova categoria
+
+2.4 GET /api/products/:id
 
 @Descr Ottiene informazioni su un singolo prodotto, compreso il link della richiesta per prendere la sua immagine
 
@@ -146,6 +151,9 @@ Output:
         { "idprodotto": Number, "nome": String, ..., "idartigiano": Number }
      - Errore (500 Internal Server Error): In caso di errore del server.
        { "error": "Stringa di errore" }
+
+
+  
 
 #############
 #3 Aggiornare un prodotto:

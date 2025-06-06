@@ -275,7 +275,7 @@ router.post('/verify-session', isAuthenticated, hasPermission(['Cliente']), asyn
                 res.status(500).json({ error: 'Database processing error.' });
             } finally {
                 pgClient.release();
-            }8
+            }
         } else {
             console.log(`Verify Session: Paid session ${actualPaidSessionId} for order ${finalOrderId} has payment_status '${paymentStatus}'. This is unexpected for a success redirect.`);
             let updatedOrderStatus = dbOrder.status;
