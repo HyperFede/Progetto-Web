@@ -37,6 +37,7 @@
     align-items: center;
 }
 .back-link-add-product:hover {
+    text-decoration: none;
     color: var(--primary-color);
 }
 .back-link-add-product i {
