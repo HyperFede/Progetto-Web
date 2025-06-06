@@ -113,7 +113,9 @@ const productQueryConfig = {
         { queryParam: 'nome_like', dbColumn: 'nome', type: 'like', dataType: 'string' },
         { queryParam: 'quantitadisponibile_lte', dbColumn: 'quantitadisponibile', type: 'lte', dataType: 'integer' }
     ],
-    allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto'],
+    allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto', 'quantitadisponibile'], // Added quantitadisponibile
+    defaultLimit: 20, // Default number of products to return
+    maxLimit: 100,    // Maximum number of products per request
     defaultSortField: 'idprodotto',
     defaultSortOrder: 'ASC'
 };
@@ -141,6 +143,8 @@ const adminProductQueryConfig = {
         { queryParam: 'deleted', dbColumn: 'deleted', type: 'boolean', dataType: 'boolean' } // Admins can filter by deleted status
     ],
     allowedSortFields: [...productQueryConfig.allowedSortFields, 'deleted'], // Admins can sort by deleted status
+    defaultLimit: productQueryConfig.defaultLimit, // Inherit from base config
+    maxLimit: productQueryConfig.maxLimit,       // Inherit from base config
     // No baseWhereClause for admins, they see all by default unless they filter
 };
 
@@ -150,7 +154,7 @@ router.get('/',
     createQueryBuilderMiddleware(adminProductQueryConfig),
     async (req, res) => {
     try {
-        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano, deleted FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano, deleted FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause} ${req.sqlLimitClause} ${req.sqlOffsetClause}`;
         const allProductsIncludingDeleted = await pool.query(queryText, req.sqlQueryValues);
         const productsWithUrls = allProductsIncludingDeleted.rows.map(product => transformProductForResponse(product, req));
         res.json(productsWithUrls);
@@ -191,8 +195,7 @@ router.get(
         // or "WHERE (deleted = FALSE)" if no other filters are applied by the user.
         // req.sqlQueryValues will contain the corresponding values
         // req.sqlOrderByClause will be like "ORDER BY nome ASC"
-
-        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause} ${req.sqlLimitClause} ${req.sqlOffsetClause}`;
         
         const allProducts = await pool.query(queryText, req.sqlQueryValues);
         const productsWithUrls = allProducts.rows.map(product => transformProductForResponse(product, req));

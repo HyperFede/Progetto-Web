@@ -9,6 +9,8 @@ const pool = require('../config/db-connect'); // Only if needed for validation, 
  * @param {Array<string>} config.allowedSortFields - Array of database column names allowed for sorting.
  * @param {string} config.defaultSortField - Default field to sort by if not specified.
  * @param {'ASC'|'DESC'} [config.defaultSortOrder='ASC'] - Default sort order.
+ * @param {number} [config.defaultLimit] - Default limit if not specified in query.
+ * @param {number} [config.maxLimit=100] - Maximum allowed limit.
  * @param {string} [config.baseWhereClause=''] - A base WHERE clause to always include (e.g., 'deleted = FALSE').
  */
 function createQueryBuilderMiddleware(config) {
@@ -86,6 +88,42 @@ function createQueryBuilderMiddleware(config) {
         // Ensure sortBy is a valid column name before direct concatenation
         // The check against allowedSortFields handles this.
         req.sqlOrderByClause = `ORDER BY ${sortBy} ${sortOrder}`;
+
+        // Build LIMIT and OFFSET clauses
+        req.sqlLimitClause = '';
+        req.sqlOffsetClause = '';
+
+        let limit = config.defaultLimit;
+        if (queryParams.limit !== undefined) {
+            const requestedLimit = parseInt(queryParams.limit, 10);
+            if (!isNaN(requestedLimit) && requestedLimit > 0) {
+                limit = Math.min(requestedLimit, config.maxLimit || 100); // Use maxLimit or default to 100
+            } else if (requestedLimit === 0) { // Allow 0 to mean no limit if desired, or handle as invalid
+                limit = undefined; // No limit
+            }
+        }
+
+        if (limit !== undefined && limit > 0) {
+            req.sqlQueryValues.push(limit);
+            req.sqlLimitClause = `LIMIT $${req.sqlQueryValues.length}`;
+
+            let offset = 0;
+            if (queryParams.offset !== undefined) {
+                const requestedOffset = parseInt(queryParams.offset, 10);
+                if (!isNaN(requestedOffset) && requestedOffset >= 0) {
+                    offset = requestedOffset;
+                }
+            } else if (queryParams.page !== undefined) {
+                const requestedPage = parseInt(queryParams.page, 10);
+                if (!isNaN(requestedPage) && requestedPage > 0) {
+                    offset = (requestedPage - 1) * limit;
+                }
+            }
+            if (offset >= 0) { // Offset can be 0
+                req.sqlQueryValues.push(offset);
+                req.sqlOffsetClause = `OFFSET $${req.sqlQueryValues.length}`;
+            }
+        }
 
         next();
     };
