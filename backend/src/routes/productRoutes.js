@@ -204,6 +204,31 @@ router.get(
 });
 
 /**
+ * @route GET /api/products/categories
+ * @description Recupera tutte le categorie distinte dei prodotti.
+ *              Questa rotta è pubblica e non richiede autenticazione.
+ * @access Public
+ *
+ * Interazione Black-Box:
+ *  Input: Nessuno.
+ *  Output:
+ *      - Successo (200 OK): Array JSON di stringhe, ognuna rappresentante una categoria distinta.
+ *        [ "Elettronica", "Libri", "Abbigliamento", ... ]
+ *      - Errore (500 Internal Server Error): In caso di errore del server.
+ *        { "error": "Stringa di errore" }
+ */
+router.get('/categories', async (req, res) => {
+    try {
+        const distinctCategoriesQuery = await pool.query("SELECT DISTINCT Categoria FROM Prodotto ORDER BY Categoria ASC");
+        const categories = distinctCategoriesQuery.rows.map(row => row.categoria); // pg driver returns lowercase keys
+        res.json(categories);
+    } catch (err) {
+        console.error('Error fetching distinct categories:', err.message, err.stack);
+        res.status(500).json({ error: "Errore del server durante il recupero delle categorie." });
+    }
+});
+
+/**
  * @route GET /api/products/:id
  * @description Recupera un singolo prodotto tramite il suo ID, solo se non è marcato come 'deleted'.
  *              Questa rotta è pubblica e non richiede autenticazione.
