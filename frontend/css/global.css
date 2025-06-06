@@ -133,3 +133,7 @@ a:hover {
     color: var(--pakistan-green);
     background-color: var(--primary-color);
 }
+
+.invisible{
+    display: none;
+}

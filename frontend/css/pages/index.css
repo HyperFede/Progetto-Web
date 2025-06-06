@@ -118,3 +118,7 @@ min-height: 400px;
     opacity: 0.85;
     color: var(--text-light) !important; /* Colore del testo al passaggio del mouse */
 }
+
+.invisible-admin{
+    display: none;
+}

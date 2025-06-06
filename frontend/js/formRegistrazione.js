@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', function(){
         const isChecked = this.checked;
         
         //se lo switch è attivo vengono mostrati i campi sottostanti
-        const conditionalSections = document.querySelectorAll('.conditional-section');
-            conditionalSections.forEach(section => {
+        const selector = document.querySelectorAll('.conditional-section');
+            selector.forEach(section => {
                 section.style.display = this.checked ? 'block' : 'none';
             });
         

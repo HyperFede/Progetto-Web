@@ -27,7 +27,7 @@ async function fetchData(url, method="POST", body=null){
         return {data: data, status: response.status};
 
     }catch(error){
-        console.error("Errore durante la fetch: ", error);
+        //console.error("Errore durante la fetch: ", error);
         return null;
     }
 }
