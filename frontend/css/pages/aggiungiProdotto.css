@@ -62,7 +62,7 @@
     padding: 2rem 1rem;
     cursor: pointer;
     transition: border-color 0.2s;
-    background-color: var(--background-color);
+    background-color: #e9ecef;
     border-radius: 0.25rem;
 }
 .product-image-upload-box:hover {
@@ -95,7 +95,7 @@
 
 .add-product-form-box .form-control,
 .add-product-form-box .form-select {
-    background-color: var(--background-color);
+    background-color: #e9ecef;
     color: var(--text-dark);
     border: 1px solid var(--border-color);
 }
