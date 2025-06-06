@@ -170,6 +170,7 @@
         const stars = document.querySelectorAll('.star-rating .bi-star, .star-rating .bi-star-fill');
         const ratingValueInput = document.getElementById('ratingValue');
 
+        // Inizializza le stelle come vuote
         stars.forEach(star => {
             star.addEventListener('mouseover', function () {
                 resetStars();
@@ -179,7 +180,7 @@
                     stars[i].classList.add('bi-star-fill', 'hovered');
                 }
             });
-
+            // Gestione mouseout per mantenere la valutazione corrente
             star.addEventListener('mouseout', function () {
                 const currentRating = ratingValueInput.value ? parseInt(ratingValueInput.value) : 0;
                 resetStars();
@@ -190,7 +191,7 @@
                     }
                 }
             });
-
+            // Gestione click per impostare la valutazione
             star.addEventListener('click', function () {
                 const clickedValue = parseInt(this.dataset.value);
                 ratingValueInput.value = clickedValue;
@@ -201,7 +202,7 @@
                 }
             });
         });
-
+        // Funzione per resettare le stelle (quando hai già mandato la recensione)
         function resetStars() {
             stars.forEach(s => {
                 s.classList.remove('bi-star-fill', 'selected', 'hovered');
@@ -222,7 +223,7 @@
 
                 alert('Recensione inviata! (simulazione)');
 
-                // Esempio di reset (opzionale)
+                // Esempio di reset di tutto il form
                 reviewForm.reset();
                 resetStars();
                 ratingValueInput.value = '';
