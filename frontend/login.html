@@ -16,10 +16,10 @@
             <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 100px;">
         </a>
         <h1 class="title-center" id="title-login">Accedi su Piattaforma</h1>
-        <form action="" method="post">
+        <form>
             <div class="input-group">
                 <label>Username</label>
-                <input type="text" placeholder="Username" name="username" required>
+                <input type="text" placeholder="Username" name="username" id="username" required>
             </div>
             <div class="input-group password-wrapper">
                 <label>Password</label>
@@ -36,10 +36,29 @@
                     </div>
                 -->
             </div>
-            <button type="submit" class="submit-btn">Accedi</button>
+            <button id="loginButton" type="button" class="submit-btn">Accedi</button>
         </form>
         <span class="signup-text">Prima volta? <a href="registrati.html">Registrati</a></span>
     </div>
     <script src="js/passwordFieldShower.js"></script>
+    <script src="js/fetcher.js"></script>
+    <script>
+        document.getElementById("loginButton").addEventListener('click', async () => {
+            const formData = {
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value
+            };
+
+            let result = await fetchData("/api/auth/login", "POST", formData);
+            console.log(result);
+            if(result){
+                window.location.replace("/")
+            }else{
+                console.log()
+                //TODO: mettere qualcosa in caso di failure della login
+            }
+        })
+
+    </script>
 </body>
 </html>

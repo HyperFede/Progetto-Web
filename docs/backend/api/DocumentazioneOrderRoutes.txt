@@ -1,0 +1,360 @@
+Elenco Endpoint
+
+GET api/orders/
+GET api/orders/:id
+GET api/orders/my-orders
+
+POST api/orders/create-and-reserve
+
+DELETE api/orders/:id
+
+#1 creare un nuovo ordine
+Orders API Documentation
+
+Schema di Funzionalità:
+  #1 Create (POST)  
+  #2 Read (GET)  
+  #3 Update (PUT/POST)  
+  #4 Delete (DELETE)  
+
+-------------------------------------------------------------------------------
+#1 Create Order
+Endpoint:  
+  POST /api/orders/reserve-and-create-checkout-session
+
+Descrizione:  
+  - Crea un nuovo ordine “In attesa” per il cliente autenticato.  
+  - Controlla lo stock dei prodotti nel carrello, lo riserva (tramite transazione), popola la tabella DettagliOrdine, svuota il carrello e genera una sessione Stripe valida per 30 minuti.  
+  - Se esiste già un ordine pendente (status dell'ordine = “In attesa” e deleted = false), restituisce 409 con il link alla sessione Stripe esistente (ancora utilizzabile).
+  - I prodotti nel carrello vengono eliminati nel momento della creazione dell'ordine (da fixare piu tardi, andrebbe eliminato al verificare del pagamento)
+  -Se dopo 30 minuti non si è ancora pagato (StripeSessionID scade), i prodotti verrano re-stockati (da fixare, non messi nel carrello)
+Accesso:  
+  - Autenticazione richiesta (middleware isAuthenticated)  
+  - Ruolo richiesto: “Cliente” (middleware hasPermission(['Cliente']))
+
+Input:  
+  - Header:  
+      Authorization: Bearer <token_JWT>  
+  - Corpo:  
+      Nessun JSON formale richiesto: l’endpoint recupera automaticamente i prodotti da “dettaglicarrello” associato a req.user.idutente.  
+  - Precondizione:  
+      1. Nel DB, l’utente deve avere almeno un prodotto nel carrello (dettaglicarrello).  
+      2. L’utente deve avere un indirizzo salvato (Utente.indirizzo non-null).  
+
+Output (risposta HTTP):
+
+  * Caso “nuovo ordine” (201 Created)  
+    ```json
+    {
+      "message": "Ordine creato e articoli riservati con successo. Hai 30 minuti per completare il pagamento.",
+      "ordine": {
+        "idordine": <Number>,
+        "dataOrdine": "YYYY-MM-DD",
+        "oraOrdine": "HH:MM:SS",
+        "status": "In attesa",
+        "importoTotale": "XXX.YY"
+      },
+      "existingOrder": false,
+      "stripeSessionId": "<string>",
+      "stripeSessionUrl": "<https://checkout.stripe.com/...>"
+    }
+    ```
+    - `ordine`: riepilogo del record appena inserito.  
+    - `existingOrder: false` indica che non esisteva un ordine pendente.  
+    - `stripeSessionId` e `stripeSessionUrl` servono al client per il checkout.
+
+  * Caso “ordine pendente già esistente” (409 Conflict)  
+    ```json
+    {
+      "message": "Hai già un ordine (ID: 123) in attesa di pagamento. Se il link precedente non fosse valido, ne è stato generato uno aggiornato per completare il pagamento.",
+      "orderId": 123,
+      "existingOrder": true,
+      "stripeSessionUrl": "<https://checkout.stripe.com/...>"
+    }
+    ```
+    - `existingOrder: true` indica che l’ordine era già in stato “In attesa”.  
+    -  `stripeSessionUrl` punta alla sessione ancora aperta di Stripe.
+
+  * Errori (risposte comuni):  
+    - 400 Bad Request:  
+      - Carrello vuoto: `{ "message": "Il tuo carrello è vuoto." }`  
+      - Indirizzo mancante: `{ "message": "Indirizzo di spedizione mancante. Per favore, aggiorna il tuo profilo utente." }`  
+      - Stock insufficiente per un prodotto:  
+        `{ "message": "Stock insufficiente per il prodotto \"<nome>\". Richiesti: Q, Disponibili: P." }`  
+    - 500 Internal Server Error: `{ "message": "Errore del server durante la creazione dell’ordine." }`
+
+-------------------------------------------------------------------------------
+#2 Read Orders
+
+## 2.1 GET All Orders (Admin)
+Endpoint:  
+  GET /api/orders/
+
+Descrizione:  
+  - Restituisce la lista di tutti gli ordini (inclusi quelli soft‐deleted).  
+  - Per ciascun ordine include: idordine, idutente, data, ora, importototale, status, deleted, nomeutente, emailutente, indirizzospedizione, più un array “dettagli” con le righe di DettagliOrdine (idprodotto, quantita, prezzostoricounitario, nomeprodotto, totaleriga).
+
+Accesso:  
+  - Autenticazione richiesta  
+  - Ruolo richiesto: “Admin”  
+
+Filtri (nei parametri di query, implementati da `queryBuilderMiddleware`):  
+  - `status=<string>` (es.: ?status=Pagato → WHERE o.status = 'Pagato')  
+  - `deleted=<true|false>`  
+  - `idutente=<Numero>`  
+  - `data_gte=YYYY-MM-DD` e `data_lte=YYYY-MM-DD`  
+  - `nomeutente_like=<string>` (LIKE %value%)  
+  - `emailutente_like=<string>`
+
+Ordinamento (query string, es.: `?sort=importototale,ASC`):  
+  - Campi ammessi: idordine, data, ora, importototale, status, nomeutente, emailutente, deleted  
+  - Se non specificato, `ORDER BY data DESC`.
+
+Input:  
+  - Header:  
+      Authorization: Bearer <token_JWT>  
+  - Query string (facoltativa): filtri e sort come sopra.  
+
+Output (200 OK):  
+  ```json
+  [
+    {
+      "idordine": 58,
+      "idutente": 517,
+      "data": "2025-05-20",
+      "ora": "14:30:00",
+      "importototale": "120.00",
+      "status": "In attesa",
+      "deleted": false,
+      "nomeutente": "mariorossi",
+      "emailutente": "mario.rossi@example.com",
+      "indirizzospedizione": "Via Roma 10, Milano",
+      "dettagli": [
+        {
+          "idprodotto": 10,
+          "quantita": 2,
+          "prezzostoricounitario": "25.00",
+          "nomeprodotto": "Ciotola in Ceramica",
+          "totaleriga": "50.00"
+        },
+        {
+          "idprodotto": 15,
+          "quantita": 1,
+          "prezzostoricounitario": "70.00",
+          "nomeprodotto": "Lampada Artigianale",
+          "totaleriga": "70.00"
+        }
+      ]
+    },
+    { /* altro ordine… */ }
+  ]
+
+
+
+#2 visualizzare gli ordini:
+GET api/orders/
+
+@Descr restituisce tutti gli ordini del DB (filtrabili)
+
+@Access Admin
+@filters esempi:
+GET /api/orders?status=Pagato
+GET /api/orders?deleted=true&sort=importototale&order=asc
+GET /api/orders?idutente=5
+GET /api/orders?data_gte=2023-01-01&data_lte=2023-01-31
+GET /api/orders?nomeutente_like=john
+GET /api/orders?status=In attesa&sort=ora&order=asc //nota lo spazio per in attesa
+
+Input (nessuno oltre al token)
+
+output
+[
+    {
+        "idordine": 13,
+        "idutente": 5,
+        "data": "2025-06-01T22:00:00.000Z",
+        "ora": "00:37:38.372084",
+        "importototale": "359.00",
+        "status": "Scaduto",
+        "deleted": false,
+        "nomeutente": "cli1",
+        "emailutente": "g.russo@mail.com",
+        "indirizzospedizione": "Via Clienti 7, Napoli",
+        "dettagli": [
+            {
+                "idprodotto": 4,
+                "quantita": 1,
+                "prezzostoricounitario": "89.00",
+                "nomeprodotto": "Collana Argento",
+                "totaleriga": "89.00"
+            },
+            {
+                "idprodotto": 7,
+                "quantita": 1,
+                "prezzostoricounitario": "120.00",
+                "nomeprodotto": "Scultura Cavallo",
+                "totaleriga": "120.00"
+            },
+            {
+                "idprodotto": 6,
+                "quantita": 2,
+                "prezzostoricounitario": "75.00",
+                "nomeprodotto": "Bracciale Intrecciato",
+                "totaleriga": "150.00"
+            }
+        ]
+    },
+    {
+        ...
+        "dettagli": [
+            {
+                ...
+            },
+            {
+                ...
+            }
+        ]
+    }
+]
+
+
+2.2 GET My Orders (Cliente)
+Endpoint:
+GET /api/orders/my-orders
+
+Descrizione:
+
+Restituisce la lista degli ordini NON soft‐deleted (deleted = false) appartenenti al cliente autenticato (req.user.idutente).
+
+Include gli stessi campi di “GET /api/orders/” più “dettagli” riga per riga.
+
+Accesso: Autenticazione richiesta
+Ruolo richiesto: “Cliente”
+
+Filtri: (query string, vedi clientOrderQueryConfig):
+status=<string>
+data_gte=YYYY-MM-DD e data_lte=YYYY-MM-DD
+Ordinamento:
+Campi ammessi: idordine, data, ora, importototale, status
+Default: ORDER BY data DESC
+
+Input:
+
+-Header:
+-Authorization: Bearer <token_JWT>
+-Query string (facoltativa): filtri/ordinamento.
+
+
+-Output (200 OK):
+[
+  {
+    "idordine": 200,
+    "idutente": 45,
+    "data": "2025-05-20",
+    "ora": "15:10:00",
+    "importototale": "75.00",
+    "status": "Pagato",
+    "deleted": false,
+    "nomeutente": "mariorossi",
+    "emailutente": "mario.rossi@example.com",
+    "indirizzospedizione": "Via Roma 10, Milano",
+    "dettagli": [
+      {
+        "idprodotto": 10,
+        "quantita": 3,
+        "prezzostoricounitario": "25.00",
+        "nomeprodotto": "Ciotola in Ceramica",
+        "totaleriga": "75.00"
+      }
+    ]
+  },
+  { /* altro ordine Cliente… */ }
+]
+
+2.3 GET Single Order (Admin & Cliente)
+Endpoint:
+GET /api/orders/:id
+
+Descrizione:
+Restituisce i dettagli di un singolo ordine identificato da :id (inclusi i dettagli di riga).
+Un Admin può vedere qualsiasi ordine, incluso se deleted = true.
+Un Cliente può vedere solo i propri ordini e solo se deleted = false.
+
+Accesso: Autenticazione richiesta
+Ruolo richiesto: “Admin” o “Cliente”
+
+Validazioni Preliminari:
+id deve essere un numero valido, altrimenti 400 Bad Request.
+Se nessun ordine trovato → 404 Not Found.
+Se Cliente tenta di accedere a un ordine altrui o soft‐deleted → 404 Not Found.
+Se nessuna delle due condizioni soddisfatta e non Admin/Cliente → 403 Forbidden.
+
+Input:
+
+Header:
+Authorization: Bearer <token_JWT>
+
+Path Params:
+:id (ID numerico ordine)
+
+Output (200 OK):
+{
+  "idordine": 300,
+  "idutente": 45,
+  "data": "2025-05-22",
+  "ora": "12:00:00",
+  "importototale": "120.00",
+  "status": "In attesa",
+  "deleted": false,
+  "nomeutente": "mariorossi",
+  "emailutente": "mario.rossi@example.com",
+  "indirizzospedizione": "Via Roma 10, Milano",
+  "dettagli": [
+    {
+      "idprodotto": 58,
+      "quantita": 4,
+      "prezzostoricounitario": "30.00",
+      "nomeprodotto": "Lampada in Legno",
+      "totaleriga": "120.00"
+    }
+  ]
+}
+
+#3 Update order
+
+3.1 Cancel Pending Order (Status Update)
+Endpoint:
+POST /api/orders/:id/cancel
+
+Descrizione:
+
+Annulla un ordine pendente (status = 'In attesa') per il cliente autenticato.
+
+Ripristina lo stock dei prodotti elencati in DettagliOrdine, imposta Ordine.Status = 'Scaduto' e, se presente, forza la scadenza della sessione Stripe.
+Accesso:
+Autenticazione richiesta
+Ruolo richiesto: “Cliente"
+
+Validazioni Preliminari:
+id deve essere un numero valido, altrimenti 400 Bad Request.
+Se nessun ordine trovato / deleted = true → 404 Not Found.
+
+Se order.idutente !== req.user.idutente → 403 Forbidden.
+Se order.status !== 'In attesa' → 400 Bad Request.
+
+NB non restituisce ancora gli item nel carrello (da fixare)
+Input:
+
+Header:
+Authorization: Bearer <token_JWT>
+
+Path Param:
+:id (ID ordine da cancellare)
+
+Output (200 OK):
+{
+  "message": "Ordine ID <id> annullato con successo (Status='Scaduto') e articoli riassortiti."
+}
+
+#4
+DELETE :id fa soft delete (per ora non eliminiamo del tutto)

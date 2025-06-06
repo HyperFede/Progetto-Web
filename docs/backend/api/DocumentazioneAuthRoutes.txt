@@ -1,0 +1,67 @@
+Routes API di tipo auth:
+
+-POST api/auth/login
+-POST api/auth/logout
+
+-POST api/auth/recover-password/verify-identity
+-POST api/auth/recover-password/reset
+
+-GET api/auth/session-info (restitusice se l'utente è autentiacto e che tipo è)
+
+
+#1 login:
+
+Accesso: pubblico, senza middleware
+
+Input: Oggetto JSON nel corpo della richiesta (req.body) con i seguenti campi:
+     {
+         "username": "String (obbligatorio)",
+         "password": "String (obbligatorio)"
+     }
+Output:
+    - Successo (200 OK): Oggetto JSON contenente il token JWT e i dati dell'utente (senza password).
+      { 
+        "token": "aaaaa.bbbbbb.cccccc", 
+        "user": { "idutente": Number, "username": String, ... }, 
+        "message": "Stringa di successo" 
+      }
+    - Errore (400 Bad Request): Se username o password mancano nel corpo della richiesta.
+      { "message": "Stringa di errore" }
+    - Errore (401 Unauthorized): Se le credenziali (username o password) non sono valide
+                                 o se l'utente è marcato come 'deleted'.
+      { "message": "Stringa di errore" }
+    - Errore (500 Internal Server Error): In caso di errore del server.
+      { "message": "Stringa di errore" }
+
+Il token di JWT viene anche salvato nei cookies del Browser+
+
+#2 logout:
+
+Accesso: pubblico
+
+ il logout è principalmente una responsabilità del client:
+ il client deve eliminare il token memorizzato (es. da localStorage, sessionStorage,).
+ dai cookie invece viene fatto scadere automaticamente
+
+ restituisce uno status (200) che ricorda al client di sbarazzarsi del token
+
+
+#3 Reset della password
+
+
+-POST api/auth/recover-password/verify-identity
+
+Richiede il campo username (obbligatorio)
+
+Se l'utente è di tipo Cliente richiede il campo email
+Se l'utente è di tipo Artigiano richiede il campo piva
+
+restituisce un token che scade entro 10 minuti che si puo utilizzare esclusivamente per il reset della password
+
+
+-POST api/auth/recover-password/reset
+
+Richiede il token di autorizzazione, e il campo nuovapassword, resetta la password
+
+
+

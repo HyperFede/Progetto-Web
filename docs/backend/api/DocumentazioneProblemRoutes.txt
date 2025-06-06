@@ -1,0 +1,394 @@
+Problemi API Documentation
+
+Schema di Funzionalità:
+  #1 Create      – POST /api/problems
+  #2 Read        – GET /api/problems, GET /api/problems/me, GET /api/problems/:id
+  #3 Update      – PUT /api/problems/:id/status
+  #4 Delete      – DELETE /api/problems/:id
+
+--------------------------------------------------------------------------------
+#1 Create Problema
+Endpoint:
+  POST /api/problems
+
+Descrizione:
+  - Crea un nuovo “Problema” segnalato da un Cliente o da un Artigiano per un ordine esistente.
+  - Il campo “immagine” rimane NULL all’inserimento iniziale.
+
+Accesso:
+  - isAuthenticated
+  - hasPermission(['Cliente', 'Artigiano'])
+
+Regole di Business:
+  - Deve essere fornito `idordine` (numero) e `descrizione` (stringa).
+  - Se utente è Cliente → `idcliente = idutente`; se Artigiano → `idartigiano = idutente`.
+  - `timestampsegnalazione` è generato automaticamente da server.
+  - `status` iniziale = `"Aperto"`.
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Body (JSON):
+    {
+      "idordine": <Number>,
+      "descrizione": "<stringa>"
+    }
+
+Validazioni:
+  - Se manca `idordine` o `descrizione` → 400 Bad Request:
+    { "error": "idordine and descrizione are required." }
+  - Se ruolo utente non è Cliente/Artigiano → 403 Forbidden.
+
+Output:
+  - 201 Created:
+    {
+      "idproblema": 56,
+      "idcliente": 45,         // oppure null se è un artigiano
+      "idartigiano": null,     // oppure idutente se artigiano
+      "idordine": 123,
+      "descrizione": "Descrizione del problema",
+      "status": "Aperto",
+      "timestampsegnalazione": "2025-06-04T12:34:56.789Z",
+      "username_cliente": "mariorossi",        // se idcliente non null
+      "username_artigiano": null,              // se idartigiano null
+      "username_admin": null,                  // rimane null finché non assegnato
+      "immagine_url": null                      // presente solo se img non null
+    }
+  - 400 Bad Request: { "error": "idordine and descrizione are required." }
+  - 403 Forbidden: { "error": "User role cannot create a problema." }
+  - 500 Internal Server Error: { "error": "Failed to create problema." }
+
+--------------------------------------------------------------------------------
+#2 Read Problemi
+
+## 2.1 GET Tutti i Problemi
+Endpoint:
+  GET /api/problems
+
+Descrizione:
+  - Restituisce la lista di tutti i Problemi nel sistema, ordinati per `timestampsegnalazione` DESC.
+  - Include username di cliente, artigiano e admin (se assegnato).
+
+Accesso:
+  - isAuthenticated
+  - hasPermission(['Admin'])
+
+Filtri (query string, esempi):
+  - `?idproblema=10`  
+  - `?idcliente=45&idartigiano=20`  
+  - `?idordine=123`  
+  - `?status=Aperto`  
+  - `?descrizione_like=ritardo`  (corrisponde a `%ritardo%`)  
+  - `?timestampsegnalazione_gte=2025-06-01T00:00:00.000Z`  
+  - `?timestampsegnalazione_lte=2025-06-05T23:59:59.999Z`
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+
+Output (200 OK):
+  [
+    {
+      "idproblema": 56,
+      "idcliente": 45,
+      "idartigiano": null,
+      "idordine": 123,
+      "descrizione": "Descrizione del problema",
+      "status": "Aperto",
+      "timestampsegnalazione": "2025-06-04T12:34:56.789Z",
+      "username_cliente": "mariorossi",
+      "username_artigiano": null,
+      "username_admin": null,
+      "immagine_url": null
+    },
+    { /* altro problema… */ }
+  ]
+
+Errori:
+  - 500 Internal Server Error: { "error": "Failed to fetch problemi." }
+
+---
+
+## 2.2 GET Problemi “Me”
+Endpoint:
+  GET /api/problems/me
+
+Descrizione:
+  - Restituisce i Problemi segnalati o assegnati all’utente autenticato (Cliente o Artigiano).
+  - Se Cliente → filtra `idcliente = idutente`; se Artigiano → `idartigiano = idutente`.
+  - Ordina per `timestampsegnalazione` DESC e include `username_admin` se assegnato.
+
+Accesso:
+  - isAuthenticated
+  - hasPermission(['Cliente', 'Artigiano'])
+
+Filtri: come prima, comunque tutti applicabili (idcliente e idartigiano sono un po' inutili ma si potrebbero usare)
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+
+Output (200 OK):
+  [
+    {
+      "idproblema": 57,
+      "idcliente": 45,           // se Cliente
+      "idartigiano": null,
+      "idordine": 124,
+      "descrizione": "Altro problema",
+      "status": "Aperto",
+      "timestampsegnalazione": "2025-06-03T15:20:00.000Z",
+      "username_cliente": "mariorossi",
+      "username_artigiano": null,
+      "username_admin": null,
+      "immagine_url": null
+    },
+    { /* … */ }
+  ]
+
+Errori:
+  - 500 Internal Server Error: { "error": "Failed to fetch user problemi." }
+
+---
+
+## 2.3 GET Singolo Problema
+Endpoint:
+  GET /api/problems/:id
+
+Descrizione:
+  - Restituisce i dettagli di un singolo Problema via `idproblema`.
+  - Include `username_cliente`, `username_artigiano`, `username_admin`.
+
+Accesso:
+  - isAuthenticated
+  - Condizioni:
+      • Admin può vedere qualsiasi Problema.
+      • Cliente può vedere solo se `idcliente === idutente`.
+      • Artigiano può vedere solo se `idartigiano === idutente`.
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Path Param:
+      :id (IDProblema, numero intero)
+
+Validazioni Preliminari:
+  - Se nessun record → 404 Not Found: { "error": "Problema not found." }
+  - Se utente non autorizzato → 403 Forbidden: { "error": "Forbidden: You do not have permission to view this problema." }
+
+Output (200 OK):
+  {
+    "idproblema": 56,
+    "idcliente": 45,
+    "idartigiano": null,
+    "idordine": 123,
+    "descrizione": "Descrizione del problema",
+    "status": "Aperto",
+    "timestampsegnalazione": "2025-06-04T12:34:56.789Z",
+    "username_cliente": "mariorossi",
+    "username_artigiano": null,
+    "username_admin": null,
+    "immagine_url": null
+  }
+
+Errori:
+  - 404 Not Found: { "error": "Problema not found." }
+  - 403 Forbidden: { "error": "Forbidden: You do not have permission to view this problema." }
+  - 500 Internal Server Error: { "error": "Failed to fetch problema." }
+
+--------------------------------------------------------------------------------
+#3 Update Problema Status
+Endpoint:
+  PUT /api/problems/:id/status
+
+Descrizione:
+  - Aggiorna il campo `status` di un Problema (ad esempio da “Aperto” a “In lavorazione” o “Risolto”) e assegna `idadmin = idutente` dell’Admin che esegue l’azione.
+
+Accesso:
+  - isAuthenticated
+  - hasPermission(['Admin'])
+
+Validazioni:
+  - `:id` deve essere un numero intero → 400 Bad Request se NaN.
+  - Body JSON dev’essere: { "status": "<string>" } con valore in [“In lavorazione”, “Risolto”].
+  - Se status non valido → 400 Bad Request:
+    { "error": "Invalid status. Must be 'In lavorazione' or 'Risolto'." }
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Path Param:
+      :id (IDProblema, numero intero)
+  - Body (JSON):
+    {
+      "status": "In lavorazione"   // oppure "Risolto"
+    }
+
+Output:
+  - 200 OK (oggetto Problema aggiornato):
+    {
+      "idproblema": 56,
+      "idcliente": 45,
+      "idartigiano": null,
+      "idordine": 123,
+      "descrizione": "Descrizione del problema",
+      "status": "In lavorazione",
+      "timestampsegnalazione": "2025-06-04T12:34:56.789Z",
+      "username_cliente": "mariorossi",
+      "username_artigiano": null,
+      "username_admin": "adminuser",
+      "immagine_url": null
+    }
+  - 400 Bad Request: { "error": "Invalid status. Must be 'In lavorazione' or 'Risolto'." }
+  - 404 Not Found: { "error": "Problema not found or no change made." }
+  - 500 Internal Server Error: { "error": "Failed to update problema status." }
+
+--------------------------------------------------------------------------------
+#4 Delete Problema
+Endpoint:
+  DELETE /api/problems/:id
+
+Descrizione:
+  - Elimina un Problema (soft/hard delete a seconda del DB, qui è hard delete).
+
+Accesso:
+  - isAuthenticated
+  - hasPermission(['Admin'])
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Path Param:
+      :id (IDProblema, numero intero)
+
+Output:
+  - 204 No Content (eliminazione riuscita)
+  - 404 Not Found: { "error": "Problema not found." }
+  - 500 Internal Server Error: { "error": "Failed to delete problema." }
+
+--------------------------------------------------------------------------------
+#5 Image Handling Routes
+
+## 5.1 GET Problema Image Content
+Endpoint:
+  GET /api/problems/:id/image_content
+
+Descrizione:
+  - Restituisce i dati binari dell’immagine (BYTEA) associata al Problema.
+  - In base al buffer, imposta header `Content-Type` tramite `file-type.fromBuffer()`.
+
+Accesso:
+  - isAuthenticated
+  - Condizioni:
+      • Admin
+      • Cliente se `idcliente === idutente`
+      • Artigiano se `idartigiano === idutente`
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Path Param:
+      :id (IDProblema, numero intero)
+
+Validazioni Preliminari:
+  - Se `id` non numerico → 400 Bad Request:
+    { "error": "Invalid problema ID format." }
+  - checkProblemaOwnershipOrAdmin:
+      • Se `not_found` → 404: { "error": "Problema not found." }
+      • Se `Forbidden` → 403: { "error": "Forbidden: You do not have permission to view this image." }
+
+Processo:
+  1. SELECT `immagine` FROM `Problema` WHERE `idproblema = $1`.
+  2. Se nessun record o `immagine` NULL → 404: { "error": "Image not found for this problema." }
+  3. Se valore non Buffer → 500: { "error": "Image data corrupted or invalid format." }
+  4. `const fileTypeResult = await FileType.fromBuffer(imageBuffer)`
+     - Se esiste → `res.setHeader('Content-Type', fileTypeResult.mime)`
+     - Altrimenti → `res.setHeader('Content-Type', 'application/octet-stream')`
+  5. `res.send(imageBuffer)`
+
+Output:
+  - 200 OK (header corretto e body = buffer binario)
+  - 404 Not Found / 403 Forbidden / 400 / 500 come sopra
+
+---
+
+## 5.2 PUT Problema Image
+Endpoint:
+  PUT /api/problems/:id/image
+
+Descrizione:
+  - Carica o aggiorna l’immagine per un Problema esistente. Formato raw fino a 10 MB tramite `rawImageParser('10mb')`.
+
+Accesso:
+  - isAuthenticated
+  - Condizioni:
+      • Admin
+      • Cliente se `idcliente === idutente`
+      • Artigiano se `idartigiano === idutente`
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+      Content-Type: image/png | image/jpeg | …
+  - Path Param:
+      :id (IDProblema, numero intero)
+  - Corpo: dati binari dell’immagine (raw)
+
+Validazioni:
+  - Se `id` non numerico → 400 Bad Request: { "error": "Invalid problema ID format." }
+  - Se body vuoto → 400 Bad Request: { "error": "No image data received." }
+  - checkProblemaOwnershipOrAdmin:
+      • Se `not_found` → 404: { "error": "Problema not found." }
+      • Se `Forbidden` → 403: { "error": "Forbidden: You do not have permission to update the image for this problema." }
+  - Se dimensione >10 MB → 413 Payload Too Large:
+    { "error": "Image too large. Limit: 10mb." }
+
+Processo:
+  1. UPDATE `Problema SET immagine = $1 WHERE idproblema = $2`.
+  2. Se `rowCount === 0` → 404: { "error": "Problema not found, image update failed." }
+  3. 200 OK: { "message": "Image updated successfully for problema ID <id>" }
+
+Errori:
+  - 400, 403, 404 come sopra
+  - 413 Payload Too Large
+  - 500 Internal Server Error: { "error": "Server error while updating image." }
+
+---
+
+## 5.3 DELETE Problema Image
+Endpoint:
+  DELETE /api/problems/:id/image
+
+Descrizione:
+  - Rimuove l’immagine associata a un Problema (setta `immagine = NULL`).
+
+Accesso:
+  - isAuthenticated
+  - Condizioni:
+      • Admin
+      • Cliente se `idcliente === idutente`
+      • Artigiano se `idartigiano === idutente`
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Path Param:
+      :id (IDProblema, numero intero)
+
+Validazioni:
+  - Se `id` non numerico → 400 Bad Request: { "error": "Invalid problema ID format." }
+  - checkProblemaOwnershipOrAdmin:
+      • Se `not_found` → 404: { "error": "Problema not found." }
+      • Se `Forbidden` → 403: { "error": "Forbidden: You do not have permission to delete the image for this problema." }
+
+Processo:
+  1. SELECT `immagine` FROM `Problema` WHERE `idproblema = $1`.
+     - Se `rowCount === 0` → 404: { "error": "Problema not found." }
+     - Se `immagine === NULL` → 404: { "error": "Problema does not have an image associated." }
+  2. UPDATE `Problema SET immagine = NULL WHERE idproblema = $1`.
+     - Se `rowCount === 0` → 404: { "error": "Problema not found, image deletion failed." }
+  3. 200 OK: { "message": "Image deleted successfully for problema ID <id>" }
+
+Errori:
+  - 400, 403, 404 come sopra
+  - 500 Internal Server Error: { "error": "Server error while deleting image." }
