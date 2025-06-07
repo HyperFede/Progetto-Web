@@ -61,14 +61,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 verifyIdentityButton.style.display = 'none'; // Hide verify button
                 usernameInput.disabled = true; // Disable username and email fields
                 emailOrPivaInput.disabled = true;
-
             }
             else if (response.status === 404) {
-                verifyMessageDiv.innerHTML = `<span class="error-text">${response.message || 'Utente non trovato o dati non corrispondenti.'}</span>`;
+                // Assuming 404 from backend also comes in response.message if fetchData doesn't throw
+                verifyMessageDiv.innerHTML = `<span class="error-text">${(response.data && response.message) || response.message || 'Utente non trovato o dati non corrispondenti.'}</span>`;
             }
             else {
                 // Handle errors from the backend (e.g., user not found, email/piva mismatch)
-                verifyMessageDiv.innerHTML = `<span class="error-text">${response.message || 'Verifica fallita. Controlla i dati inseriti.'}</span>`;
+                verifyMessageDiv.innerHTML = `<span class="error-text">${(response.data && response.message) || response.message || 'Verifica fallita. Controlla i dati inseriti.'}</span>`;
                 console.error('Verification failed:', response);
             }
         });
@@ -122,12 +122,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.log('Password reset successful:', response)
 
                 } else {
-                    // Handle specific errors from backend if available in response.message
-                    resetMessageDiv.innerHTML = `<span class="error-text">${response.message || 'Reset della password fallito. Riprova.'}</span>`;
+                    // This case might be less likely if fetchData throws for non-200, error handled in catch.
+                    // But if fetchData could return non-200 without throwing:
+                    resetMessageDiv.innerHTML = `<span class="error-text">${(response.data && response.message) || response.message || 'Reset della password fallito. Riprova.'}</span>`;
                 }
             } catch (error) {
                 console.error('Errore durante il reset della password:', error);
-                resetMessageDiv.innerHTML = '<span class="error-text">Errore di comunicazione con il server durante il reset. Riprova più tardi.</span>';
+                const backendMessage = error.body && error.body.message ? error.body.message : 'Errore di comunicazione con il server durante il reset. Riprova più tardi.';
+                resetMessageDiv.innerHTML = `<span class="error-text">${backendMessage}</span>`;
             }
         });
     }
