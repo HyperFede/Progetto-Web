@@ -274,7 +274,7 @@ router.post('/recover-password/reset', async (req, res) => {
     }
 
     try {
-        
+
         const decoded = jwt.verify(resetToken, jwtSecret);
         // Verifica che il token sia effettivamente per il reset password e non un token di sessione
         if (!decoded.user || !decoded.user.id || decoded.user.purpose !== 'password-reset') {
@@ -322,6 +322,7 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
             indirizzo: req.user.indirizzo,
             email: req.user.email,
             idutente: req.user.idutente,
+
         };
         //console.log(responsePayload);
         // Check the user's actual tipologia from req.user, case-insensitively.
@@ -330,6 +331,8 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
         if (req.user.tipologia && req.user.tipologia.toLowerCase() === 'artigiano') {
             responsePayload.piva = req.user.piva;
             responsePayload.artigianodescrizione = req.user.artigianodescrizione;
+                    responsePayload.piva = req.user.piva;
+                    responsePayload.artigianodescrizione = req.user.artigianodescrizione;
         }
 
         res.status(200).json(responsePayload);

@@ -181,3 +181,8 @@ min-height: 400px;
 .invisible{
     display: none;
 }
+
+
+.invisible-admin{
+    display: none;
+}

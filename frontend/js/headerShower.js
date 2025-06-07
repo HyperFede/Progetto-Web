@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     let result = await fetchData("/api/auth/session-info", "GET");
                 if(result.status == 200){
                     //loggato
-                    //console.log(result);
+                    console.log(result);
 
                     const usernameSpans = document.querySelectorAll('#nav-username');
                     usernameSpans.forEach(span => {
