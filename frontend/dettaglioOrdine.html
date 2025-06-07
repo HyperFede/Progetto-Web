@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dettaglio Ordine - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/pages/dettaglioOrdine.css">
+</head>
+<body>
+    <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
+
+            <ul class="nav nav-pills align-items-center">
+                <li class="nav-item dropdown">
+                    <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-3 me-2"></i> Username
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                        <li><a class="dropdown-item" href="dashboardArtigiano.html"><i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO</a></li>
+                        <li><a class="dropdown-item" href="prodottiArtigiano.html"><i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI</a></li>
+                        <li><a class="dropdown-item" href="ordiniRicevuti.html"><i class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Inserisci Prodotto
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Navbar per schermi < lg -->
+    <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none">
+         <div class="container-fluid d-flex justify-content-between align-items-center">
+            <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
+
+            <div class="ms-auto"></div>
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Dashboard Artigiano</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                        <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="dashboardArtigiano.html">
+                                <i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                             <a class="nav-link" href="prodottiArtigiano.html"> <i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI
+                             </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="ordiniRicevuti.html"> <i class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"> <i class="bi bi-flag-fill me-2"></i>SEGNALAZIONI
+                            </a>
+                        </li>
+                        </ul>
+                        <hr class="sidebar-divider">
+                        <button class="btn logout-btn w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                        </button>
+                    </div>
+                </div>
+            </div>
+           <ul class="nav nav-pills align-items-center">
+                <li class="nav-item">
+                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
+                        <i class="bi bi-plus-circle-fill"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container my-4 pt-lg-0">
+        <div class="row mb-3">
+            <div class="col">
+                <a href="#" onclick="history.back(); return false;" class="back-to-link">
+                    <i class="bi bi-arrow-left-circle me-1"></i>
+                    Indietro
+                </a>
+            </div>
+        </div>
+
+        <h2 class="order-detail-page-title text-center mb-4">Ordine: #ORD12345</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-9">
+                <div class="order-detail-box p-4 mb-4">
+                    <h4 class="section-title mb-3">Informazioni Cliente</h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <strong>Nome:</strong> Mario
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Cognome:</strong> Rossi
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Indirizzo di Spedizione:</strong> Via Roma 10, 00100 Roma (RM), Italia
+                    </div>
+                </div>
+
+                <div class="order-detail-box p-4 mb-4">
+                    <h4 class="section-title mb-3">Prodotti Ordinati</h4>
+                    
+                    <!-- Esempio Prodotto Ordinato 1 -->
+                    <div class="ordered-product-item d-flex align-items-center mb-3">
+                        <img src="https://via.placeholder.com/80x80?text=Prodotto1" alt="Immagine Prodotto" class="ordered-product-image me-3">
+                        <div class="ordered-product-info flex-grow-1">
+                            <h5 class="product-name mb-1">Vaso in Ceramica Dipinto</h5>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="mb-0"><strong>Quantità:</strong> 1</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p class="mb-0"><strong>Prezzo:</strong> € 45,00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <!-- Esempio Prodotto Ordinato 2 -->
+                    <div class="ordered-product-item d-flex align-items-center mb-3">
+                        <img src="https://via.placeholder.com/80x80?text=Prodotto2" alt="Immagine Prodotto" class="ordered-product-image me-3">
+                        <div class="ordered-product-info flex-grow-1">
+                            <h5 class="product-name mb-1">Collana Artigianale</h5>
+                             <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="mb-0"><strong>Quantità:</strong> 2</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p class="mb-0"><strong>Prezzo:</strong> € 30,50 (2 x € 15,25)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Aggiungere altri prodotti ordinati qui -->
+
+                    <div class="text-end mt-4">
+                        <h5 class="total-order-price">Importo Totale Ordine: € 75,50</h5>
+                    </div>
+                </div>
+
+                <div class="order-detail-box p-4 mb-5">
+                    <h4 class="section-title mb-3">Stato Ordine</h4>
+                    <div class="row align-items-end">
+                        <div class="col-md-8 mb-3 mb-md-0">
+                            <label for="orderStatus" class="form-label">Modifica Stato:</label>
+                            <select class="form-select dashboard-input" id="orderStatus" name="orderStatus">
+                                <option value="pending">In Attesa</option>
+                                <option value="processing" selected>In Lavorazione</option>
+                                <option value="shipped">Spedito</option>
+                                <option value="completed">Completato</option>
+                                <option value="cancelled">Annullato</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <button type="button" class="btn btn-primary save-status-btn w-100">Salva Stato</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
