@@ -122,7 +122,8 @@ const productQueryConfig = {
         { queryParam: 'prezzounitario_gte', dbColumn: 'prezzounitario', type: 'gte', dataType: 'number' },
         { queryParam: 'prezzounitario_lte', dbColumn: 'prezzounitario', type: 'lte', dataType: 'number' },
         { queryParam: 'nome_like', dbColumn: 'nome', type: 'like', dataType: 'string' },
-        { queryParam: 'quantitadisponibile_lte', dbColumn: 'quantitadisponibile', type: 'lte', dataType: 'integer' }
+        { queryParam: 'quantitadisponibile_lte', dbColumn: 'quantitadisponibile', type: 'lte', dataType: 'integer' },
+        { queryParam: 'quantitadisponibile_gte', dbColumn: 'quantitadisponibile', type: 'gte', dataType: 'integer' }
     ],
     allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto', 'quantitadisponibile', 'nomeartigiano'], // Changed alias
     defaultLimit: 20, // Default number of products to return

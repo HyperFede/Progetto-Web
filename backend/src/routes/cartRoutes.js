@@ -148,16 +148,17 @@ router.get('/:idcliente', isAuthenticated, hasPermission(['Admin', 'Cliente']), 
 
 /**
  * * POST /api/carts/items
- * * @description Aggiunge un prodotto al carrello dell'utente autenticato o ne aggiorna la quantità.
- * * Se il prodotto è già presente nel carrello, aggiorna la quantità e il totale parziale.
- * * Se il prodotto non è presente, lo aggiunge come nuovo articolo.
+ * * @description Aggiunge un prodotto al carrello dell'utente autenticato. 
+ * * Se il prodotto è già presente nel carrello, ne incrementa la quantità.
+ * * Se il prodotto non è presente, lo aggiunge come nuovo articolo con la quantità specificata.
  * * @Access Accessibile solo agli utenti autenticati con permessi di Cliente.
  * *  Input:
  * - Corpo della richiesta (JSON):
  *  - idprodotto: ID del prodotto da aggiungere al carrello (obbligatorio).
- * *  - quantita: Quantità del prodotto da aggiungere al carrello (obbligatorio, deve essere un numero intero positivo).
+ * *  - quantita: Quantità del prodotto da aggiungere/incrementare nel carrello (obbligatorio, deve essere un numero intero positivo).
  * *  Output:
  * - 201 Created: Se il prodotto è stato aggiunto con successo al carrello.
+ * - 200 OK: Se la quantità di un prodotto esistente nel carrello è stata incrementata con successo.
  *  Restituisce l'oggetto dell'articolo aggiunto con i campi:
  * *   - idcliente: ID del cliente
  * *   - idprodotto: ID del prodotto
@@ -165,18 +166,13 @@ router.get('/:idcliente', isAuthenticated, hasPermission(['Admin', 'Cliente']), 
  * *   - totaleparziale: Totale parziale per l'articolo (quantità * prezzo unitario)
  * *   - nomeprodotto: Nome del prodotto
  * *   - prezzounitario: Prezzo unitario del prodotto
- * - 400 Bad Request: Se l'ID del prodotto o la quantità non sono validi.
+ * - 400 Bad Request: Se l'ID del prodotto o la quantità non sono validi, o se lo stock è insufficiente.
  * - 404 Not Found: Se il prodotto non esiste o non è disponibile (quantitadisponibile <= 0).
- * 
- * - 409 Conflict: Se il prodotto è già presente nel carrello dell'utente.
- *   In questo caso, è obbligatorio (per ora) di usare PUT /api/carts/items/:idprodotto per aggiornare la quantità.
- * 
- * 
  * - 500 Internal Server Error: Se si verifica un errore durante l'aggiunta o l'aggiornamento dell'articolo nel carrello.
  */
 router.post('/items', isAuthenticated, hasPermission(['Cliente']), async (req, res) => {
     const idcliente = req.user.idutente;
-    const { idprodotto, quantita } = req.body; // 'quantita' is the initial quantity for the new item
+    const { idprodotto, quantita } = req.body; 
 
     if (!idprodotto || typeof quantita !== 'number' || quantita <= 0 || !Number.isInteger(quantita)) {
         return res.status(400).json({ message: 'ID prodotto e quantità (intera, positiva) sono obbligatori.' });
@@ -185,38 +181,44 @@ router.post('/items', isAuthenticated, hasPermission(['Cliente']), async (req, r
     try {
         await beginTransaction();
 
-        const productQuery = await pool.query('SELECT nome, prezzounitario, quantitadisponibile FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE', [idprodotto]);
+        // Fetch product details, lock the row for stock checking
+        const productQuery = await pool.query('SELECT nome, prezzounitario, quantitadisponibile FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE FOR UPDATE', [idprodotto]);
         if (productQuery.rows.length === 0) {
             await rollbackTransaction();
             return res.status(404).json({ message: 'Prodotto non trovato o non disponibile.' });
         }
         const prodotto = productQuery.rows[0];
 
-        // Check if the item already exists in the cart for this user
-        const cartItemQuery = await pool.query('SELECT quantita FROM dettaglicarrello WHERE idcliente = $1 AND idprodotto = $2', [idcliente, idprodotto]);
-        if (cartItemQuery.rows.length > 0) {
-            await rollbackTransaction();
-            return res.status(409).json({ message: 'Articolo già presente nel carrello. Usa PUT /api/carts/items/:idprodotto per aggiornare la quantità.' });
-        }
+        // Fetch current cart item if it exists, lock the row
+        const cartItemQuery = await pool.query('SELECT quantita FROM dettaglicarrello WHERE idcliente = $1 AND idprodotto = $2 FOR UPDATE', [idcliente, idprodotto]);
         
-        // The 'quantita' from the request is the final quantity for the new item
-        const finalQuantita = quantita;
+        const itemExistsInCart = cartItemQuery.rows.length > 0;
 
-        if (finalQuantita > prodotto.quantitadisponibile) {
+        if (quantita > prodotto.quantitadisponibile) {
             await rollbackTransaction();
             return res.status(400).json({ message: `Stock insufficiente. Disponibili: ${prodotto.quantitadisponibile}, richiesti: ${finalQuantita}` });
         }
 
-        const totaleparziale = parseFloat(prodotto.prezzounitario) * finalQuantita;
+        const finalTotaleparziale = parseFloat(prodotto.prezzounitario) * quantita;
+        let result;
+        let statusCode;
 
-        // Simple INSERT as we've already checked for conflicts
-        const insertQuery = `
-            INSERT INTO dettaglicarrello (idcliente, idprodotto, quantita, totaleparziale)
-            VALUES ($1, $2, $3, $4)
-            RETURNING *;
-        `;
-        const result = await pool.query(insertQuery, [idcliente, idprodotto, finalQuantita, totaleparziale]);
-        const newDettaglioCart = result.rows[0];
+        if (itemExistsInCart) {
+            // Update existing item
+            result = await pool.query(
+                'UPDATE dettaglicarrello SET quantita = $1, totaleparziale = $2 WHERE idcliente = $3 AND idprodotto = $4 RETURNING *',
+                [quantita, finalTotaleparziale, idcliente, idprodotto]
+            );
+            statusCode = 200; // OK
+        } else {
+            // Insert new item
+            result = await pool.query(
+                'INSERT INTO dettaglicarrello (idcliente, idprodotto, quantita, totaleparziale) VALUES ($1, $2, $3, $4) RETURNING *',
+                [idcliente, idprodotto, quantita, finalTotaleparziale]
+            );
+            statusCode = 201; // Created
+        }
+        const newDettaglioCart = result.rows[0]; // pg driver returns lowercase keys
 
         const responseItem = {
             idcliente: newDettaglioCart.idcliente,
@@ -228,7 +230,7 @@ router.post('/items', isAuthenticated, hasPermission(['Cliente']), async (req, r
         };
 
         await commitTransaction();
-        res.status(201).json(responseItem);
+        res.status(statusCode).json(responseItem);
     } catch (error) { //NOSONAR
         await rollbackTransaction();
         console.error('Errore durante l\'aggiunta/aggiornamento dell\'articolo nel carrello:', error);
