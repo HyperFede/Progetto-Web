@@ -192,3 +192,17 @@ min-height: 400px;
 .nav-link-cart { /* Selettore reso più generico */
     color: var(--secondary-color) !important; /* Colore modificato come da richiesta */
 }
+
+/* artigiano */
+.add-product-btn {
+    background-color: var(--primary-color);
+    color: var(--pakistan-green);
+    border: 1px solid var(--primary-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+.add-product-btn:hover {
+    background-color: var(--tigers-eye);
+    border-color: var(--tigers-eye);
+    color: var(--text-light);
+}

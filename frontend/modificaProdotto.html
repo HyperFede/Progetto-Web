@@ -60,7 +60,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                             <a class="nav-link active" aria-current="page" href="prodottiArtigiano.html"> <i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI
+                             <a class="nav-link" aria-current="page" href="prodottiArtigiano.html"> <i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI
                              </a>
                         </li>
                         <li class="nav-item">
@@ -92,9 +92,9 @@
     <main class="container my-4 pt-lg-0">
         <div class="row mb-3">
             <div class="col">
-                <a href="index.html" class="back-to-search-link">
+                <a href="prodottiArtigiano.html" class="back-to-search-link">
                     <i class="bi bi-arrow-left-circle me-1"></i>
-                    Torna alla ricerca
+                    Torna ai prodotti
                 </a>
             </div>
         </div>
@@ -107,9 +107,26 @@
             </div>
 
             <div class="col-md-6 product-details-column">
-                <p class="product-category-detail">CATEGORIA_PRODOTTO</p>
-                <h1 class="product-name-detail">Nome Prodotto Dettaglio</h1>
-                <div class="product-rating-detail mb-2">
+                <div class="mb-3">
+                    <h5 class="mb-2">Categoria</h5>
+                    <select class="form-select dashboard-input" id="productCategory" name="category" required>
+                        <option selected disabled value="">Scegli una categoria...</option>
+                        <option value="cat1">Categoria A</option>
+                        <option value="cat2">Categoria B</option>
+                        <option value="cat3">Categoria C</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <h5 class="mb-2">Nome Prodotto</h5>
+                    <input type="text" class="form-control dashboard-input" id="productName" name="productName" required>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-2">Prezzo(€)</h5>
+                    <input type="number" class="form-control dashboard-input" id="productPrice" name="price" min="0" step="0.01"
+                        required placeholder="">
+                </div>
+
+                <div class="product-rating-detail mb-2 mt-4">
                     <i class="bi bi-star-fill"></i>
                     <i class="bi bi-star-fill"></i>
                     <i class="bi bi-star-fill"></i>
@@ -117,15 +134,6 @@
                     <i class="bi bi-star"></i>
                     <span class="ms-1 text-muted">(N. Valutazioni)</span>
                 </div>
-                <p class="product-status-detail status-available mb-2">Disponibile</p>
-                <p class="product-price-detail mb-3">Prezzo: €XX.XX</p>
-
-                <a href="dettaglioArtigiano.html" class="artisan-link">
-                    <div class="product-artisan-detail d-flex align-items-center">
-                        <div class="artisan-icon-placeholder me-2">A</div>
-                        <span>Nome Artigiano</span>
-                    </div>
-                </a>
             </div>
         </div>
 
@@ -133,10 +141,9 @@
             <div class="col-12">
                 <div class="product-description-box">
                     <h5 class="mb-2">Descrizione Prodotto</h5>
-                    <div class="description-content">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+                    <div class="mb-3">
+                        <textarea class="form-control dashboard-input" id="productDescription" name="description" rows="5"
+                            required></textarea>
                     </div>
                 </div>
             </div>
@@ -198,34 +205,12 @@
                         </div>
                     </div>
                 </div>
-                </div>
-        </div>
-
-        <div class="d-grid p-3 add-to-cart-section align-items-center three-columns">
-            <div class="text-center mb-3 mb-md-0">
-                <h6 class="add-to-cart-product-name">Nome Prodotto Dettaglio</h6>
-                <p class="add-to-cart-product-price mb-0">Prezzo: €XX.XX</p>
-            </div>
-            <div class="mb-3 mb-md-0">
-                <label for="quantityInput" class="form-label quantity-label text-center">Quantità:</label>
-                <input type="number" class="form-control quantity-input text-center" id="quantityInput" value="1" min="1">
-            </div>
-
-            <!-- UNLOGGED -->
-             <!--
-             <div class="text-end"> 
-                <a href="login.html" class="btn w-100 add-to-cart-button-detail d-flex justify-content-center align-items-center">
-                    <i class="bi bi-cart-plus fs-3"></i>
-                </a>
-            </div>-->
-
-            <!-- LOGGED -->
-            <div class="text-end">
-                <button class="btn w-100 add-to-cart-button-detail d-flex justify-content-center align-items-center">
-                    <i class="bi bi-cart-plus fs-3"></i>
-                </button>
             </div>
         </div>
+
+        <button class="btn add-to-cart-button-detail d-flex justify-content-center align-items-center fixed-bottom-save-button">
+                salva cambiamenti
+        </button>
 
     </main>
 
