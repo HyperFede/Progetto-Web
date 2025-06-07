@@ -274,6 +274,7 @@ router.post('/recover-password/reset', async (req, res) => {
     }
 
     try {
+        
         const decoded = jwt.verify(resetToken, jwtSecret);
         // Verifica che il token sia effettivamente per il reset password e non un token di sessione
         if (!decoded.user || !decoded.user.id || decoded.user.purpose !== 'password-reset') {

@@ -27,8 +27,6 @@ const app = express();
 app.use(cors()); // Abilita CORS per tutte le richieste
 app.use(cookieParser()); // Usa il middleware per il parsing dei cookie
 
-
-
 const dbport = process.env.DB_PORT || 5432; // Usa la porta 5432 come default se non specificata
 const serverport = process.env.PORT || 3000; // Usa la porta 3000 come default se non specificata
 
