@@ -10,7 +10,7 @@
     <script>
        document.addEventListener('DOMContentLoaded', async function(){
          let result = await fetchData("/api/auth/logout", "POST");
-                if(result){
+                if(result.status == 200){
                     window.location.replace("/login.html")
                 }else{
                     window.location.replace("/login.html")

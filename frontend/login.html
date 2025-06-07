@@ -30,11 +30,11 @@
                     </button>
                 </div>
                 <!-- Questo div deve essere visibile quando l'esito di api/auth/login è errato (anche se ) -->
-                <!--
-                    <div class = "error-message">
+                
+                    <div id="error-message" class = "error-message invisible">
                         <span class="error-text" id="user-error">Username o password errati</span>
                     </div>
-                -->
+               
             </div>
             <button id="loginButton" type="button" class="submit-btn">Accedi</button>
         </form>
@@ -44,6 +44,8 @@
     <script src="js/fetcher.js"></script>
     <script>
         document.getElementById("loginButton").addEventListener('click', async () => {
+            errorText = document.getElementById("error-message");
+            errorText.classList.add("invisible")
             const formData = {
                 username: document.getElementById("username").value,
                 password: document.getElementById("password").value
@@ -51,11 +53,11 @@
 
             let result = await fetchData("/api/auth/login", "POST", formData);
             console.log(result);
-            if(result){
+            if(result.status == 200){
                 window.location.replace("/")
             }else{
                 console.log()
-                //TODO: mettere qualcosa in caso di failure della login
+                errorText.classList.remove("invisible");
             }
         })
 

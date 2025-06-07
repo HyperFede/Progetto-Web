@@ -24,13 +24,17 @@ document.addEventListener('DOMContentLoaded', function(){
     //quando viene submittato
     document.getElementById('formRegistrazione').addEventListener('submit', async function(event) {
                 event.preventDefault();
+                const usernameError = document.getElementById("username-error");
+                const emailError = document.getElementById("email-error");
+                usernameError.classList.add("invisible");
+                emailError.classList.add("invisible")
     
                 //prende tutti i dati e li converti in un oggetto facile per inviare all'endpoint
                 const formData = new FormData(this);
     
                 const formObj = Object.fromEntries(formData.entries());
     
-                console.log(formObj);
+                // console.log(formObj);
     
                 if(formObj.checkArtigiano){
                     formObj.tipologia = "Artigiano";
@@ -40,11 +44,16 @@ document.addEventListener('DOMContentLoaded', function(){
     
                 console.log(formObj);
                 let result = await fetchData("/api/users", "POST", formObj);
-                if(result){
-                    window.location.replace("/")
+                if(result.status == 200){
+                    console.log(result);
+                    //window.location.replace("/")
                 }else{
-                    console.log()
-                    //TODO: mettere qualcosa in caso di failure della registrazione
+                    if(result.message == "Username già esistente."){
+                        //TODO: mettere qualcosa in caso di failure della registrazione
+                        usernameError.classList.remove("invisible");
+                    }else if(result.message == "Email già esistente."){
+                        emailError.classList.remove("invisible");
+                    }
                 }
             });
 })

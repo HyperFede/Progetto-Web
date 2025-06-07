@@ -45,9 +45,9 @@
                         <label class="form-label">Username</label>
                         <input type="text" name="username" placeholder="Username" class="form-control" required>
                         <!-- Quando l'esito di POST api/users/ è username già esistente, cambia display:none -->
-                        <!--
-                        <span class="error-text" id="username-error">Username già esistente</span>
-                        --> 
+                        
+                        <span class="error-text invisible" id="username-error">Username già esistente</span>
+                        
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -62,9 +62,9 @@
                 <label class="form-label">Email</label>
                 <input type="email" name="email" placeholder="email@example.com" class="form-control" required>
                 <!-- Quando l'esito di POST api/users/ è email già esistente -->
-                <!--
-                <span class="error-text" id="email-error">Email già esistente</span>
-                -->
+                
+                <span class="error-text invisible" id="email-error">Email già esistente</span>
+               
             </div>
 
             <!-- Terza Riga -->

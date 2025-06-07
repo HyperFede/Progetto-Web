@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async function(){
 
     let result = await fetchData("/api/products/notdeleted", "GET");
     console.log(result);
-    if(result){
+    if(result.status == 200){
         showProducts(result);
 
     }else{
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async function(){
             opt += `categoria=${formObj.categoria}&`
         }
         if(formObj.checkStock){
-            opt += `quantitadisponibile_lte>0`
+            opt += `quantitadisponibile_gte=1`
         }
         let resultSearch = await fetchData("/api/products/notdeleted" + opt, "GET");
         showProducts(resultSearch);

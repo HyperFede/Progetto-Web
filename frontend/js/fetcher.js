@@ -17,17 +17,30 @@ async function fetchData(url, method="POST", body=null){
         try{
             data = await response.json()
         }catch(error){
-            console.error("Error nel json: ", error);
+            if (!response.ok) {
+                const error = new Error(response.statusText);
+                error.status = response.status;
+                throw error;
+            }
         }
 
         if(!response.ok){
-            throw new Error("HTTP Error: ", response.status)
+            const error = new Error(data?.message || response.statusText);
+            error.status = response.status;
+            error.body = data;
+            throw error;
         }
 
         return {data: data, status: response.status};
 
     }catch(error){
-        //console.error("Errore durante la fetch: ", error);
-        return null;
+        console.error("Errore in fetchData:", error);
+
+        return {
+            message: error.message,
+            status: error.status || null,
+            body: error.body || null,
+            error: true
+        };
     }
 }
