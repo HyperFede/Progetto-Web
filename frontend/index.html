@@ -221,19 +221,6 @@
     <script src="js/fetcher.js"></script>
     <script src="js/getProducts.js"></script>
     <script src="js/headerShower.js"></script>
-    <script>
-        async function aggiungiAlCarrello(id){
-            obj = {
-                "idprodotto": id,
-                "quantita": 1
-            }
-            let result = await fetchData("/api/cart/items", "POST", obj);
-                if(result.status == 201){
-                    console.log("Aggiunto al carrello!")
-                }else{
-                    console.log("Errore nella aggiunta!")
-                }
-        }
-    </script>
+    <script src="js/addCartProduct.js"></script>
 </body>
 </html>

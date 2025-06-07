@@ -93,9 +93,10 @@ document.addEventListener("DOMContentLoaded", async function(){
         if(formObj.categoria != ""){
             opt += `categoria=${formObj.categoria}&`
         }
-        if(formObj.checkStock){
+        if(formObj.checkStock == ""){
             opt += `quantitadisponibile_gte=1`
         }
+        console.log(opt)
         let resultSearch = await fetchData("/api/products/notdeleted" + opt, "GET");
         showProducts(resultSearch);
     })
