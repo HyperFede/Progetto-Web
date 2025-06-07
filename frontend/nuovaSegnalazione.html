@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/pages/recensioneProdotto.css">
+    <link rel="stylesheet" href="css/pages/nuovaSegnalazione.css">
     <script src = "js/imagePreview.js"> </script>
 
 </head>
@@ -90,7 +90,7 @@
     </nav>
 
     <main class="container my-4 pt-5 pt-lg-0">
-        <h2 class="page-title text-center mb-3">Scrivi una Recensione</h2>
+        <h2 class="page-title text-center mb-3">Nuova Segnalazione</h2>
 
         <div class="row mb-3">
             <div class="col">
@@ -101,20 +101,19 @@
             </div>
         </div>
 
-        <div class="review-form-container p-4">
-            <div class="d-flex align-items-center mb-3 product-info-header">
-                <h5 class="problem-question">Vuoi segnalare un problema? </span></h5>
+        <div class="problem-form-container p-4">
+            <div class="d-flex justify-content-center align-items-center mb-3 product-info-header">
+                <h4 class="problem-question">Vuoi segnalare un problema?</h4>
             </div>
 
-            <div class="d-flex align-items-center mb-3 product-info-header">
-                <h3 class="tell-us-more-text">Dicci di più? </span></h3>
+            <div class="d-flex justify-content-center align-items-center mb-3 product-info-header">
+                <h2 class="tell-us-more-text">Dicci di più?</h2>
             </div>
 
-            <form id="problemForm">
+            <form id="problem-Form">
                 <div class="mb-4">
-                    <label for="reviewTextInput" class="form-label review-text-label">Id ordine di riferimento:
-                        <input type = "text" class="form-control review-textarea" id="reviewTextInput" name="reviewText" rows="5" placeholder="Qui ci va l'idOrdine"></input>
-                    </label>
+                    <label for="orderIdInput" class="form-label order-id-text-label">ID Ordine di riferimento:</label>
+                    <input type="text" class="form-control dashboard-input" id="orderIdInput" name="order-id" required placeholder=>
                 </div>
 
                 <div class="mb-4">
@@ -128,96 +127,87 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="reviewTextInput" class="form-label review-text-label">Dacci una descrizione del problema</label>
-                    <textarea class="form-control review-textarea" id="reviewTextInput" name="reviewText" rows="5" placeholder="Cosa è andato storto?"></textarea>
+                    <label for="problemDescriptionInput" class="form-label problem-text-label">Dacci una descrizione del problema</label>
+                    <textarea class="form-control problem-description-textarea" id="problemDescriptionInput" name="problemText" rows="5" placeholder="Cosa è andato storto?" required></textarea>
                 </div>
                 
                 <div class = "text-center">
-                    <!-- caso in cui alla recensione va tutto bene-->
-                    <!--
-                    <div id="successMessage" class="alert alert-success" role="alert">
-                        Grazie per la tua recensione! Sarà pubblicata dopo la revisione.
-                    -->
+                    <div id="successMessage" class="alert alert-success" role="alert" style="display: none;">
+                        Segnalazione inviata con successo!
                     </div>
+                </div>
 
                 <div class="text-center">
-                    <button type="submit" class="btn rounded-pill submit-review-btn">INVIA</button>
+                    <button type="submit" class="btn rounded-pill submit-segnalazione-btn">INVIA SEGNALAZIONE</button>
                 </div>
             </form>
         </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="product-review.js"></script>
+
+    
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-        // ⭐ Stelle di valutazione
-        const stars = document.querySelectorAll('.star-rating .bi-star, .star-rating .bi-star-fill');
-        const ratingValueInput = document.getElementById('ratingValue');
+            // Gestione invio form segnalazione
+            const problemForm = document.getElementById('problem-Form');
+            const successMessageDiv = document.getElementById('successMessage');
+            const orderIdInput = document.getElementById('orderIdInput');
+            const problemDescriptionInput = document.getElementById('problemDescriptionInput');
+            const photoPreviewContainer = document.getElementById('photoPreview');
 
-        // Inizializza le stelle come vuote
-        stars.forEach(star => {
-            star.addEventListener('mouseover', function () {
-                resetStars();
-                const currentValue = parseInt(this.dataset.value);
-                for (let i = 0; i < currentValue; i++) {
-                    stars[i].classList.remove('bi-star');
-                    stars[i].classList.add('bi-star-fill', 'hovered');
-                }
-            });
-            // Gestione mouseout per mantenere la valutazione corrente
-            star.addEventListener('mouseout', function () {
-                const currentRating = ratingValueInput.value ? parseInt(ratingValueInput.value) : 0;
-                resetStars();
-                if (currentRating > 0) {
-                    for (let i = 0; i < currentRating; i++) {
-                        stars[i].classList.remove('bi-star');
-                        stars[i].classList.add('bi-star-fill', 'selected');
+            // Pre-fill order ID if passed in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const idOrdineFromUrl = urlParams.get('idordine'); // Ensure 'idordine' matches the parameter name in your link
+
+            if (idOrdineFromUrl && orderIdInput) {
+                orderIdInput.value = idOrdineFromUrl;
+            }
+
+            if (problemForm) {
+                problemForm.addEventListener('submit', function(event) {
+                    event.preventDefault(); // Previene l'invio tradizionale del form
+
+                    // Validazione
+                    if (!orderIdInput.value.trim()) {
+                        alert('Per favore, inserisci l\'ID Ordine.');
+                        orderIdInput.focus();
+                        return;
                     }
-                }
-            });
-            // Gestione click per impostare la valutazione
-            star.addEventListener('click', function () {
-                const clickedValue = parseInt(this.dataset.value);
-                ratingValueInput.value = clickedValue;
-                resetStars();
-                for (let i = 0; i < clickedValue; i++) {
-                    stars[i].classList.remove('bi-star');
-                    stars[i].classList.add('bi-star-fill', 'selected');
-                }
-            });
+                    if (!problemDescriptionInput.value.trim()) {
+                        alert('Per favore, fornisci una descrizione del problema.');
+                        problemDescriptionInput.focus();
+                        return;
+                    }
+
+                    // Simulazione invio dati (qui potresti fare una chiamata API)
+                    console.log('Segnalazione da inviare:');
+                    console.log('ID Ordine:', orderIdInput.value);
+                    console.log('Descrizione:', problemDescriptionInput.value);
+                    const photoInput = document.getElementById('photoUploadInput');
+                    console.log('Numero immagini:', photoInput.files.length);
+
+                    // Mostra messaggio di successo
+                    if (successMessageDiv) {
+                        successMessageDiv.textContent = 'Segnalazione inviata con successo!'; // Puoi personalizzare il messaggio
+                        successMessageDiv.style.display = 'block';
+                    }
+                    // alert('Segnalazione inviata con successo! (simulazione)'); // Rimosso alert duplicato
+
+                    // Reset del form
+                    problemForm.reset();
+                    if (photoPreviewContainer) {
+                        photoPreviewContainer.innerHTML = ''; // Pulisci preview foto
+                    }
+
+                    // Nascondi messaggio di successo dopo qualche secondo
+                    setTimeout(() => {
+                        if (successMessageDiv) successMessageDiv.style.display = 'none';
+                    }, 5000); // Nasconde dopo 5 secondi
+                });
+            }
         });
-        // Funzione per resettare le stelle (quando hai già mandato la recensione)
-        function resetStars() {
-            stars.forEach(s => {
-                s.classList.remove('bi-star-fill', 'selected', 'hovered');
-                s.classList.add('bi-star');
-            });
-        }
-
-        // 📄 Invio del form recensione
-        const reviewForm = document.getElementById('productReviewForm');
-        if (reviewForm) {
-            reviewForm.addEventListener('submit', function(event) {
-                event.preventDefault(); // Previene l'invio tradizionale del form
-
-                if (!ratingValueInput.value) {
-                    alert('Per favore, fornisci una valutazione a stelle.');
-                    return;
-                }
-
-                alert('Recensione inviata! (simulazione)');
-
-                // Esempio di reset di tutto il form
-                reviewForm.reset();
-                resetStars();
-                ratingValueInput.value = '';
-                const photoPreviewContainer = document.getElementById('photoPreview');
-                photoPreviewContainer.innerHTML = ''; // Pulisci preview foto
-            });
-        }
-    });
 
     </script>
 </body>
