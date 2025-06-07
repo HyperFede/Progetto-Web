@@ -265,3 +265,55 @@ hr.my-4 {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.25rem rgba(221, 161, 94, 0.25);
 }
+
+/* Stili per il contenitore dell'immagine (product-detail-image-placeholder fornisce già stili base) */
+.product-detail-image-container {
+    /* Assicurati che sia position: relative per gli overlay figli */
+}
+
+.current-image-display span { /* Stile per il testo "IMG" placeholder */
+    color: var(--secondary-color);
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+.current-image-display img {
+    max-width: 100%;
+    max-height: 100%; /* Adatta all'altezza del contenitore */
+    width: 100%; /* Occupa tutta la larghezza disponibile */
+    height: 100%; /* Occupa tutta l'altezza disponibile */
+    object-fit: cover; /* 'cover' riempie, 'contain' mostra tutto. Scegli in base alle tue preferenze. */
+}
+
+/* Overlay per l'azione di rimozione */
+.image-action-overlay {
+    transition: opacity 0.2s ease-in-out;
+    opacity: 0; /* Inizia trasparente, gestito da JS e hover */
+}
+
+/* Mostra l'overlay con il cestino quando c'è un'immagine e si fa hover */
+.product-detail-image-container:hover .image-action-overlay.can-delete {
+    opacity: 1;
+    display: flex !important; /* Sovrascrive display:none inline */
+}
+
+/* Trigger per aggiungere immagine */
+.add-image-trigger {
+    /* display: none; è gestito da JS/inline style inizialmente */
+    border: 2px dashed var(--secondary-color); /* Bordo per indicare area cliccabile */
+    border-radius: 0.25rem; /* Consistente con gli altri bordi */
+}
+.add-image-trigger:hover {
+    background-color: rgba(0,0,0,0.05); /* Leggero feedback su hover */
+}
+
+/* Stato: quando si deve aggiungere un'immagine (nessuna immagine presente) */
+.product-detail-image-container.state-add-image .current-image-display {
+    display: none !important;
+}
+.product-detail-image-container.state-add-image .add-image-trigger {
+    display: flex !important;
+}
+.product-detail-image-container.state-add-image .image-action-overlay {
+    display: none !important;
+    opacity: 0 !important;
+}

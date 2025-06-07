@@ -101,8 +101,28 @@
 
         <div class="row mb-4">
             <div class="col-md-6 mb-3 mb-md-0">
-                <div class="product-detail-image-placeholder d-flex align-items-center justify-content-center">
-                    IMG
+                <div class="product-detail-image-container position-relative product-detail-image-placeholder">
+                    <!-- Contenitore per l'immagine o il testo placeholder -->
+                    <div class="current-image-display d-flex align-items-center justify-content-center w-100 h-100">
+                        <!-- Se c'è un'immagine caricata, verrà inserita qui dal JS. Esempio: -->
+                        <!-- <img src="path/to/actual-image.jpg" alt="Immagine Prodotto" class="img-fluid"> -->
+                        <!-- Altrimenti, il testo placeholder di default: -->
+                        <span>IMG</span>
+                    </div>
+
+                    <!-- Overlay con icona cestino (mostrato su hover sull'immagine) -->
+                    <div class="image-action-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.4); display: none; cursor: default;">
+                        <button type="button" class="btn btn-danger btn-remove-image" title="Rimuovi immagine">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+
+                    <!-- Bottone/Icona per aggiungere immagine (mostrato quando non c'è immagine) -->
+                    <div class="add-image-trigger d-flex flex-column align-items-center justify-content-center w-100 h-100" style="cursor: pointer; display: none;">
+                        <i class="bi bi-camera-fill fs-1 text-muted"></i>
+                        <span class="text-muted mt-2">Aggiungi Immagine</span>
+                        <input type="file" class="d-none" id="productImageInput" accept="image/*">
+                    </div>
                 </div>
             </div>
 
@@ -215,5 +235,90 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', () => {
+    const imageContainer = document.querySelector('.product-detail-image-container');
+    if (!imageContainer) return;
+
+    const currentImageDisplay = imageContainer.querySelector('.current-image-display');
+    const imageActionOverlay = imageContainer.querySelector('.image-action-overlay');
+    const btnRemoveImage = imageContainer.querySelector('.btn-remove-image');
+    const addImageTrigger = imageContainer.querySelector('.add-image-trigger');
+    const productImageInput = imageContainer.querySelector('#productImageInput');
+
+    // Funzione per aggiornare lo stato dell'interfaccia immagine
+    function updateImageUI(hasImage) {
+        if (hasImage) {
+            currentImageDisplay.style.display = 'flex';
+            addImageTrigger.style.display = 'none';
+            imageContainer.classList.remove('state-add-image');
+            imageActionOverlay.classList.add('can-delete'); // Permette all'hover CSS di mostrare il cestino
+        } else {
+            currentImageDisplay.style.display = 'none';
+            addImageTrigger.style.display = 'flex';
+            imageContainer.classList.add('state-add-image');
+            imageActionOverlay.classList.remove('can-delete');
+            // Assicura che l'overlay sia effettivamente nascosto quando non c'è immagine
+            imageActionOverlay.style.display = 'none';
+            imageActionOverlay.style.opacity = '0';
+        }
+    }
+
+    // Controlla lo stato iniziale:
+    // Se currentImageDisplay contiene un tag <img> con un src, consideriamo che ci sia un'immagine.
+    // Altrimenti (se c'è solo lo span "IMG"), consideriamo che non ci sia un'immagine caricata.
+    let initialImageElement = currentImageDisplay.querySelector('img');
+    let hasInitialImage = initialImageElement && initialImageElement.getAttribute('src') && initialImageElement.getAttribute('src') !== '' && initialImageElement.getAttribute('src') !== '#';
+
+    // Se non c'è un tag <img> ma solo lo span "IMG", allora non c'è una vera immagine.
+    if (!initialImageElement && currentImageDisplay.querySelector('span')?.textContent === 'IMG') {
+        hasInitialImage = false;
+    }
+    updateImageUI(hasInitialImage);
+
+
+    // Evento per rimuovere l'immagine
+    if (btnRemoveImage) {
+        btnRemoveImage.addEventListener('click', () => {
+            currentImageDisplay.innerHTML = '<span>IMG</span>'; // Ripristina il placeholder testuale
+            productImageInput.value = ''; // Resetta l'input file
+            updateImageUI(false);
+            // Qui dovresti anche inviare un segnale al backend o aggiornare un campo form nascosto
+            // per indicare che l'immagine è stata rimossa, se necessario per il salvataggio.
+        });
+    }
+
+    // Evento per triggerare l'input file quando si clicca sul placeholder di aggiunta
+    if (addImageTrigger) {
+        addImageTrigger.addEventListener('click', () => {
+            productImageInput.click();
+        });
+    }
+
+    // Evento quando un file viene selezionato tramite l'input
+    if (productImageInput) {
+        productImageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Mostra l'anteprima della nuova immagine
+                    currentImageDisplay.innerHTML = `<img src="${e.target.result}" alt="Anteprima Prodotto">`;
+                    updateImageUI(true);
+                }
+                reader.readAsDataURL(file);
+            } else {
+                // Se l'utente annulla la selezione del file, e non c'era un'immagine prima,
+                // assicurati che la UI rifletta lo stato "nessuna immagine".
+                // Questo scenario è più complesso se si vuole tornare a un'immagine precedente non salvata.
+                // Per semplicità, se annulla, e non c'è un'immagine "salvata", si torna a "IMG".
+                if (!currentImageDisplay.querySelector('img[src], img[data-existing-src]')) {
+                     currentImageDisplay.innerHTML = '<span>IMG</span>';
+                     updateImageUI(false);
+                }
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>
