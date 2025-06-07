@@ -67,12 +67,12 @@ router.post('/', isAuthenticated, hasPermission(['Cliente']), async (req, res) =
     const ora = currentDate.toTimeString().split(' ')[0];  // HH:MM:SS
 
     if (!idprodotto || !testo || !valutazione || valutazione === undefined) {
-        return res.status(400).json({ error: 'Missing required fields: idprodotto, testo, valutazione' });
+        return res.status(400).json({ error: 'Campi obbligatori mancanti: idprodotto, testo, valutazione' });
     }
 
     const parsedValutazione = parseInt(valutazione, 10);
     if (isNaN(parsedValutazione) || parsedValutazione < 1 || parsedValutazione > 5) {
-        return res.status(400).json({ error: 'Valutazione must be an integer between 1 and 5' });
+        return res.status(400).json({ error: 'La valutazione deve essere un numero intero tra 1 e 5' });
     }
     try {
         // Rule: Cliente can only review a product they purchased and which was delivered.
@@ -80,7 +80,7 @@ router.post('/', isAuthenticated, hasPermission(['Cliente']), async (req, res) =
             `SELECT 1
              FROM Ordine o
              JOIN DettagliOrdine dor ON o.IDOrdine = dor.IDOrdine
-             JOIN Prodotto p ON dor.IDProdotto = p.IDProd   otto
+             JOIN Prodotto p ON dor.IDProdotto = p.IDProdotto
              JOIN SubOrdine so ON o.IDOrdine = so.IDOrdine AND p.IDArtigiano = so.IDArtigiano
              WHERE o.IDUtente = $1      -- Authenticated user's ID
                AND dor.IDProdotto = $2   -- Product being reviewed
@@ -92,7 +92,7 @@ router.post('/', isAuthenticated, hasPermission(['Cliente']), async (req, res) =
 
         if (purchaseVerificationQuery.rows.length === 0) {
             return res.status(403).json({ 
-                error: "Forbidden: You can only review products you have purchased and that have been delivered." 
+                error: "Vietato: Puoi recensire solo i prodotti che hai acquistato e che sono stati consegnati." 
             });
         }
 
@@ -107,19 +107,19 @@ router.post('/', isAuthenticated, hasPermission(['Cliente']), async (req, res) =
         res.status(201).json(transformReviewForResponse(newReviewQuery.rows[0], req));
     } catch (err) {
         console.error(err.message);
-        if (err.constraint === 'recensione_valutazione_check') {
-            return res.status(400).json({ error: 'Valutazione must be between 1 and 5.' });
+        if (err.constraint === 'recensione_valutazione_check') { // This constraint name might vary based on your DB schema
+            return res.status(400).json({ error: 'La valutazione deve essere compresa tra 1 e 5.' });
         }
         if (err.message.includes('violates foreign key constraint')) {
             if (err.message.includes('recensione_idutente_fkey')) {
                 // This should ideally not happen if idutente is from a valid token
-                return res.status(400).json({ error: `User with IDUtente ${idutente} does not exist.` });
+                return res.status(400).json({ error: `Utente con IDUtente ${idutente} non esiste.` });
             }
             if (err.message.includes('recensione_idprodotto_fkey')) {
-                return res.status(404).json({ error: `Product with IDProdotto ${idprodotto} does not exist.` });
+                return res.status(404).json({ error: `Prodotto con IDProdotto ${idprodotto} non esiste.` });
             }
         }
-        res.status(500).json({ error: 'Server error while creating review' });
+        res.status(500).json({ error: 'Errore del server durante la creazione della recensione' });
     }
 });
 
@@ -139,12 +139,12 @@ router.get('/:id', async (req, res) => {
                         [id]
         );
         if (reviewQuery.rows.length === 0) {
-            return res.status(404).json({ error: 'Review not found' });
+            return res.status(404).json({ error: 'Recensione non trovata' });
         }
         res.json(transformReviewForResponse(reviewQuery.rows[0], req));
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: 'Server error while fetching review' });
+        res.status(500).json({ error: 'Errore del server durante il recupero della recensione' });
     }
 });
 
@@ -155,31 +155,31 @@ router.put('/:id', isAuthenticated, async (req, res) => {
     const { testo, valutazione } = req.body;
 
     if (isNaN(reviewId)) {
-        return res.status(400).json({ error: 'Invalid review ID format.' });
+        return res.status(400).json({ error: 'Formato ID recensione non valido.' });
     }
 
     const authCheck = await checkReviewOwnershipOrAdmin(reviewId, req.user.idutente, req.user.tipologia);
     if (!authCheck.authorized) {
-        if (authCheck.status === 'not_found') return res.status(404).json({ error: 'Review not found.' });
-        return res.status(403).json({ error: 'Forbidden: You do not have permission to update this review.' });
+        if (authCheck.status === 'not_found') return res.status(404).json({ error: 'Recensione non trovata.' });
+        return res.status(403).json({ error: 'Vietato: Non hai i permessi per aggiornare questa recensione.' });
     }
 
     let parsedValutazione;
     if (valutazione !== undefined) {
         parsedValutazione = parseInt(valutazione, 10);
         if (isNaN(parsedValutazione) || parsedValutazione < 1 || parsedValutazione > 5) {
-            return res.status(400).json({ error: 'Valutazione must be an integer between 1 and 5' });
+            return res.status(400).json({ error: 'La valutazione deve essere un numero intero tra 1 e 5' });
         }
     }
 
     if (testo === undefined && valutazione === undefined) {
-        return res.status(400).json({ error: 'No fields to update provided (testo or valutazione).' });
+        return res.status(400).json({ error: "Nessun campo fornito per l'aggiornamento (testo o valutazione)." });
     }
 
     try {
         const existingReviewQuery = await pool.query("SELECT Testo, Valutazione FROM Recensione WHERE IDRecensione = $1", [reviewId]);
         if (existingReviewQuery.rows.length === 0) { // Should be caught by authCheck, but good to have
-            return res.status(404).json({ error: 'Review not found' });
+            return res.status(404).json({ error: 'Recensione non trovata' });
         }
 
         const existingReview = existingReviewQuery.rows[0];
@@ -197,10 +197,10 @@ router.put('/:id', isAuthenticated, async (req, res) => {
         res.json(transformReviewForResponse(updatedReviewQuery.rows[0], req));
     } catch (err) {
         console.error(err.message);
-        if (err.constraint === 'recensione_valutazione_check') {
-            return res.status(400).json({ error: 'Valutazione must be between 1 and 5.' });
+        if (err.constraint === 'recensione_valutazione_check') { // This constraint name might vary
+            return res.status(400).json({ error: 'La valutazione deve essere compresa tra 1 e 5.' });
         }
-        res.status(500).json({ error: 'Server error while updating review' });
+        res.status(500).json({ error: "Errore del server durante l'aggiornamento della recensione" });
     }
 });
 
@@ -210,13 +210,13 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     const reviewId = parseInt(id, 10);
 
     if (isNaN(reviewId)) {
-        return res.status(400).json({ error: 'Invalid review ID format.' });
+        return res.status(400).json({ error: 'Formato ID recensione non valido.' });
     }
 
     const authCheck = await checkReviewOwnershipOrAdmin(reviewId, req.user.idutente, req.user.tipologia);
     if (!authCheck.authorized) {
-        if (authCheck.status === 'not_found') return res.status(404).json({ error: 'Review not found.' });
-        return res.status(403).json({ error: 'Forbidden: You do not have permission to delete this review.' });
+        if (authCheck.status === 'not_found') return res.status(404).json({ error: 'Recensione non trovata.' });
+        return res.status(403).json({ error: 'Vietato: Non hai i permessi per eliminare questa recensione.' });
     }
     try {
         const deleteOp = await pool.query(
@@ -224,13 +224,13 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
             [reviewId]
         );
         if (deleteOp.rowCount === 0) { // Should be caught by authCheck, but good to have
-            return res.status(404).json({ error: 'Review not found' });
+            return res.status(404).json({ error: 'Recensione non trovata' });
         }
-        res.json({ message: 'Review deleted successfully', deletedReview: transformReviewForResponse(deleteOp.rows[0], req) });
+        res.json({ message: 'Recensione eliminata con successo', deletedReview: transformReviewForResponse(deleteOp.rows[0], req) });
 
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: 'Server error while deleting review' });
+        res.status(500).json({ error: "Errore del server durante l'eliminazione della recensione" });
     }
 });
 
@@ -241,7 +241,7 @@ router.get('/product/:productId', async (req, res) => {
     const productId = parseInt(req.params.productId, 10);
 
     if (isNaN(productId)) {
-        return res.status(400).json({ error: 'Invalid Product ID format.' });
+        return res.status(400).json({ error: 'Formato ID Prodotto non valido.' });
     }
 
     // Create a specific config for this route, excluding product ID from filters
@@ -290,7 +290,7 @@ router.get('/product/:productId', async (req, res) => {
 
         } catch (err) {
             console.error(`Error fetching reviews for product ${productId}:`, err.message, err.stack);
-            res.status(500).json({ error: 'Server error while fetching reviews for product' });
+            res.status(500).json({ error: 'Errore del server durante il recupero delle recensioni per il prodotto' });
         }
     });
 });
@@ -320,7 +320,7 @@ router.get('/', createQueryBuilderMiddleware({
         res.json(transformedReviews);
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: 'Server error while fetching all reviews' });
+        res.status(500).json({ error: 'Errore del server durante il recupero di tutte le recensioni' });
     }
 });
 
@@ -332,7 +332,7 @@ router.get('/:id/image_content', async (req, res) => {
     const reviewId = parseInt(id, 10);
 
     if (isNaN(reviewId)) {
-        return res.status(400).json({ error: "Invalid review ID format." });
+        return res.status(400).json({ error: "Formato ID recensione non valido." });
     }
 
     try {
@@ -342,14 +342,14 @@ router.get('/:id/image_content', async (req, res) => {
         );
 
         if (reviewQuery.rows.length === 0 || !reviewQuery.rows[0].immagine) {
-            return res.status(404).json({ error: "Image not found for this review." });
+            return res.status(404).json({ error: "Immagine non trovata per questa recensione." });
         }
 
         const imageBuffer = reviewQuery.rows[0].immagine;
 
         if (!(imageBuffer instanceof Buffer)) {
-            console.error(`Image data corrupted or invalid format in DB for review ID ${reviewId}.`);
-            return res.status(500).json({ error: "Image data corrupted or invalid format." });
+            console.error(`Dati immagine corrotti o formato non valido nel DB per ID recensione ${reviewId}.`);
+            return res.status(500).json({ error: "Dati immagine corrotti o formato non valido." });
         }
 
         const fileTypeResult = await FileType.fromBuffer(imageBuffer);
@@ -362,8 +362,8 @@ router.get('/:id/image_content', async (req, res) => {
         res.send(imageBuffer);
 
     } catch (err) {
-        console.error(`Error retrieving image content for review ID ${reviewId}:`, err.message, err.stack);
-        res.status(500).json({ error: "Server error while retrieving image content." });
+        console.error(`Errore durante il recupero del contenuto dell'immagine per ID recensione ${reviewId}:`, err.message, err.stack);
+        res.status(500).json({ error: "Errore del server durante il recupero del contenuto dell'immagine." });
     }
 });
 
@@ -373,11 +373,11 @@ router.put('/:id/image', isAuthenticated, rawImageParser('10mb'), async (req, re
     const reviewId = parseInt(id, 10);
 
     if (isNaN(reviewId)) {
-        return res.status(400).json({ error: "Invalid review ID format." });
+        return res.status(400).json({ error: "Formato ID recensione non valido." });
     }
 
     if (!req.body || req.body.length === 0) {
-        return res.status(400).json({ error: "No image data received." });
+        return res.status(400).json({ error: "Nessun dato immagine ricevuto." });
     }
     
     // Check Content-Type for basic image validation (already done by rawImageParser's fileFilter option if configured)
@@ -390,8 +390,8 @@ router.put('/:id/image', isAuthenticated, rawImageParser('10mb'), async (req, re
 
     const authCheck = await checkReviewOwnershipOrAdmin(reviewId, req.user.idutente, req.user.tipologia);
     if (!authCheck.authorized) {
-        if (authCheck.status === 'not_found') return res.status(404).json({ error: 'Review not found.' });
-        return res.status(403).json({ error: 'Forbidden: You do not have permission to update the image for this review.' });
+        if (authCheck.status === 'not_found') return res.status(404).json({ error: 'Recensione non trovata.' });
+        return res.status(403).json({ error: "Vietato: Non hai i permessi per aggiornare l'immagine di questa recensione." });
     }
 
     try {
@@ -402,19 +402,19 @@ router.put('/:id/image', isAuthenticated, rawImageParser('10mb'), async (req, re
 
         if (updateResult.rowCount === 0) {
             // This case should ideally be caught by the authCheck finding the review
-            return res.status(404).json({ error: "Review not found, image update failed." });
+            return res.status(404).json({ error: "Recensione non trovata, aggiornamento immagine fallito." });
         }
 
-        res.status(200).json({ message: `Image updated successfully for review ID ${reviewId}` });
+        res.status(200).json({ message: `Immagine aggiornata con successo per la recensione ID ${reviewId}` });
 
     } catch (err) {
-        console.error(`Error updating image for review ID ${reviewId}:`, err.message, err.stack);
+        console.error(`Errore durante l'aggiornamento dell'immagine per ID recensione ${reviewId}:`, err.message, err.stack);
         // rawImageParser might throw its own errors (e.g., size limit) which could be caught here
         // or handled by its onError callback if defined in the middleware.
         if (err.type === 'entity.too.large') { // Example, if error is propagated
-             return res.status(413).json({ error: `Image too large. Limit: 10mb.` });
+             return res.status(413).json({ error: `Immagine troppo grande. Limite: 10mb.` });
         }
-        res.status(500).json({ error: "Server error while updating image." });
+        res.status(500).json({ error: "Errore del server durante l'aggiornamento dell'immagine." });
     }
 });
 
@@ -424,23 +424,23 @@ router.delete('/:id/image', isAuthenticated, async (req, res) => {
     const reviewId = parseInt(id, 10);
 
     if (isNaN(reviewId)) {
-        return res.status(400).json({ error: "Invalid review ID format." });
+        return res.status(400).json({ error: "Formato ID recensione non valido." });
     }
 
     const authCheck = await checkReviewOwnershipOrAdmin(reviewId, req.user.idutente, req.user.tipologia);
     if (!authCheck.authorized) {
-        if (authCheck.status === 'not_found') return res.status(404).json({ error: 'Review not found.' });
-        return res.status(403).json({ error: 'Forbidden: You do not have permission to delete the image for this review.' });
+        if (authCheck.status === 'not_found') return res.status(404).json({ error: 'Recensione non trovata.' });
+        return res.status(403).json({ error: "Vietato: Non hai i permessi per eliminare l'immagine di questa recensione." });
     }
     
     try {
         // Check if there is an image to delete
         const reviewCheck = await pool.query("SELECT Immagine FROM Recensione WHERE IDRecensione = $1", [reviewId]);
         if (reviewCheck.rows.length === 0) { // Should be caught by authCheck
-            return res.status(404).json({ error: "Review not found." });
+            return res.status(404).json({ error: "Recensione non trovata." });
         }
         if (reviewCheck.rows[0].immagine === null) {
-            return res.status(404).json({ error: "Review does not have an image to delete." });
+            return res.status(404).json({ error: "La recensione non ha un'immagine associata da eliminare." });
         }
 
         const updateResult = await pool.query(
@@ -450,14 +450,14 @@ router.delete('/:id/image', isAuthenticated, async (req, res) => {
 
         if (updateResult.rowCount === 0) {
             // This case should ideally be caught by the authCheck
-            return res.status(404).json({ error: "Review not found, image deletion failed." });
+            return res.status(404).json({ error: "Recensione non trovata, eliminazione immagine fallita." });
         }
 
-        res.status(200).json({ message: `Image deleted successfully for review ID ${reviewId}` });
+        res.status(200).json({ message: `Immagine eliminata con successo per la recensione ID ${reviewId}` });
 
     } catch (err) {
-        console.error(`Error deleting image for review ID ${reviewId}:`, err.message, err.stack);
-        res.status(500).json({ error: "Server error while deleting image." });
+        console.error(`Errore durante l'eliminazione dell'immagine per ID recensione ${reviewId}:`, err.message, err.stack);
+        res.status(500).json({ error: "Errore del server durante l'eliminazione dell'immagine." });
     }
 });
 module.exports = router;
