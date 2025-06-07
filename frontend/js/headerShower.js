@@ -2,7 +2,12 @@ document.addEventListener('DOMContentLoaded', async function(){
     let result = await fetchData("/api/auth/session-info", "GET");
                 if(result){
                     //loggato
-                    console.log(result);
+                    //console.log(result);
+
+                    const usernameSpans = document.querySelectorAll('#nav-username');
+                    usernameSpans.forEach(span => {
+                        span.textContent = result.data.username;
+                    })
 
                     const selectorInvisible = document.querySelectorAll('.invisible');
                     selectorInvisible.forEach(section => {
