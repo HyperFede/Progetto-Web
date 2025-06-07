@@ -10,6 +10,16 @@ const commitTransaction = async () => pool.query('COMMIT');
 // Helper function to rollback a transaction
 const rollbackTransaction = async () => pool.query('ROLLBACK');
 
+// Helper function to calculate the total of a cart
+async function calculateCartTotal(idcliente, client) {
+    const totalQuery = await client.query(
+        'SELECT SUM(totaleparziale) AS total FROM dettaglicarrello WHERE idcliente = $1',
+        [idcliente]
+    );
+    const total = parseFloat(totalQuery.rows[0]?.total || 0).toFixed(2);
+    return total;
+}
+
 // GET per ottenere tutti i dettagli dei carrelli di tutti gli utenti, solo per admin
 /**
  * * GET /api/carts
@@ -124,12 +134,12 @@ router.get('/:idcliente', isAuthenticated, hasPermission(['Admin', 'Cliente']), 
         // }
 
         const rawCartItems = result.rows;
-        let totaleCarrello = 0;
+        let totalecarrello = 0;
 
         for (const item of rawCartItems) {
             // item.totaleparziale is likely a string if it comes from a NUMERIC/DECIMAL DB type.
             //  (in piu js fa cose strane con i numeri)
-            totaleCarrello += parseFloat(item.totaleparziale) || 0;
+            totalecarrello += parseFloat(item.totaleparziale) || 0;
         }
         const parsedCartItems = rawCartItems.map(item => ({
             ...item,
@@ -137,7 +147,7 @@ router.get('/:idcliente', isAuthenticated, hasPermission(['Admin', 'Cliente']), 
             totaleparziale: parseFloat(item.totaleparziale).toFixed(2)
         }));
 
-        res.json({ items: parsedCartItems, totaleCarrello: parseFloat(totaleCarrello.toFixed(2)) });
+        res.json({ items: parsedCartItems, totalecarrello: parseFloat(totalecarrello.toFixed(2)) });
     } catch (error) { //NOSONAR
         console.error('Errore nel recupero del carrello:', error);
         res.status(500).json({ message: 'Errore del server durante il recupero del carrello.' });
@@ -260,6 +270,7 @@ router.post('/items', isAuthenticated, hasPermission(['Cliente']), async (req, r
  * *   - totaleparziale: Nuovo totale parziale per l'articolo (quantità * prezzo unitario)
  * *   - nomeprodotto: Nome del prodotto
  * *   - prezzounitario: Prezzo unitario del prodotto
+ * *   - totaleCarrello: Il nuovo importo totale del carrello dopo l'aggiornamento.
  *   Se rimosso (quantita <= 0), restituisce un messaggio di conferma.
  * - 400 Bad Request: Se l'ID del prodotto non è valido, la quantità non è un numero intero,
  *                    o se la quantità è positiva ma supera lo stock disponibile.
@@ -325,15 +336,18 @@ router.put('/items/:idprodotto', isAuthenticated, hasPermission(['Cliente']), as
             // Tuttavia, per robustezza, si potrebbe aggiungere un controllo.
             const updatedDettaglioCart = result.rows[0];
 
+            const totalecarrello = await calculateCartTotal(idcliente, pool); // Use pool as we are in a transaction
+
             const responseItem = {
                 idcliente: updatedDettaglioCart.idcliente,
                 idprodotto: updatedDettaglioCart.idprodotto,
                 quantita: updatedDettaglioCart.quantita,
                 totaleparziale: parseFloat(updatedDettaglioCart.totaleparziale).toFixed(2),
                 nomeprodotto: prodotto.nome,
-                prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2)
+                prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2),
+                totalecarrello: totalecarrello
             };
-
+            
             await commitTransaction();
             res.json(responseItem);
         }
@@ -365,6 +379,7 @@ router.put('/items/:idprodotto', isAuthenticated, hasPermission(['Cliente']), as
  * *   - totaleparziale: Nuovo totale parziale per l'articolo (quantità * prezzo unitario)
  * *   - nomeprodotto: Nome del prodotto
  * *   - prezzounitario: Prezzo unitario del prodotto
+ * *   - totaleCarrello: Il nuovo importo totale del carrello dopo l'incremento.
  * - 400 Bad Request: Se l'ID del prodotto o la quantità da aggiungere non sono validi.
  * - 404 Not Found: Se il prodotto non esiste o non è disponibile (quantitadisponibile <= 0) o se l'articolo non è nel carrello.
  *  In questo caso, è obbligatorio (per ora) di usare POST /api/carts/items per aggiungerlo.
@@ -421,15 +436,18 @@ router.put('/items/:idprodotto/add', isAuthenticated, hasPermission(['Cliente'])
         const result = await pool.query(updateQuery, [nuovaQuantita, totaleparziale, idcliente, idprodotto]);
 
         const updatedDettaglioCart = result.rows[0];
+
+        const totalecarrello = await calculateCartTotal(idcliente, pool);
+
         const responseItem = {
             idcliente: updatedDettaglioCart.idcliente,
             idprodotto: updatedDettaglioCart.idprodotto,
             quantita: updatedDettaglioCart.quantita,
             totaleparziale: parseFloat(updatedDettaglioCart.totaleparziale).toFixed(2),
             nomeprodotto: prodotto.nome,
-            prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2)
+            prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2),
+            totalecarrello: totalecarrello
         };
-
         await commitTransaction();
         res.json(responseItem);
     } catch (error) { //NOSONAR
@@ -460,6 +478,7 @@ router.put('/items/:idprodotto/add', isAuthenticated, hasPermission(['Cliente'])
  * *   - totaleparziale: Nuovo totale parziale per l'articolo (quantità * prezzo unitario)
  * *   - nomeprodotto: Nome del prodotto
  * *   - prezzounitario: Prezzo unitario del prodotto
+ * *   - totalecarrello: Il nuovo importo totale del carrello dopo il decremento.
  * - 400 Bad Request: Se l'ID del prodotto o la quantità da sottrarre non sono validi.
  * - 404 Not Found: Se il prodotto non esiste o non è disponibile (quantitadisponibile <= 0) o se l'articolo non è nel carrello.
  *  In questo caso, è obbligatorio (per ora) di usare POST /api/carts/items per aggiungerlo.
@@ -514,15 +533,18 @@ router.put('/items/:idprodotto/subtract', isAuthenticated, hasPermission(['Clien
             `;
             const result = await pool.query(updateQuery, [nuovaQuantita, totaleparziale, idcliente, idprodotto]);
             const updatedDettaglioCart = result.rows[0];
+
+            const totalecarrello = await calculateCartTotal(idcliente, pool);
+
             const responseItem = {
                 idcliente: updatedDettaglioCart.idcliente,
                 idprodotto: updatedDettaglioCart.idprodotto,
                 quantita: updatedDettaglioCart.quantita,
                 totaleparziale: parseFloat(updatedDettaglioCart.totaleparziale).toFixed(2),
                 nomeprodotto: prodotto.nome,
-                prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2)
+                prezzounitario: parseFloat(prodotto.prezzounitario).toFixed(2),
+                totalecarrello: totalecarrello
             };
-
             await commitTransaction();
             res.json(responseItem);
         }
