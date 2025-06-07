@@ -31,7 +31,7 @@ async function getUserFromToken(token) {
         const userId = decoded.user.id;
 
         const userQuery = await pool.query(
-            'SELECT idutente, username, nome, cognome, email, tipologia, indirizzo, piva,artigianodescrizione, deleted FROM utente WHERE idutente = $1 AND deleted = false',
+            'SELECT idutente, username, nome, cognome, email, tipologia,indirizzo, piva,artigianodescrizione,  indirizzo, piva,artigianodescrizione, deleted FROM utente WHERE idutente = $1 AND deleted = false',
             [userId]
         );
 

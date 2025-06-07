@@ -329,6 +329,8 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
         // Crucially, ensure that 'piva' and 'artigianodescrizione' are being selected
         // and populated into req.user by your isAuthenticated middleware for artisan users.
         if (req.user.tipologia && req.user.tipologia.toLowerCase() === 'artigiano') {
+            responsePayload.piva = req.user.piva;
+            responsePayload.artigianodescrizione = req.user.artigianodescrizione;
                     responsePayload.piva = req.user.piva;
                     responsePayload.artigianodescrizione = req.user.artigianodescrizione;
         }
