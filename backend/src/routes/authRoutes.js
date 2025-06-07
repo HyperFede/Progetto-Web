@@ -274,6 +274,7 @@ router.post('/recover-password/reset', async (req, res) => {
     }
 
     try {
+
         const decoded = jwt.verify(resetToken, jwtSecret);
         // Verifica che il token sia effettivamente per il reset password e non un token di sessione
         if (!decoded.user || !decoded.user.id || decoded.user.purpose !== 'password-reset') {
@@ -322,27 +323,14 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
             email: req.user.email,
             idutente: req.user.idutente,
 
-
         };
         //console.log(responsePayload);
         // Check the user's actual tipologia from req.user, case-insensitively.
         // Crucially, ensure that 'piva' and 'artigianodescrizione' are being selected
         // and populated into req.user by your isAuthenticated middleware for artisan users.
         if (req.user.tipologia && req.user.tipologia.toLowerCase() === 'artigiano') {
-            try {
-                const artigianoDetailsQuery = await pool.query(
-                    'SELECT piva, artigianodescrizione FROM utente WHERE idutente = $1',
-                    [req.user.idutente] // or responsePayload.idutente
-                );
-                if (artigianoDetailsQuery.rows.length > 0) {
-                    responsePayload.piva = artigianoDetailsQuery.rows[0].piva;
-                    responsePayload.artigianodescrizione = artigianoDetailsQuery.rows[0].artigianodescrizione;
-                }
-            } catch (dbError) {
-                console.error('[session-info] Error fetching artigiano details from DB:', dbError);
-                // Decide if you want to fail the request or send partial data
-                // For now, we'll send the data without piva/descrizione if DB query fails
-            }
+                    responsePayload.piva = req.user.piva;
+                    responsePayload.artigianodescrizione = req.user.artigianodescrizione;
         }
 
         res.status(200).json(responsePayload);
