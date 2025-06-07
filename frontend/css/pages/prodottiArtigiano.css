@@ -154,17 +154,71 @@ body {
 
 /* Stili per la tabella dei prodotti, se necessari */
 .table td .input-group.input-group-sm input[type="number"].form-control {
-    /* Rimuove le freccette predefinite (spinners) dagli input numerici in WebKit (Chrome, Safari, Edge) */
-    -webkit-appearance: none;
-    margin: 0; /* Rimuove eventuali margini aggiunti dagli spinners */
+    -webkit-appearance: none; /* Rimuove spinner WebKit */
+    -moz-appearance: textfield; /* Rimuove spinner Firefox */
+    margin: 0; /* Rimuove margini da spinner */
+    border-color: var(--secondary-color); /* Colore bordo di default */
 }
 
-.table td .input-group.input-group-sm input[type="number"].form-control {
-    /* Rimuove le freccette predefinite (spinners) dagli input numerici in Firefox */
-    -moz-appearance: textfield;
+/* Necessario per alcuni browser WebKit per rimuovere completamente gli spinner */
+.table td .input-group.input-group-sm input[type="number"].form-control::-webkit-inner-spin-button,
+.table td .input-group.input-group-sm input[type="number"].form-control::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.table td .input-group.input-group-sm input[type="number"].form-control:hover {
+    border-color: var(--accent-color); /* Colore bordo per hover */
+}
+
+.table td .input-group.input-group-sm input[type="number"].form-control:focus {
+    border-color: var(--primary-color); /* Colore bordo per focus */
+    /* box-shadow simile a .dashboard-input (RGB di --primary-color #DDA15E) */
+    box-shadow: 0 0 0 0.25rem rgba(221, 161, 94, 0.25);
+}
+
+
+/* Bottone "Aggiungi" nell'input group */
+.table td .input-group.input-group-sm .btn.btn-outline-primary.btn-sm {
+    /* Colori di base personalizzati */
+    color: var(--pakistan-green);
+    border-color: var(--primary-color);
+    background-color: var(--primary-color); /* Mantiene l'aspetto outline */
+}
+
+.table td .input-group.input-group-sm .btn.btn-outline-primary.btn-sm:hover {
+    /* Colori per l'hover e focus personalizzati */
+    color: var(--text-light); /* Testo scuro su sfondo accentato, come .add-product-btn */
+    background-color: var(--pakistan-green);
+    border-color: var(--pakistan-green);
 }
 
 /* Assicura che il gruppo di input non abbia margini strani nella cella della tabella */
 .table td .input-group.input-group-sm {
     margin-bottom: 0;
+}
+
+/* Icona cestino per eliminare prodotto */
+.delete-product-icon {
+    background: none;
+    border: none;
+    padding: 0; /* Rimuove padding extra per farla sembrare solo un'icona */
+    margin: 0;
+    color: var(--secondary-color); /* Colore icona di default (grigio Bootstrap) */
+    cursor: pointer;
+    font-size: 1.1rem; /* Dimensione dell'icona, puoi aggiustarla */
+    line-height: 1; /* Per un miglior allineamento verticale */
+    vertical-align: middle; /* Allinea l'icona se necessario */
+}
+
+.delete-product-icon:hover {
+    color: #dc3545; /* Rosso standard di Bootstrap (danger) */
+}
+
+.delete-product-icon:focus {
+    color: #dc3545; /* Rosso anche per il focus */
+    outline: none; /* Rimuove l'outline di default del browser */
+}
+.delete-product-icon:focus-visible { /* Stile di focus per accessibilità (navigazione da tastiera) */
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25); /* Ombra rossa simile a Bootstrap */
 }
