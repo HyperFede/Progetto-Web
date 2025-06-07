@@ -25,6 +25,9 @@ function transformProductForResponse(product, req) {
     if (transformedProduct.prezzounitario !== null && transformedProduct.prezzounitario !== undefined) {
         transformedProduct.prezzounitario = parseFloat(transformedProduct.prezzounitario); //in Json restituirebbe una String, (non so il motivo)
     }
+    // If nomeartigiano is already joined and selected, it will be part of transformedProduct.
+    // No specific action needed here for nomeartigiano if it's selected in the query.
+    // If it's fetched separately (e.g., in POST/PUT), it should be added to the product object before calling this.
     return transformedProduct;
 }
 
@@ -79,12 +82,20 @@ router.post('/', isAuthenticated, hasPermission(['Artigiano']), async (req, res)
         // Usa minuscole per i nomi delle colonne del database nella query SQL
         // NB Il campo 'immagine' viene inserito come NULL. Verrà aggiornato tramite l'endpoint PUT dedicato.
         const newProduct = await pool.query(
-            "INSERT INTO Prodotto (nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano, deleted) VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE) RETURNING *",
+            "INSERT INTO Prodotto (nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano, deleted) VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE) RETURNING idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, idartigiano, deleted",
             [nome, descrizione, categoria, prezzounitario, quantitadisponibile, null, finalIdArtigiano]
         );
 
         const productData = newProduct.rows[0];
-        res.status(201).json(transformProductForResponse(productData, req));
+
+        // Fetch artisan's name to include in the response
+        if (productData.idartigiano) {
+            const artisanQuery = await pool.query("SELECT nome FROM Utente WHERE idutente = $1", [productData.idartigiano]);
+            if (artisanQuery.rows.length > 0) {
+                productData.nomeartigiano = artisanQuery.rows[0].nome; // Changed alias
+            }
+        }
+        res.status(201).json(transformProductForResponse(productData, req)); // transformProductForResponse will now include nomeartigiano
     } catch (err) {
         console.error('Errore durante la creazione del prodotto:', err.message, err.stack);
         if (err.code === '23505') { // violazione_univocità
@@ -113,7 +124,9 @@ const productQueryConfig = {
         { queryParam: 'nome_like', dbColumn: 'nome', type: 'like', dataType: 'string' },
         { queryParam: 'quantitadisponibile_lte', dbColumn: 'quantitadisponibile', type: 'lte', dataType: 'integer' }
     ],
-    allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto'],
+    allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto', 'quantitadisponibile', 'nomeartigiano'], // Changed alias
+    defaultLimit: 20, // Default number of products to return
+    maxLimit: 100,    // Maximum number of products per request
     defaultSortField: 'idprodotto',
     defaultSortOrder: 'ASC'
 };
@@ -139,8 +152,10 @@ const adminProductQueryConfig = {
     allowedFilters: [ // Override or extend allowedFilters
         ...productQueryConfig.allowedFilters,
         { queryParam: 'deleted', dbColumn: 'deleted', type: 'boolean', dataType: 'boolean' } // Admins can filter by deleted status
-    ],
+    ], // nomeartigiano filter could be added here if needed: { queryParam: 'nomeartigiano_like', dbColumn: 'u_art.nome', type: 'like', dataType: 'string'}
     allowedSortFields: [...productQueryConfig.allowedSortFields, 'deleted'], // Admins can sort by deleted status
+    defaultLimit: productQueryConfig.defaultLimit, // Inherit from base config
+    maxLimit: productQueryConfig.maxLimit,       // Inherit from base config
     // No baseWhereClause for admins, they see all by default unless they filter
 };
 
@@ -150,7 +165,12 @@ router.get('/',
     createQueryBuilderMiddleware(adminProductQueryConfig),
     async (req, res) => {
     try {
-        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano, deleted FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        const queryText = ` 
+            SELECT p.idprodotto, p.nome, p.descrizione, p.categoria, p.prezzounitario, p.quantitadisponibile, p.immagine, p.idartigiano, p.deleted, u_art.nome AS nomeartigiano
+            FROM Prodotto p
+            LEFT JOIN Utente u_art ON p.idartigiano = u_art.idutente
+            ${req.sqlWhereClause} ${req.sqlOrderByClause} ${req.sqlLimitClause} ${req.sqlOffsetClause}
+        `;
         const allProductsIncludingDeleted = await pool.query(queryText, req.sqlQueryValues);
         const productsWithUrls = allProductsIncludingDeleted.rows.map(product => transformProductForResponse(product, req));
         res.json(productsWithUrls);
@@ -184,15 +204,19 @@ router.get('/',
 // GET /api/products/notdeleted
 router.get(
     '/notdeleted',
-    createQueryBuilderMiddleware({ ...productQueryConfig, baseWhereClause: 'deleted = FALSE' }),
+    createQueryBuilderMiddleware({ ...productQueryConfig, baseWhereClause: 'p.deleted = FALSE' }), // Qualified p.deleted
     async (req, res) => {
     try {
         // req.sqlWhereClause will be like "WHERE (deleted = FALSE) AND categoria = $1 ..."
         // or "WHERE (deleted = FALSE)" if no other filters are applied by the user.
         // req.sqlQueryValues will contain the corresponding values
         // req.sqlOrderByClause will be like "ORDER BY nome ASC"
-
-        const queryText = `SELECT idprodotto, nome, descrizione, categoria, prezzounitario, quantitadisponibile, immagine, idartigiano FROM Prodotto ${req.sqlWhereClause} ${req.sqlOrderByClause}`;
+        const queryText = ` 
+            SELECT p.idprodotto, p.nome, p.descrizione, p.categoria, p.prezzounitario, p.quantitadisponibile, p.immagine, p.idartigiano, u_art.username AS nomeartigiano
+            FROM Prodotto p
+            LEFT JOIN Utente u_art ON p.idartigiano = u_art.idutente
+            ${req.sqlWhereClause} ${req.sqlOrderByClause} ${req.sqlLimitClause} ${req.sqlOffsetClause}
+        `;
         
         const allProducts = await pool.query(queryText, req.sqlQueryValues);
         const productsWithUrls = allProducts.rows.map(product => transformProductForResponse(product, req));
@@ -258,8 +282,13 @@ router.get('/:id', async (req, res) => {
         if (isNaN(productId)) {
             return res.status(400).json({ error: "Formato ID prodotto non valido." });
         }
-        // Usa minuscole per i nomi delle colonne del database
-        const productResult = await pool.query("SELECT * FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE", [productId]);
+        
+        const productResult = await pool.query(
+            `SELECT p.*, u_art.username AS nomeartigiano 
+             FROM Prodotto p
+             LEFT JOIN Utente u_art ON p.idartigiano = u_art.idutente
+             WHERE p.idprodotto = $1 AND p.deleted = FALSE`, 
+            [productId]);
 
         if (productResult.rows.length === 0) {
             return res.status(404).json({ error: "Prodotto non trovato o è stato rimosso." });
@@ -391,14 +420,22 @@ router.put('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), async 
         // Usa minuscole per i nomi delle colonne del database
         const queryText = `UPDATE Prodotto SET ${setClauses.join(', ')} WHERE idprodotto = $${paramIndex} AND deleted = FALSE RETURNING *`;
 
-        const updatedProductResult = await pool.query(queryText, values);
+        const updateResult = await pool.query(queryText, values);
 
-        if (updatedProductResult.rows.length === 0) {
+        if (updateResult.rows.length === 0) {
             // Questo potrebbe accadere se il record è stato eliminato da un altro processo o se non si è verificata alcuna modifica effettiva che soddisfacesse i criteri
             return res.status(404).json({ error: "Il prodotto non può essere aggiornato o non sono state applicate modifiche." });
         }
         
-        const productData = updatedProductResult.rows[0]; // il driver pg restituisce chiavi minuscole
+        const productData = updateResult.rows[0]; // il driver pg restituisce chiavi minuscole
+        // Fetch artisan's name to include in the response
+        if (productData.idartigiano) {
+            const artisanQuery = await pool.query("SELECT nome FROM Utente WHERE idutente = $1", [productData.idartigiano]);
+            if (artisanQuery.rows.length > 0) {
+                productData.nomeartigiano = artisanQuery.rows[0].nome; // Changed alias
+            }
+        }
+
         const transformedProduct = transformProductForResponse(productData, req);
         let message = "Prodotto aggiornato con successo";
         if (transformedProduct.quantitadisponibile === 0) {
@@ -557,7 +594,14 @@ router.put('/:id/stock/add', isAuthenticated, hasPermission(['Artigiano', 'Admin
         );
 
         await commitTransaction();
-        const updatedProduct = updateResult.rows[0];
+        let updatedProduct = updateResult.rows[0];
+
+        if (updatedProduct.idartigiano) {
+            const artisanQuery = await pool.query("SELECT nome FROM Utente WHERE idutente = $1", [updatedProduct.idartigiano]);
+            if (artisanQuery.rows.length > 0) {
+                updatedProduct.nomeartigiano = artisanQuery.rows[0].nome; // Changed alias
+            }
+        }
         const transformedProduct = transformProductForResponse(updatedProduct, req);
         const message = "Stock del prodotto incrementato con successo";
         // No special message needed for stock becoming 0 when adding,
@@ -630,7 +674,14 @@ router.put('/:id/stock/subtract', isAuthenticated, hasPermission(['Artigiano', '
         );
 
         await commitTransaction();
-        const updatedProduct = updateResult.rows[0];
+        let updatedProduct = updateResult.rows[0];
+
+        if (updatedProduct.idartigiano) {
+            const artisanQuery = await pool.query("SELECT nome FROM Utente WHERE idutente = $1", [updatedProduct.idartigiano]);
+            if (artisanQuery.rows.length > 0) {
+                updatedProduct.nomeartigiano = artisanQuery.rows[0].nome; // Changed alias
+            }
+        }
         const transformedProduct = transformProductForResponse(updatedProduct, req);
         let message = "Stock del prodotto decrementato con successo";
         if (transformedProduct.quantitadisponibile === 0) {
@@ -808,6 +859,59 @@ router.get('/:id/image_content', async (req, res) => {
     } catch (err) {
         console.error(`Errore durante il recupero del contenuto dell'immagine per il prodotto ID ${req.params.id}:`, err.message, err.stack);
         res.status(500).json({ error: "Errore del server durante il recupero del contenuto dell'immagine." });
+    }
+});
+
+/**
+ * @route GET /api/products/:id/average-rating
+ * @description Recupera la valutazione media di un singolo prodotto.
+ * @access Public
+ *
+ * Interazione Black-Box:
+ *  Input:
+ *      - Parametro di rotta `id`: ID numerico del prodotto.
+ *  Output:
+ *      - Successo (200 OK): Oggetto JSON con l'ID del prodotto e la sua valutazione media.
+ *        { "idprodotto": Number, "average_rating": Number (può essere null se non ci sono recensioni) }
+ *      - Errore (400 Bad Request): Se l'ID del prodotto fornito non è un numero valido.
+ *        { "error": "Invalid product ID format." }
+ *      - Errore (404 Not Found): Se il prodotto con l'ID specificato non esiste (per coerenza con GET /:id, anche se qui potremmo solo non trovare recensioni).
+ *        { "error": "Product not found." } // O un messaggio specifico per "nessuna recensione"
+ *      - Errore (500 Internal Server Error): In caso di errore del server.
+ *        { "error": "Stringa di errore" }
+ */
+router.get('/:id/average-rating', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const productId = parseInt(id, 10);
+
+        if (isNaN(productId)) {
+            return res.status(400).json({ error: "Formato ID prodotto non valido." });
+        }
+
+        const avgRatingQuery = await pool.query(
+            "SELECT AVG(Valutazione) as average_rating FROM Recensione WHERE IDProdotto = $1",
+            [productId]
+        );
+        
+        let averageRating = null;
+        if (avgRatingQuery.rows[0].average_rating !== null) {
+            const rawAverage = parseFloat(avgRatingQuery.rows[0].average_rating);
+            // Round up to the nearest 0.5
+            const roundedAverage = Math.ceil(rawAverage * 2) / 2;
+
+            averageRating = roundedAverage.toFixed(1); // Format to one decimal place (e.g., 3.0, 3.5)
+        }
+        else{
+            averageRating = 0;
+        }
+
+
+
+        res.status(200).json({ idprodotto: productId, average_rating: averageRating });
+    } catch (err) {
+        console.error(`Errore durante il recupero della valutazione media per il prodotto ID ${req.params.id}:`, err.message, err.stack);
+        res.status(500).json({ error: "Errore del server durante il recupero della valutazione media." });
     }
 });
 
