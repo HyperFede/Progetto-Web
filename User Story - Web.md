@@ -8,8 +8,8 @@
 
 ####Criteri di accettazione:
 -  La pagina "Catalogo" carica dinamicamente i prodotti dal database.
--  I filtri (categoria, prezzo, disponibilità) aggiornano la lista dei prodotti in tempo reale.
--  Ogni prodotto elencato mostra le informazioni necessarie: nome, descrizione, immagine, prezzo e quantità disponibile.
+-  I filtri (nome, categoria, disponibilità) aggiornano la lista dei prodotti in tempo reale.
+-  Ogni prodotto elencato mostra le informazioni necessarie: nome, descrizione, immagine, prezzo e disponibilità.
 
 
 ###-Acquisto Prodotti:
@@ -19,7 +19,7 @@
 ####Criteri di accettazione:
 -  Il carrello consente di aggiungere, rimuovere o modificare la quantità dei prodotti selezionati.
 -  Il sistema calcola il totale del carrello in base ai prodotti selezionati.
--  Il checkout richiede i dati di pagamento e conferma l'ordine e lo notifica con un pop-up all'utente.
+-  Il checkout richiede i dati di pagamento e conferma l'ordine e lo notifica all'utente.
 
 
 ###-Gestione Account:
@@ -30,7 +30,7 @@
 ####Criteri di accettazione:
  - La registrazione richiede i campi obbligatori: nome, cognome, email, indirizzo, username e password.
  - L’utente autenticato può modificare i dati personali dal proprio profilo.
- - Lo storico degli ordini mostra la lista degli ordini con dettagli: ID ordine, data, importo e (stato ?).
+ - Lo storico degli ordini mostra la lista degli ordini con dettagli: ID ordine, data, importo e stato.
 
 
 ###-Scrivere Recensioni:
@@ -39,10 +39,9 @@
 **in modo da** condividere la mia opinione con altri utenti.
 
 ####Criteri di accettazione:
-- La recensione può essere inviata solo per prodotti effettivamente acquistati.
-- Ogni recensione include testo, valutazione numerica (1-5) e immagini opzionali.
-- Le recensioni sono visibili nella pagina del prodotto e mostrate in ordine cronologico di default e possono essere filtrate (es: migliori, peggiori ecc...).
-
+- La recensione può essere inviata solo per prodotti effettivamente acquistati e consegnati.
+- Ogni recensione include testo, valutazione numerica (1-5), data della recensione e immagini opzionali.
+- Le recensioni sono visibili nella pagina del prodotto.
 
 ###-Segnalare Problemi:
 **Come** cliente, 
@@ -50,7 +49,8 @@
 **così che** verrà gestito da un admin
 
 ####Criteri di accettazione:
-Da definire
+- le segnalazioni e il loro stato può essere visto dall'area appostita nella propria area personale.
+- Ogni segnalazione contiene descrizione del problema, 
 
 
 [========]
