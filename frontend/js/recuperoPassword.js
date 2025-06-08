@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Elements for Step 2: New Password
     const recuperoForm = document.getElementById('recuperoForm'); // Form element
     const newPasswordSection = document.getElementById('newPasswordSection');
-    const newPasswordInput = document.getElementById('newPassword');
+    const newPasswordInput = document.getElementById('password');
     const resetPasswordButton = document.getElementById('resetPasswordButton');
     const resetMessageDiv = document.getElementById('resetMessage');
 
