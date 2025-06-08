@@ -10,6 +10,33 @@
 .back-to-search-link i {
     vertical-align: middle;
 }
+/* In c:\Users\enric\Desktop\Uni\ProgettoWebClonedRepo\Progetto-Web\frontend\css\pages\dettaglioProdotto.css */
+
+.product-detail-image-placeholder {
+  width: 100%;
+  /* Puoi impostare un'altezza fissa o un'altezza massima per il contenitore se necessario */
+  /* Esempio: height: 400px; o max-height: 500px; */
+  /* Per ora, lasciamo che l'altezza sia determinata dal contenuto (l'immagine) o da altre regole */
+  background-color: #f8f9fa; /* Un colore di sfondo leggero per il placeholder */
+  border-radius: 0.375rem; /* Bootstrap's default border-radius */
+  overflow: hidden; /* Assicura che l'immagine non esca dai bordi arrotondati */
+  display: flex; /* Già presente, ma lo confermiamo per l'allineamento */
+  align-items: center; /* Già presente */
+  justify-content: center; /* Già presente */
+  border: 1px solid #dee2e6; /* Un bordo leggero */
+}
+
+#immagineProdotto {
+  max-width: 100%; /* Assicura che l'immagine non superi la larghezza del contenitore */
+  max-height: 500px; /* Imposta un'altezza massima per l'immagine, aggiustala secondo necessità */
+  height: auto; /* Mantiene le proporzioni dell'immagine quando si ridimensiona in larghezza */
+  object-fit: contain; /* Assicura che l'intera immagine sia visibile all'interno delle dimensioni date,
+                           mantenendo le proporzioni. Potrebbe lasciare spazi vuoti se le proporzioni
+                           dell'immagine non corrispondono a quelle del contenitore.
+                           Alternativa: 'cover' per riempire lo spazio, tagliando l'immagine. */
+  display: block; /* Rimuove eventuali spazi extra sotto l'immagine (comportamento inline) */
+  border-radius: 0.25rem; /* Bordi leggermente arrotondati per l'immagine stessa, se più piccola del contenitore */
+}
 
 .product-detail-image-placeholder {
     background-color: #e9ecef;
