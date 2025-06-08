@@ -5,7 +5,7 @@ function showProducts(result){
                 `<div class="col">
                     <div class="card h-100" style="border-color: var(--secondary-color);">
                         <a href="dettaglioProdotto.html?id=${product.idprodotto}" class="text-decoration-none text-dark">
-                        <img src="${product.immagine}" class="card-img-top" alt="Immagine Prodotto ${product.idprodotto}" style="height: 200px; object-fit: cover; width: 100%;">
+                        <img src="${product.immagine_url}" class="card-img-top" alt="Immagine Prodotto ${product.idprodotto}" style="height: 200px; object-fit: cover; width: 100%;">
                         </a>
                         <div class="card-body d-flex flex-column p-3">
                             <h5 class="card-title" style="color: var(--primary-color);">${product.nome}</h5>

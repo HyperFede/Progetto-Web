@@ -45,6 +45,21 @@ CREATE TABLE IF NOT EXISTS Prodotto (
 );
 
 -- ==================================================
+-- x. Tabella DettagliCarrello 
+-- ==================================================
+CREATE TABLE IF NOT EXISTS DettagliCarrello (
+    IDCliente INTEGER REFERENCES Utente(IDUtente)
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE,
+    IDProdotto INTEGER NOT NULL REFERENCES Prodotto(IDProdotto)
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE,
+    Quantita INTEGER NOT NULL CHECK (Quantita > 0),
+    TotaleParziale NUMERIC(10,2) NOT NULL,
+    PRIMARY KEY (IDCliente, IDProdotto)
+);
+
+-- ==================================================
 -- 4. Tabella Ordine (con soft delete)
 -- ==================================================
 CREATE TABLE IF NOT EXISTS Ordine (
@@ -141,20 +156,7 @@ CREATE TABLE IF NOT EXISTS StoricoApprovazioni (
     DataEsito TIMESTAMP 
 );
 
--- ==================================================
--- 9. Tabella DettagliCarrello 
--- ==================================================
-CREATE TABLE IF NOT EXISTS DettagliCarrello (
-    IDCliente INTEGER REFERENCES Utente(IDUtente)
-        ON DELETE CASCADE 
-        ON UPDATE CASCADE,
-    IDProdotto INTEGER NOT NULL REFERENCES Prodotto(IDProdotto)
-        ON DELETE CASCADE 
-        ON UPDATE CASCADE,
-    Quantita INTEGER NOT NULL CHECK (Quantita > 0),
-    TotaleParziale NUMERIC(10,2) NOT NULL,
-    PRIMARY KEY (IDCliente, IDProdotto)
-);
+
 
 -- ==================================================
 -- 10. Tabella Pagamento 

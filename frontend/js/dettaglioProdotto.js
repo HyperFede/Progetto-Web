@@ -1,3 +1,16 @@
+document.addEventListener('DOMContentLoaded', async function(){
+
+
+    sessionStorage.setItem("id", getOrderIdFromURL());
+
+});
+
+
+function getOrderIdFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id');
+}
+
 function dateFormatter(datestr){
   const date = new Date(datestr);
   
@@ -93,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const descProdotto = document.getElementById("descProdotto");
     descProdotto.textContent = result.data.descrizione
     const immagineProdotto = document.getElementById("immagineProdotto");
-    immagineProdotto.src = result.data.immagine
+    immagineProdotto.src = result.data.immagine_url
     const categoriaProdotto = document.getElementById("categoriaProdotto");
     categoriaProdotto.textContent = result.data.categoria
     const statoProdotto = document.getElementById("statoProdotto");

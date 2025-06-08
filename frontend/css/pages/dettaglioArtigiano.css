@@ -4,12 +4,31 @@
     font-weight: 500;
     font-size: 0.95rem;
 }
+
 .back-link:hover {
     color: var(--primary-color);
     text-decoration: underline;
 }
+
 .back-link i {
     vertical-align: text-bottom;
+}
+
+.imageProduct {
+    max-width: 100%;
+    /* Assicura che l'immagine non superi la larghezza del contenitore */
+    max-height: 500px;
+    /* Imposta un'altezza massima per l'immagine, aggiustala secondo necessità */
+    height: auto;
+    /* Mantiene le proporzioni dell'immagine quando si ridimensiona in larghezza */
+    object-fit: contain;
+    /* Assicura che l'intera immagine sia visibile all'interno delle dimensioni date,
+                           mantenendo le proporzioni. Potrebbe lasciare spazi vuoti se le proporzioni
+                           dell'immagine non corrispondono a quelle del contenitore.
+                           Alternativa: 'cover' per riempire lo spazio, tagliando l'immagine. */
+    display: block;
+    /* Rimuove eventuali spazi extra sotto l'immagine (comportamento inline) */
+    border-radius: 0.25rem;
 }
 
 .artisan-info-box {
@@ -69,7 +88,8 @@
 
 .product-card-artisan .product-image-placeholder {
     background-color: #e9ecef;
-    height: 160px; /* Altezza per le immagini nel mosaico */
+    height: 160px;
+    /* Altezza per le immagini nel mosaico */
     color: var(--secondary-color);
     font-size: 1.8rem;
     font-weight: bold;
@@ -90,9 +110,11 @@
     color: var(--secondary-color);
     margin-bottom: 0.25rem;
 }
+
 .product-card-artisan .product-rating-list-item .star-icon {
     color: var(--primary-color);
-    font-size: 0.8rem; /*dimensione delle stelle*/
+    font-size: 0.8rem;
+    /*dimensione delle stelle*/
 }
 
 .product-card-artisan .product-price-list-item {
@@ -112,12 +134,17 @@ button:hover,
 input[type="button"]:hover,
 input[type="submit"]:hover,
 input[type="reset"]:hover {
-    background-color: var(--dark-moss-green) !important; /* Usa !important per sovrascrivere lo stile inline */
+    background-color: var(--dark-moss-green) !important;
+    /* Usa !important per sovrascrivere lo stile inline */
 }
 
 /* Sovrascrive il padding superiore per schermi più piccoli di 'lg' */
-@media (max-width: 991.98px) { /* Il breakpoint 'lg' di Bootstrap è 992px */
-    main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
-        padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
+@media (max-width: 991.98px) {
+
+    /* Il breakpoint 'lg' di Bootstrap è 992px */
+    main.container.my-4.pt-lg-0 {
+        /* Rimosso .pt-5 dal selettore */
+        padding-top: 7rem !important;
+        /* Aumentato valore e aggiunto !important per test */
     }
 }
