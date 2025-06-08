@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     const hrefArtigiano = document.getElementById("hrefArtigiano");
-    hrefArtigiano.href = `dettaglioArtigiano.html?${result.data.idartigiano}`;
+    hrefArtigiano.href = `dettaglioArtigiano.html?id=${result.data.idartigiano}`;
 
 
     //CARICO RECENSIONI
