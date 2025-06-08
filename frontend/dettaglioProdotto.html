@@ -12,41 +12,47 @@
 <body>
     <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">
-            <a href="index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
             </a>
 
             <ul class="nav nav-pills align-items-center">
-                <li class="nav-item dropdown">
+                <li class="nav-item dropdown invisible">
                     <a class="nav-link dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--secondary-color);">
-                        <i class="bi bi-person-circle fs-3 me-2"></i> Username
+                        <i class="bi bi-person-circle fs-3 me-2"></i> <span id="nav-username">Username</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
-                        <!-- LOGGED -->
                         <li><a class="dropdown-item" href="dashboardUtente.html"><i class="bi bi-person-fill me-2"></i>IL MIO PROFILO</a></li>
                         <li><a class="dropdown-item" href="dashboardStoricoOrdini.html"><i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI</a></li>
                         <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
+                        <li><a class="dropdown-item" href="logout.html"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
                     </ul>
                 </li>
-
+                <li class="nav-item dropdown invisible-admin">
+                    <a class="nav-link dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--secondary-color);">
+                        <i class="bi bi-person-circle fs-3 me-2"></i> <span id="nav-username">Username</span>
+                    </a>
+                    <!-- ADMIN -->
+                    <ul class="invisible-admin dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                        <li><a class="dropdown-item" href="dashboardAdmin.html"><i class="bi bi-person-fill me-2"></i>ACCETTAZIONE</a></li>
+                        <li><a class="dropdown-item" href="gestione.html"><i class="bi bi-box-seam-fill me-2"></i>GESTIONE SEGNALAZIONE</a></li>
+                        <li><a class="dropdown-item" href="logout.html"><i class="bi bi-flag-fill me-2"></i>LOGOUT</a></li>
+                    </ul>
+                    <!-- FINE -->
+                </li>
                 <!-- UNLOGGED -->
-                <!--
-                <li class="nav-item"><a href="login.html" class="nav-link" style="color: var(--secondary-color);">ACCEDI</a></li>
-                <li class="nav-item" style="color: var(--secondary-color)">|</li>
-                <li class="nav-item"><a href="registrati.html" class="nav-link" style="color: var(--secondary-color);">REGISTRATI</a></li>-->
-                
+                <li class="nav-item unlogged"><a href="login.html" class="nav-link" style="color: var(--secondary-color);">ACCEDI</a></li>
+                <li class="nav-item unlogged" style="color: var(--secondary-color)">|</li>
+                <li class="nav-item unlogged"><a href="registrati.html" class="nav-link" style="color: var(--secondary-color);">REGISTRATI</a></li>
+                <!--FINE-->
                 <li class="nav-item">
-
                     <!-- UNLOGGED -->
-                    <!---
-                    <a href="login.html" class="nav-link" style="color: var(--secondary-color);">
+                    <a href="login.html" class="nav-link unlogged" style="color: var(--secondary-color);">
                         <i class="bi bi-cart fs-4"></i>
-                    </a>-->
-
-                    <!-- LOGGED -->
-                    <a href="carrelloUtente.html" class="nav-link nav-link-cart">
+                    </a>
+                    <!--FINE-->
+                    <a href="carrelloUtente.html" class="nav-link invisible" style="color: var(--secondary-color);">
                         <i class="bi bi-cart fs-3"></i>
                     </a>
                 </li>
@@ -54,24 +60,24 @@
         </div>
     </header>
 
-    <!-- Navbar per schermi < lg -->
+<!-- Navbar per schermi < lg -->
     <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none"> <!-- Mantenuto fixed-top come richiesto in precedenza -->
          <div class="container-fluid d-flex justify-content-between align-items-center">
             <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a href="index.html" class="d-flex align-items-center text-dark text-decoration-none">
+            <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
                 <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
             </a>
             <div class="ms-auto"></div> <!-- Spacer to push toggler and logo to the left -->
 
             <!-- Offcanvas UNLOGGED -->
-            <!--<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-                <div class="offcanvas-header">
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header unlogged">
                     <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menù</h5>
                      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
-                <div class="offcanvas-body">
+                <div class="offcanvas-body unlogged">
                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
                         <ul class="nav nav-pills flex-column mb-auto">
                         <li class="nav-item">
@@ -86,15 +92,13 @@
                         </ul>
                     </div>
                 </div>
-            </div>-->
 
-            <!-- Offcanvas menu LOGGED-->
-            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-                <div class="offcanvas-header">
+                <!-- Offcanvas menu LOGGED-->
+                <div class="offcanvas-header invisible">
                     <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Il Mio Account</h5>
                      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
-                <div class="offcanvas-body">
+                <div class="offcanvas-body invisible">
                      <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
                         <ul class="nav nav-pills flex-column mb-auto">
                         <li class="nav-item">
@@ -112,15 +116,20 @@
                             </li>
                             </ul>
                         <hr class="sidebar-divider">
-                        <button class="btn logout-btn w-100">
-                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
-                        </button>
+                        <a href="logout.html">
+                            <button class="btn logout-btn w-100">
+                                <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                            </button>
+                        </a>
                     </div>
                 </div>
             </div>
            <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
                 <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
-                    <a href="carrelloUtente.html" class="nav-link nav-link-cart">
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart invisible">
+                        <i class="bi bi-cart fs-3"></i>
+                    </a>
+                    <a href="login.html" class="nav-link nav-link-cart unlogged">
                         <i class="bi bi-cart fs-3"></i>
                     </a>
                 </li>
@@ -131,7 +140,7 @@
     <main class="container my-4 pt-lg-0">
         <div class="row mb-3">
             <div class="col">
-                <a href="index.html" class="back-to-search-link">
+                <a href="/" class="back-to-search-link">
                     <i class="bi bi-arrow-left-circle me-1"></i>
                     Torna alla ricerca
                 </a>
@@ -141,28 +150,27 @@
         <div class="row mb-4">
             <div class="col-md-6 mb-3 mb-md-0">
                 <div class="product-detail-image-placeholder d-flex align-items-center justify-content-center">
-                    IMG
+                    <img id="immagineProdotto" />
                 </div>
             </div>
 
             <div class="col-md-6 product-details-column">
-                <p class="product-category-detail">CATEGORIA_PRODOTTO</p>
-                <h1 class="product-name-detail">Nome Prodotto Dettaglio</h1>
+                <p id="categoriaProdotto" class="product-category-detail">CATEGORIA_PRODOTTO</p>
+                <h1 id="nomeProdotto" class="product-name-detail">Nome Prodotto Dettaglio</h1>
                 <div class="product-rating-detail mb-2">
                     <i class="bi bi-star-fill"></i>
                     <i class="bi bi-star-fill"></i>
                     <i class="bi bi-star-fill"></i>
                     <i class="bi bi-star-half"></i>
                     <i class="bi bi-star"></i>
-                    <span class="ms-1 text-muted">(N. Valutazioni)</span>
                 </div>
-                <p class="product-status-detail status-available mb-2">Disponibile</p>
-                <p class="product-price-detail mb-3">Prezzo: €XX.XX</p>
+                <p id="statoProdotto" class="product-status-detail status-available mb-2">Disponibile</p>
+                <p id="prezzoProdotto" class="product-price-detail mb-3">Prezzo: €XX.XX</p>
 
-                <a href="dettaglioArtigiano.html" class="artisan-link">
+                <a id="hrefArtigiano" href="dettaglioArtigiano.html" class="artisan-link">
                     <div class="product-artisan-detail d-flex align-items-center">
                         <div class="artisan-icon-placeholder me-2">A</div>
-                        <span>Nome Artigiano</span>
+                        <span id="artigianoProdotto">Nome Artigiano</span>
                     </div>
                 </a>
             </div>
@@ -172,7 +180,7 @@
             <div class="col-12">
                 <div class="product-description-box">
                     <h5 class="mb-2">Descrizione Prodotto</h5>
-                    <div class="description-content">
+                    <div id="descProdotto" class="description-content">
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
                         <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
                         <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
@@ -184,7 +192,7 @@
         <hr class="my-4">
         
         <div class="row mb-5">
-            <div class="col-12">
+            <div id="review" class="col-12">
                 <h3 class="customer-reviews-title mb-4">Recensioni dei clienti</h3>
 
                 <div class="customer-review-box mb-3">
@@ -242,8 +250,8 @@
 
         <div class="d-grid p-3 add-to-cart-section align-items-center three-columns">
             <div class="text-center mb-3 mb-md-0">
-                <h6 class="add-to-cart-product-name">Nome Prodotto Dettaglio</h6>
-                <p class="add-to-cart-product-price mb-0">Prezzo: €XX.XX</p>
+                <h6 id="nomeProdotto" class="add-to-cart-product-name">Nome Prodotto Dettaglio</h6>
+                <p id="prezzoProdotto" class="add-to-cart-product-price mb-0">Prezzo: €XX.XX</p>
             </div>
             <div class="mb-3 mb-md-0">
                 <label for="quantityInput" class="form-label quantity-label text-center">Quantità:</label>
@@ -251,16 +259,16 @@
             </div>
 
             <!-- UNLOGGED -->
-             <!--
-             <div class="text-end"> 
+             
+             <div class="text-end unlogged"> 
                 <a href="login.html" class="btn w-100 add-to-cart-button-detail d-flex justify-content-center align-items-center">
                     <i class="bi bi-cart-plus fs-3"></i>
                 </a>
-            </div>-->
+            </div>
 
             <!-- LOGGED -->
-            <div class="text-end">
-                <button class="btn w-100 add-to-cart-button-detail d-flex justify-content-center align-items-center">
+            <div class="text-end invisible">
+                <button onclick="aggiungiAlCarrello(null, document.getElementById('quantityInput').value)" class="btn w-100 add-to-cart-button-detail d-flex justify-content-center align-items-center">
                     <i class="bi bi-cart-plus fs-3"></i>
                 </button>
             </div>
@@ -269,5 +277,9 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/fetcher.js"></script>
+    <script src="js/headerShower.js"></script>
+    <script src="js/addCartProduct.js"></script>
+    <script src="js/dettaglioProdotto.js"></script>
 </body>
 </html>

@@ -14,7 +14,7 @@
 <body>
     <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">
-            <a href="index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
             </a>
 
@@ -46,7 +46,7 @@
             <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a href="index.html" class="d-flex align-items-center text-dark text-decoration-none">
+            <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
                 <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
             </a>
             <div class="ms-auto"></div> <!-- Spacer to push toggler and logo to the left -->
@@ -103,13 +103,13 @@
 
         <div class="review-form-container p-4">
             <div class="d-flex align-items-center mb-3 product-info-header">
-                <img src="https://via.placeholder.com/80" alt="Immagine Prodotto" class="product-review-img me-3">
-                <h5 class="product-question">Com'era l'articolo? <span class="product-name-placeholder">[Nome Prodotto Esempio]</span></h5>
+                <img src="https://via.placeholder.com/80" alt="Immagine Prodotto" id="productReviewImage" class="product-review-img me-3">
             </div>
+            <h5 class="product-question">Com'era l'articolo? <span id="productNamePlaceholder" class="product-name-placeholder">[Nome Prodotto Esempio]</span></h5>
 
             <form id="productReviewForm">
                 <div class="mb-4 text-center">
-                    <label class="form-label d-block mb-2 rating-label">La tua valutazione generale:</label>
+                    <label class="form-label d-block mb-2 rating-label"> <span class ="big-review-general-text">La tua valutazione generale </span>:</label>
                     <div class="star-rating">
                         <i class="bi bi-star" data-value="1"></i>
                         <i class="bi bi-star" data-value="2"></i>
@@ -120,13 +120,11 @@
                     <input type="hidden" name="rating" id="ratingValue" required>
 
                     <!-- Caso in cui utente non selezione la valutazione-->
-                    <!--
-                    <div id="ratingError" class="text-danger mt-2">Per favore, seleziona una valutazione.</div>
-                    -->
+                    <div id="ratingError" class="error-text mt-2" style="min-height: 1.2em;"></div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label d-block photo-upload-label">Mostrare l'aspetto dell'articolo?</label>
+                    <label class="form-label d-block photo-upload-label">Mostrare l'aspetto dell'articolo? (Opzionale)</label>
                     <div class="photo-upload-box text-center" onclick="document.getElementById('photoUploadInput').click();">
                         <i class="bi bi-camera fs-1 mb-2"></i>
                         <p>AGGIUNGI FOTO</p>
@@ -136,23 +134,21 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="reviewTitleInput" class="form-label review-title-label">Dai un titolo alla recensione <span class="text-danger">(OBBLIGATORIO)</span></label>
+                    <label for="reviewTitleInput" class="form-label review-title-label">Dai un titolo alla recensione <span class="text-danger">*</span></label>
                     <input type="text" class="form-control review-input" id="reviewTitleInput" name="reviewTitle" required>
                 </div>
 
                 <div class="mb-4">
-                    <label for="reviewTextInput" class="form-label review-text-label">Scrivi una recensione:</label>
-                    <textarea class="form-control review-textarea" id="reviewTextInput" name="reviewText" rows="5" placeholder="Cosa ti è piaciuto o non ti è piaciuto? Come hai usato questo prodotto?"></textarea>
+                    <label for="reviewTextInput" class="form-label review-text-label">Scrivi una recensione: <span class="text-danger">*</span></label>
+                    <textarea class="form-control review-textarea" id="reviewTextInput" name="reviewText" rows="5" placeholder="Cosa ti è piaciuto o non ti è piaciuto? Come hai usato questo prodotto?" required></textarea>
                 </div>
 
 
-                <div class = "text-center">
-                    <!-- caso in cui alla recensione va tutto bene-->
-                    <!--
-                    <div id="successMessage" class="alert alert-success" role="alert">
-                        Grazie per la tua recensione! Sarà pubblicata dopo la revisione.
-                    -->
-                    </div>
+                <!-- Placeholder per messaggi di successo/errore del form -->
+                <div id="formErrorMessage" class="message-placeholder my-3 text-center"></div>
+                <div id="successMessage" class="alert alert-success my-3" role="alert" style="display:none;">
+                    Grazie per la tua recensione! Sarà pubblicata dopo la revisione.
+                </div>
 
                 <div class="text-center">
                     <button type="submit" class="btn rounded-pill submit-review-btn">INVIA</button>
@@ -161,77 +157,10 @@
         </div>
     </main>
 
+    <script src="js/fetcher.js"></script> <!-- Assicurati che sia prima del tuo script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="product-review.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        // ⭐ Stelle di valutazione
-        const stars = document.querySelectorAll('.star-rating .bi-star, .star-rating .bi-star-fill');
-        const ratingValueInput = document.getElementById('ratingValue');
-
-        stars.forEach(star => {
-            star.addEventListener('mouseover', function () {
-                resetStars();
-                const currentValue = parseInt(this.dataset.value);
-                for (let i = 0; i < currentValue; i++) {
-                    stars[i].classList.remove('bi-star');
-                    stars[i].classList.add('bi-star-fill', 'hovered');
-                }
-            });
-
-            star.addEventListener('mouseout', function () {
-                const currentRating = ratingValueInput.value ? parseInt(ratingValueInput.value) : 0;
-                resetStars();
-                if (currentRating > 0) {
-                    for (let i = 0; i < currentRating; i++) {
-                        stars[i].classList.remove('bi-star');
-                        stars[i].classList.add('bi-star-fill', 'selected');
-                    }
-                }
-            });
-
-            star.addEventListener('click', function () {
-                const clickedValue = parseInt(this.dataset.value);
-                ratingValueInput.value = clickedValue;
-                resetStars();
-                for (let i = 0; i < clickedValue; i++) {
-                    stars[i].classList.remove('bi-star');
-                    stars[i].classList.add('bi-star-fill', 'selected');
-                }
-            });
-        });
-
-        function resetStars() {
-            stars.forEach(s => {
-                s.classList.remove('bi-star-fill', 'selected', 'hovered');
-                s.classList.add('bi-star');
-            });
-        }
-
-        // 📄 Invio del form recensione
-        const reviewForm = document.getElementById('productReviewForm');
-        if (reviewForm) {
-            reviewForm.addEventListener('submit', function(event) {
-                event.preventDefault(); // Previene l'invio tradizionale del form
-
-                if (!ratingValueInput.value) {
-                    alert('Per favore, fornisci una valutazione a stelle.');
-                    return;
-                }
-
-                alert('Recensione inviata! (simulazione)');
-
-                // Esempio di reset (opzionale)
-                reviewForm.reset();
-                resetStars();
-                ratingValueInput.value = '';
-                const photoPreviewContainer = document.getElementById('photoPreview');
-                photoPreviewContainer.innerHTML = ''; // Pulisci preview foto
-            });
-        }
-    });
-
-    </script>
+    <!-- <script src="js/product-review.js"></script> --> <!-- Se questo file esiste e fa altro, altrimenti rimuovilo -->
+    <script src="js/nuovaRecensioneProdotto.js"></script>
+    <!-- imagePreview.js è già incluso nell'head, va bene lì -->
 </body>
 </html>
