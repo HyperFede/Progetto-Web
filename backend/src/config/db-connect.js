@@ -5,9 +5,9 @@ const path = require('path');
 // Load environment-specific .env file
 // process.cwd() will be the 'backend' directory when running npm scripts from there.
 if (process.env.NODE_ENV === 'test') {
-    dotenv.config();
+    dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
 } else {
-    dotenv.config(); // Or just dotenv.config() if .env is always at root
+    dotenv.config({ path: path.resolve(process.cwd(), '.env') }); // Or just dotenv.config() if .env is always at root
 }
 
 let dbConfig;

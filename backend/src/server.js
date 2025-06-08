@@ -1,5 +1,5 @@
-//const path = require('path'); // Importa il modulo 'path'
-//require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Specifica il percorso del file .env
+const path = require('path'); // Importa il modulo 'path'
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Specifica il percorso del file .env
 // __dirname si riferisce alla directory corrente del file (cioè src)
 // '../.env' sale di un livello per trovare il file .env nella cartella backend
 
@@ -28,7 +28,7 @@ app.use(cors()); // Abilita CORS per tutte le richieste
 app.use(cookieParser()); // Usa il middleware per il parsing dei cookie
 
 const dbport = process.env.DB_PORT || 5432; // Usa la porta 5432 come default se non specificata
-const serverport = process.env.PORT || 5000; // Usa la porta 3000 come default se non specificata
+const serverport = process.env.PORT || 3000; // Usa la porta 3000 come default se non specificata
 
 if (!dbport) {
     console.log("Variabile d'ambiente PORT non impostata, utilizzo la porta di default 5432");
@@ -55,7 +55,7 @@ app.get('/test', (req, res) => {
     res.send('Server is running. Database initialization attempted.');
 });
 
-//app.use(express.static('../frontend/'))
+app.use(express.static('../frontend/'))
 
 async function startServer() {
     try {

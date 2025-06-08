@@ -281,6 +281,8 @@
 
         document.addEventListener("DOMContentLoaded", async function(){
 
+            let ruolo = (await fetchData("/api/auth/session-info", "GET")).data;
+            console.log(ruolo);
 
             let result = await fetchData(`/api/problems/me`, "GET");
             console.log(result);
