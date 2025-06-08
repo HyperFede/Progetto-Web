@@ -242,28 +242,41 @@ router.get('/artisan/:artisanId', isAuthenticated, async (req, res) => {
                 so.IDOrdine,
                 so.IDArtigiano,
                 so.SubOrdineStatus,
-                u.Nome AS NomeArtigiano, 
+                u_art.Nome             AS NomeArtigiano, 
                 p.IDProdotto,
-                p.Nome AS NomeProdotto,
-                p.Descrizione AS DescrizioneProdotto, -- Added for consistency
-                dor.PrezzoStoricoUnitario, -- Use historical price
+                p.Nome             AS NomeProdotto,
+                p.Descrizione      AS DescrizioneProdotto,
+                dor.PrezzoStoricoUnitario,
                 dor.Quantita,
-                (dor.PrezzoStoricoUnitario * dor.Quantita) AS SubtotaleProdotto,
-                o.Data AS DataOrdine -- Use the actual column name from Ordine table
+                (dor.PrezzoStoricoUnitario * dor.Quantita) AS subtotaleprodotto,
+                -- new column: total per suborder (all products)
+                SUM(dor.PrezzoStoricoUnitario * dor.Quantita)
+                    OVER (PARTITION BY so.IDArtigiano, so.IDOrdine)
+                AS prezzototalesubordine,
+                o.Data            AS DataOrdine,
+                u_cli.username        AS usernameCliente
             FROM
                 SubOrdine so
-            JOIN -- Added join for Utente table
-                Utente u ON so.IDArtigiano = u.IDUtente
-            JOIN -- Corrected join for DettagliOrdine
-                DettagliOrdine dor ON so.IDOrdine = dor.IDOrdine
-            JOIN -- Corrected join for Prodotto, ensuring it's for the suborder's artisan
-                Prodotto p ON dor.IDProdotto = p.IDProdotto AND p.IDArtigiano = so.IDArtigiano
             JOIN
-                Ordine o ON so.IDOrdine = o.IDOrdine
+                Utente u_art ON so.IDArtigiano = u_art.IDUtente
+            JOIN
+                DettagliOrdine dor ON so.IDOrdine = dor.IDOrdine
+            JOIN
+                Prodotto p
+                ON dor.IDProdotto = p.IDProdotto
+                AND p.IDArtigiano = so.IDArtigiano
+            JOIN
+                Ordine o
+                ON so.IDOrdine = o.IDOrdine
+            JOIN
+                Utente u_cli ON o.IDUtente = u_cli.IDUtente
             WHERE
-                so.IDArtigiano = $1::INTEGER -- Primary filter by artisan ID
+                so.IDArtigiano = $1::INTEGER
             ORDER BY
-                o.Data DESC, so.IDOrdine, p.Nome; -- Order by main order date, then order ID, then product
+                o.Data DESC,
+                so.IDOrdine,
+                p.Nome;
+
         `;
 
         const result = await client.query(query, [requestedArtisanId]);
@@ -277,7 +290,7 @@ router.get('/artisan/:artisanId', isAuthenticated, async (req, res) => {
                 subordinestatus,
                 nomeartigiano,
                 dataordine,
-                idprodotto, nomeprodotto, descrizioneprodotto, prezzostoricounitario, quantita, subtotaleprodotto
+                idprodotto, nomeprodotto, descrizioneprodotto, prezzostoricounitario, quantita, subtotaleprodotto, usernamecliente,prezzototalesubordine 
             } = row;
 
             // Use the composite key (IDOrdine, IDArtigiano) to find the subOrder group
@@ -290,6 +303,8 @@ router.get('/artisan/:artisanId', isAuthenticated, async (req, res) => {
                     NomeArtigiano: nomeartigiano,
                     SubOrdineStatus: subordinestatus,
                     DataOrdine: dataordine,
+                    usernameCliente: usernamecliente,
+                    prezzoTotale: parseFloat(prezzototalesubordine).toFixed(2),
                     Prodotti: []
                 };
                 acc.push(subOrder);
