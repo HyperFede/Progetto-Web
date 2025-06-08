@@ -3,17 +3,88 @@
     color: var(--secondary-color);
     font-weight: 500;
 }
+
 .back-to-search-link:hover {
     color: var(--primary-color);
     text-decoration: underline;
 }
+
 .back-to-search-link i {
     vertical-align: middle;
 }
 
+/* stretch the file-input over the whole container, invisible but clickable */
+#productImageInput {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* camera-overlay styling */
+.add-image-trigger {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    opacity: 0;
+    transition: opacity .2s;
+    z-index: 5;
+}
+
+/* cover entire image container with the invisible file-picker */
+#productImageInput {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* show a semi-opaque camera overlay on hover */
+.add-image-trigger {
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity .2s;
+    z-index: 5;
+}
+
+.product-detail-image-container:hover .add-image-trigger {
+    opacity: 1;
+}
+
+/* ensure the image container has a border and fixed height */
+.product-detail-image-container {
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    overflow: hidden;
+}
+
+
+.product-detail-image-container:hover .add-image-trigger {
+    opacity: 1;
+}
+
+/* keep your delete-button overlay hidden until you want it */
+.image-action-overlay {
+    /* you already have inline display:none; you can also toggle via JS */
+    z-index: 6;
+}
+
+
 .product-detail-image-placeholder {
     background-color: #e9ecef;
-    min-height: 300px; 
+    min-height: 300px;
     height: 100%;
     max-height: 450px;
     color: var(--secondary-color);
@@ -44,12 +115,15 @@
     font-weight: 500;
     font-size: 1rem;
 }
+
 .product-status-detail.status-available {
     color: var(--success-color, green);
 }
+
 .product-status-detail.status-low-stock {
     color: var(--warning-color, orange);
 }
+
 .product-status-detail.status-unavailable {
     color: var(--danger-color, red);
 }
@@ -63,20 +137,26 @@
 .product-artisan-detail {
     color: var(--secondary-color);
     font-size: 0.95rem;
-    padding: 0.75rem 1rem; /* Aumentato leggermente il padding per un aspetto migliore */
-    border: 1px solid var(--secondary-color); /* Assicurato che 'solid' sia specificato */
+    padding: 0.75rem 1rem;
+    /* Aumentato leggermente il padding per un aspetto migliore */
+    border: 1px solid var(--secondary-color);
+    /* Assicurato che 'solid' sia specificato */
     border-radius: 0.25rem;
     background-color: var(--border-color);
-    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; /* Transizione per hover */
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    /* Transizione per hover */
 }
 
 .artisan-link {
-    text-decoration: none; /* Rimuove la sottolineatura del link */
+    text-decoration: none;
+    /* Rimuove la sottolineatura del link */
 }
 
 .artisan-link:hover .product-artisan-detail {
-    background-color: var(--secondary-color); /* Cambia sfondo all'hover */
-    color: var(--text-light); /* Cambia colore testo per contrasto */
+    background-color: var(--secondary-color);
+    /* Cambia sfondo all'hover */
+    color: var(--text-light);
+    /* Cambia colore testo per contrasto */
 }
 
 .artisan-icon-placeholder {
@@ -105,7 +185,8 @@
 
 .description-content {
     max-height: 150px;
-    overflow-y: auto; /* Abilita scroll verticale se il contenuto eccede */
+    overflow-y: auto;
+    /* Abilita scroll verticale se il contenuto eccede */
     font-size: 0.95rem;
     line-height: 1.6;
     color: var(--secondary-color);
@@ -118,7 +199,8 @@
     border-radius: 0.375rem;
     position: sticky;
     bottom: 10px;
-    z-index: 1020; /* Valore standard per elementi sticky/fixed sopra il contenuto normale */
+    z-index: 1020;
+    /* Valore standard per elementi sticky/fixed sopra il contenuto normale */
     /* La classe mb-5 è stata rimossa dall'HTML per questa sezione */
 }
 
@@ -147,9 +229,10 @@
     max-width: 100px;
     margin: 0 auto;
 }
+
 .add-to-cart-section .quantity-input:focus {
-     border-color: var(--primary-color);
-     box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
 }
 
 
@@ -165,24 +248,29 @@
     background-color: var(--dark-moss-green)
 }
 
-.three-columns{
+.three-columns {
     grid-template-columns: 1fr 1fr 1fr;
 }
 
-.center-items{
+.center-items {
     place-items: anchor-center;
 }
 
 /* Stile per la linea orizzontale (hr) */
 hr.my-4 {
     border-top: 1px solid var(--secondary-color);
-    opacity: 1; /* Assicura che sia completamente opaca, sovrascrivendo l'opacità di default di Bootstrap per hr */
+    opacity: 1;
+    /* Assicura che sia completamente opaca, sovrascrivendo l'opacità di default di Bootstrap per hr */
 }
 
 /* Sovrascrive il padding superiore per schermi più piccoli di 'lg' */
-@media (max-width: 991.98px) { /* Il breakpoint 'lg' di Bootstrap è 992px */
-    main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
-        padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
+@media (max-width: 991.98px) {
+
+    /* Il breakpoint 'lg' di Bootstrap è 992px */
+    main.container.my-4.pt-lg-0 {
+        /* Rimosso .pt-5 dal selettore */
+        padding-top: 7rem !important;
+        /* Aumentato valore e aggiunto !important per test */
     }
 }
 
@@ -252,18 +340,19 @@ hr.my-4 {
 }
 
 .fixed-bottom-save-button {
-  position: sticky;
-  bottom: 20px; /* Puoi aggiustare questa distanza dal fondo se necessario */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1050;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    position: sticky;
+    bottom: 20px;
+    /* Puoi aggiustare questa distanza dal fondo se necessario */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .product-details-column .dashboard-input:hover,
 .product-description-box .dashboard-input:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.25rem rgba(221, 161, 94, 0.25);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(221, 161, 94, 0.25);
 }
 
 /* Stili per il contenitore dell'immagine (product-detail-image-placeholder fornisce già stili base) */
@@ -271,49 +360,64 @@ hr.my-4 {
     /* Assicurati che sia position: relative per gli overlay figli */
 }
 
-.current-image-display span { /* Stile per il testo "IMG" placeholder */
+.current-image-display span {
+    /* Stile per il testo "IMG" placeholder */
     color: var(--secondary-color);
     font-size: 2.5rem;
     font-weight: bold;
 }
+
 .current-image-display img {
     max-width: 100%;
-    max-height: 100%; /* Adatta all'altezza del contenitore */
-    width: 100%; /* Occupa tutta la larghezza disponibile */
-    height: 100%; /* Occupa tutta l'altezza disponibile */
-    object-fit: cover; /* 'cover' riempie, 'contain' mostra tutto. Scegli in base alle tue preferenze. */
+    max-height: 100%;
+    /* Adatta all'altezza del contenitore */
+    width: 100%;
+    /* Occupa tutta la larghezza disponibile */
+    height: 100%;
+    /* Occupa tutta l'altezza disponibile */
+    object-fit: cover;
+    /* 'cover' riempie, 'contain' mostra tutto. Scegli in base alle tue preferenze. */
 }
 
 /* Overlay per l'azione di rimozione */
 .image-action-overlay {
     transition: opacity 0.2s ease-in-out;
-    opacity: 0; /* Inizia trasparente, gestito da JS e hover */
+    opacity: 0;
+    /* Inizia trasparente, gestito da JS e hover */
 }
 
 /* Mostra l'overlay con il cestino quando c'è un'immagine e si fa hover */
 .product-detail-image-container:hover .image-action-overlay.can-delete {
     opacity: 1;
-    display: flex !important; /* Sovrascrive display:none inline */
+    display: flex !important;
+    /* Sovrascrive display:none inline */
 }
 
 /* Trigger per aggiungere immagine */
 .add-image-trigger {
     /* display: none; è gestito da JS/inline style inizialmente */
-    border: 2px dashed var(--secondary-color); /* Bordo per indicare area cliccabile */
-    border-radius: 0.25rem; /* Consistente con gli altri bordi */
+    border: 2px dashed var(--secondary-color);
+    /* Bordo per indicare area cliccabile */
+    border-radius: 0.25rem;
+    /* Consistente con gli altri bordi */
 }
+
 .add-image-trigger:hover {
-    background-color: rgba(0,0,0,0.05); /* Leggero feedback su hover */
+    background-color: rgba(0, 0, 0, 0.05);
+    /* Leggero feedback su hover */
 }
 
 /* Stato: quando si deve aggiungere un'immagine (nessuna immagine presente) */
 .product-detail-image-container.state-add-image .current-image-display {
     display: none !important;
 }
+
 .product-detail-image-container.state-add-image .add-image-trigger {
     display: flex !important;
 }
+
 .product-detail-image-container.state-add-image .image-action-overlay {
     display: none !important;
     opacity: 0 !important;
 }
+
