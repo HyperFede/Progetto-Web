@@ -140,40 +140,60 @@
     </nav>
 
     <main class="container my-4 pt-lg-0">
-        <form id="searchForm" class="row mb-4 g-3 align-items-center p-3 rounded filter-bar">
-            <div class="col-md-5">
-                <label for="searchQuery" class="form-label">Cosa Cerchi?</label>
-                <div class="input-group">
-                    <span class="input-group-text" style="background-color: var(--background-color); border-color: var(--secondary-color);"><i class="bi bi-search" style="color: var(--primary-color);"></i></span>
-                    <input type="text" name="name" class="form-control" id="searchQuery" style="border-color: var(--secondary-color);">
+        <form id="searchForm" class="mb-4 p-3 rounded filter-bar">
+            <div class="row g-3 align-items-center"> <!-- Prima riga per i filtri -->
+                <div class="col-md-3">
+                    <label for="searchQuery" class="form-label">Cosa Cerchi?</label>
+                    <div class="input-group">
+                        <span class="input-group-text"
+                            style="background-color: var(--background-color); border-color: var(--secondary-color);"><i
+                                class="bi bi-search" style="color: var(--primary-color);"></i></span>
+                        <input type="text" name="name" class="form-control" id="searchQuery"
+                            style="border-color: var(--secondary-color);">
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <label for="categorySelect" class="form-label">Categoria</label>
-                <select class="form-select" name="categoria" id="categorySelect" style="border-color: var(--secondary-color);">
-                    <option value="" selected>Scegli...</option>
-                    <option value="Quadri">Quadri</option>
-                    <option value="Sculture">Sculture</option>
-                    <option value="Erboristeria">Erboristeria</option>
-                    <option value="Creme">Creme</option>
-                    <option value="Mobili e arredamento">Mobili e arredamento</option>
-                    <option value="Collane e bracciali">Collane e bracciali</option>
-                </select>
-            </div>
-            <div class="col-md-2 d-flex">
-                <div class="form-check d-flex flex-column">
-                    <label class="form-check-label form-label" for="inStockCheck">
-                        In Stock
-                    </label>
-                    <input class="form-check-input m-0 p-3" name="checkStock" type="checkbox" value="" id="inStockCheck">
+                <div class="col-md-3">
+                    <label for="categorySelect" class="form-label">Categoria</label>
+                    <select class="form-select" name="categoria" id="categorySelect"
+                        style="border-color: var(--secondary-color);">
+                        <option value="" selected>Scegli...</option>
+                        <option value="Quadri">Quadri</option>
+                        <option value="Sculture">Sculture</option>
+                        <option value="Erboristeria">Erboristeria</option>
+                        <option value="Creme">Creme</option>
+                        <option value="Mobili e arredamento">Mobili e arredamento</option>
+                        <option value="Collane e bracciali">Collane e bracciali</option>
+                    </select>
                 </div>
-            </div>
-            <div class="col-md-2 d-flex align-items-end mt-4">
-                <button type="submit" class="btn w-100" style="background-color: var(--primary-color); color: white;">
-                    <i class="bi bi-search"></i>
-                </button>
+                <div class="col-md-2">
+                    <label for="priceMin" class="form-label">Prezzo Min</label>
+                    <input type="number" name="priceMin" class="form-control me-2" id="priceMin"
+                        style="border-color: var(--secondary-color);" placeholder="€">
+                </div>
+                <div class="col-md-2">
+                    <label for="priceMax" class="form-label">Prezzo Max</label>
+                    <input type="number" name="priceMax" class="form-control" id="priceMax"
+                        style="border-color: var(--secondary-color);" placeholder="€">
+                </div>
+                <div class="col-md-2 d-flex flex-column align-items-center">
+                    <div class="form-check d-flex flex-column">
+                        <label class="form-check-label form-label" for="inStockCheck">
+                            In Stock
+                        </label>
+                        <input class="form-check-input m-0 p-3" name="checkStock" type="checkbox" value="" id="inStockCheck">
+                    </div>
+                </div>
+            </div> <!-- Fine della riga dei filtri -->
+            <div class="row mt-3"> <!-- Nuova riga per il bottone -->
+                <div class="col-12 d-flex justify-content-center">
+                    <button type="submit" class="btn w-100" style="background-color: var(--primary-color); color: white;">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
             </div>
         </form>
+
+
 
         <div id="products" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <div class="col">
