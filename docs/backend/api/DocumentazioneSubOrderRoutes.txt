@@ -1,0 +1,238 @@
+SubOrders API Documentation
+
+Schema di Funzionalità:
+  #1 Create      – Nessun endpoint pubblico di creazione SubOrdine (gestito internamente dopo il pagamento)
+  #2 Read        – Due endpoint GET per recuperare SubOrdini (suddivisi per ordine e per artigiano) 
+  (rispettivamente per gli artigiani che vogliono sapere a quali ordini appartiene un subordine e per i clienti che dividono un ordine in base agli artigiani)
+  #3 Update      – Un endpoint PUT per aggiornare lo stato di un SubOrdine
+  #4 Delete      – Nessun endpoint pubblico di cancellazione SubOrdine (gestito con cascading da Ordine)
+
+--------------------------------------------------------------------------------
+#2 Read SubOrders
+
+## 2.1 GET SubOrdini per Ordine
+Endpoint:
+  GET /api/suborders/order/:orderId
+
+Descrizione:
+  - Recupera i dettagli di tutti i SubOrdini associati a un singolo Ordine (IDOrdine = :orderId).
+  - Group by artigiano: per ciascun artigiano coinvolto fornisce nome, email, stato del SubOrdine, e lista dei prodotti a lui assegnati (con prezzo storico, quantità e subtotale).
+  - Utile per la vista cliente: mostra come sono suddivise le righe dell’ordine tra i vari artigiani e il loro stato.
+
+Accesso:
+  - Middleware: isAuthenticated
+  - Ruoli ammessi:
+      • Admin: può accedere a qualsiasi ordine.
+      • Cliente: può accedere solo se req.user.idutente === IDUtenteOrdine.
+
+Filtri:
+  - Nessun filtro opzionale (l’ordine è identificato univocamente da :orderId).
+  - Viene automaticamente scartato se Deleted = TRUE (si ottiene 404).
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Path Parameter:
+      :orderId (numero intero)
+
+Output (200 OK):
+  ```json
+  {
+    "IdOrdine": 58,
+    "OrdineStatus": "Da spedire",
+    "DataOrdine": "2025-05-20",
+    "OraOrdine": "14:30:00",
+    "IdUtenteOrdine": 517,
+    "ImportoTotaleOrdine": "120.00",
+    "Artigiani": [
+      {
+        "IDArtigiano": 101,
+        "NomeArtigiano": "Mario Rossi",
+        "EmailArtigiano": "mario.rossi@example.com",
+        "SubOrdineStatus": "Spedito",
+        "Prodotti": [
+          {
+            "IDProdotto": 10,
+            "NomeProdotto": "Ciotola in Ceramica",
+            "DescrizioneProdotto": "Ciotola fatta a mano",
+            "PrezzoStoricoUnitario": "25.00",
+            "Quantita": 2,
+            "SubtotaleProdotto": "50.00"
+          },
+          {
+            "IDProdotto": 12,
+            "NomeProdotto": "Tazza Artigianale",
+            "DescrizioneProdotto": "Tazza smaltata a mano",
+            "PrezzoStoricoUnitario": "35.00",
+            "Quantita": 1,
+            "SubtotaleProdotto": "35.00"
+          }
+        ]
+      },
+      {
+        "IDArtigiano": 102,
+        "NomeArtigiano": "Luigi Bianchi",
+        "EmailArtigiano": "luigi.bianchi@example.com",
+        "SubOrdineStatus": "Da spedire",
+        "Prodotti": [
+          {
+            "IDProdotto": 15,
+            "NomeProdotto": "Lampada Artigianale",
+            "DescrizioneProdotto": "Lampada in legno intagliato",
+            "PrezzoStoricoUnitario": "35.00",
+            "Quantita": 1,
+            "SubtotaleProdotto": "35.00"
+          }
+        ]
+      }
+    ]
+  }
+
+
+I campi numerici (ImportoTotaleOrdine, PrezzoStoricoUnitario, SubtotaleProdotto) sono stringhe con 2 decimali, fare il ParseFloat sui numeri.
+Errori comuni:
+
+400 Bad Request:
+{ "message": "Order not found." } (se orderId non è un numero valido, ma viene gestito come 404)
+
+403 Forbidden:
+{ "message": "Access denied. You do not have permission to view suborders for this order." }
+
+404 Not Found:
+{ "message": "Order not found." } (ordine inesistente o Deleted = TRUE)
+
+500 Internal Server Error:
+{ "message": "Error fetching suborder details.", "error": "<dettagli>" }
+
+
+2.2 GET SubOrdini per Artigiano
+Endpoint:
+GET /api/suborders/artisan/:artisanId
+
+Descrizione:
+
+Recupera tutti i SubOrdini assegnati a un dato artigiano (IDArtigiano = :artisanId), raggruppati per ordine principale.
+Ogni record contiene IDOrdine, nome artigiano, stato del SubOrdine, data dell’ordine principale, e lista dei prodotti (con prezzo storico, quantità e subtotale).
+Utile per la dashboard artigiano: mostra quali articoli deve spedire per ogni ordine.
+
+Accesso:
+
+Middleware: isAuthenticated
+
+Ruoli ammessi:
+• Admin: può vedere tutti i SubOrdini di qualsiasi artigiano.
+• Artigiano: può vedere solo i propri (req.user.idutente === :artisanId).
+
+Filtri:
+
+Nessun filtro aggiuntivo (si passa direttamente :artisanId).
+
+Input:
+
+Header:
+Authorization: Bearer <token_JWT>
+
+Path Parameter:
+:artisanId (numero intero)
+
+Output (200 OK):
+
+[
+  {
+    "IDOrdine": 58,
+    "IDArtigiano": 101,
+    "NomeArtigiano": "Mario Rossi",
+    "SubOrdineStatus": "Spedito",
+    "DataOrdine": "2025-05-20",
+    "Prodotti": [
+      {
+        "IDProdotto": 10,
+        "NomeProdotto": "Ciotola in Ceramica",
+        "DescrizioneProdotto": "Ciotola fatta a mano",
+        "PrezzoStoricoUnitario": "25.00",
+        "Quantita": 2,
+        "SubtotaleProdotto": "50.00"
+      },
+      {
+        "IDProdotto": 12,
+        "NomeProdotto": "Tazza Artigianale",
+        "DescrizioneProdotto": "Tazza smaltata a mano",
+        "PrezzoStoricoUnitario": "35.00",
+        "Quantita": 1,
+        "SubtotaleProdotto": "35.00"
+      }
+    ]
+  },
+  {
+    "IDOrdine": 60,
+    "IDArtigiano": 101,
+    "NomeArtigiano": "Mario Rossi",
+    "SubOrdineStatus": "Da spedire",
+    "DataOrdine": "2025-05-21",
+    "Prodotti": [
+      {
+        "IDProdotto": 20,
+        "NomeProdotto": "Scultura in Legno",
+        "DescrizioneProdotto": "Scultura intagliata a mano",
+        "PrezzoStoricoUnitario": "75.00",
+        "Quantita": 1,
+        "SubtotaleProdotto": "75.00"
+      }
+    ]
+  }
+]
+Errori comuni:
+
+400 Bad Request:
+{ "message": "Invalid Artisan ID format." } (artisanId non numerico)
+
+403 Forbidden:
+{ "message": "Access denied. You do not have permission to view these suborders." }
+
+404 Not Found:
+{ "message": "No suborders found for this artisan ID." }
+
+500 Internal Server Error:
+{ "message": "Error fetching artisan suborder details.", "error": "<dettagli>" }
+
+
+#3 Update SubOrder Status
+
+Endpoint:
+PUT /api/suborders/order/:orderId/artisan/:artisanId/status
+
+Descrizione:
+
+Aggiorna il campo SubOrdineStatus per il SubOrdine identificato da (IDOrdine = :orderId, IDArtigiano = :artisanId).
+Esempio di status ammessi: “In attesa”, “Da spedire”, “Spedito”, “Consegnato”.
+Dopo l’update, chiama internamente updateMainOrderStatusBasedOnSubOrders(orderId, client) per sincronizzare lo stato dell’Ordine principale in base allo stato di tutti i SubOrdini.
+
+Accesso:
+Ruoli ammessi:
+• Admin: può aggiornare qualsiasi SubOrdine.
+• Artigiano: può aggiornare solo se req.user.idutente === :artisanId.
+
+Input:
+
+Header:
+Authorization: Bearer <token_JWT>
+
+Path Parameters:
+:orderId (numero intero)
+:artisanId (numero intero)
+
+body:
+{
+  "newStatus": "Spedito"
+}
+
+Output:
+
+{
+  "message": "Suborder status updated successfully.",
+  "subOrder": {
+    "idordine": 58,
+    "idartigiano": 101,
+    "subordinestatus": "Spedito"
+  }
+}

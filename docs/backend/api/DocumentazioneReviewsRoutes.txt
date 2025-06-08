@@ -1,0 +1,371 @@
+Reviews API Documentation (with Query Filters)
+
+Schema di Funzionalità:
+  #1 Create      – POST /api/reviews
+  #2 Read        – GET /api/reviews/:id, GET /api/reviews/product/:productId (con filtri), GET /api/reviews (con filtri)
+  #3 Update      – PUT /api/reviews/:id
+  #4 Delete      – DELETE /api/reviews/:id
+
+--------------------------------------------------------------------------------
+#1 Create Review
+Endpoint:
+  POST /api/reviews
+
+Descrizione:
+  - Crea una nuova recensione per un prodotto acquistato e consegnato.
+  - “Immagine” rimane NULL finché non viene caricata separatamente.
+
+Accesso:
+  - isAuthenticated
+  - hasPermission(['Cliente'])
+
+Regole di Business:
+  - “valutazione” intero 1–5.
+  - L’utente deve aver acquistato e ricevuto il prodotto (SubOrdineStatus = “Consegnato”).
+  - Ordine “Deleted = FALSE”.
+
+Input:
+  - Header:
+      Authorization: Bearer <token_JWT>
+  - Body (JSON):
+    {
+      "idprodotto": <Number>,
+      "testo": "<string>",
+      "valutazione": <Number>
+    }
+
+Validazioni:
+  - Se manca un campo → 400 Bad Request:
+    { "error": "Missing required fields: idprodotto, testo, valutazione" }
+  - Se valutazione non è intero 1–5 → 400 Bad Request:
+    { "error": "Valutazione must be an integer between 1 and 5" }
+  - Se prodotto non acquistato o non consegnato → 403 Forbidden:
+    { "error": "Forbidden: You can only review products you have purchased and that have been delivered." }
+
+Output:
+  - 201 Created:
+    {
+      "idrecensione": 123,
+      "idutente": 45,
+      "idprodotto": 10,
+      "testo": "Ottimo prodotto!",
+      "valutazione": 5,
+      "data": "2025-06-01",
+      "ora": "13:45:00",
+      "username": "mariorossi",
+      "nomeprodotto": "Ciotola in Ceramica",
+      "immagine_url": null
+    }
+  - 400 Bad Request (vincoli DB):
+    { "error": "Valutazione must be between 1 and 5." } oppure messaggi FK
+  - 403 Forbidden come sopra
+  - 500 Internal Server Error:
+    { "error": "Server error while creating review" }
+
+--------------------------------------------------------------------------------
+#2 Read Review
+
+## 2.1 GET Single Review
+Endpoint:
+  GET /api/reviews/:id
+
+Descrizione:
+  - Recupera dettagli di una recensione, con “username” e “nomeprodotto”.
+  - Se “immagine” non null, aggiunge “immagine_url”.
+
+Accesso:
+  - Pubblico
+
+Input:
+  - Path Param:
+      :id (numero intero)
+
+Output (200 OK):
+  {
+    "idrecensione": 123,
+    "idutente": 45,
+    "idprodotto": 10,
+    "testo": "Recensione OK",
+    "valutazione": 4,
+    "data": "2025-06-01",
+    "ora": "13:45:00",
+    "username": "mariorossi",
+    "nomeprodotto": "Ciotola in Ceramica",
+    "immagine_url": "http://host/api/reviews/123/image_content" // se esiste
+  }
+
+Errori:
+  - 404 Not Found: { "error": "Review not found" }
+  - 500 Internal Server Error: { "error": "Server error while fetching review" }
+
+---
+
+## 2.2 GET Reviews per Prodotto (con filtri)
+Endpoint:
+  GET /api/reviews/product/:productId
+
+Descrizione:
+  - Restituisce tutte le recensioni per :productId, con possibili filtri:
+    • valutazione_gte (>=)
+    • valutazione_lte (<=)
+    • data_gte (>= YYYY-MM-DD)
+    • data_lte (<= YYYY-MM-DD)
+    • idutente (exact)
+    • username_like (LIKE %value%)
+    • nomeprodotto_like (LIKE %value%)
+  - Ordinamento via queryParam “sort” sui campi:
+    idrecensione, valutazione, data, username, nomeprodotto
+
+Accesso:
+  - Pubblico
+
+Input:
+  - Path Param:
+      :productId (numero intero)
+  - Query string (facoltativa):
+    • idutente=<num>
+    • valutazione_gte=<num>
+    • valutazione_lte=<num>
+    • data_gte=YYYY-MM-DD
+    • data_lte=YYYY-MM-DD
+    • username_like=<string>
+    • nomeprodotto_like=<string>
+    • sort=<campo>[,ASC|DESC]
+
+Output (200 OK):
+  [
+    {
+      "idrecensione": 123,
+      "idutente": 45,
+      "idprodotto": 10,
+      "testo": "Molto buono",
+      "valutazione": 5,
+      "data": "2025-06-01",
+      "ora": "13:45:00",
+      "username": "mariorossi",
+      "nomeprodotto": "Ciotola in Ceramica",
+      "immagine_url": null
+    },
+    { /* … */ }
+  ]
+
+Errori:
+  - 400 Bad Request:
+    { "error": "Invalid Product ID format." }
+  - 500 Internal Server Error:
+    { "error": "Server error while fetching reviews for product" }
+
+---
+
+## 2.3 GET All Reviews (con filtri)
+Endpoint:
+  GET /api/reviews
+
+Descrizione:
+  - Restituisce tutte le recensioni, con stesse clausole di filtro aggiuntive:
+    • idutente
+    • idprodotto
+    • valutazione_gte, valutazione_lte
+    • data_gte, data_lte
+    • username_like
+    • nomeprodotto_like
+  - Ordinamento tramite “sort” sui campi permessi:
+    idrecensione, valutazione, data, username, nomeprodotto
+
+Accesso:
+  - Pubblico
+
+Input:
+  - Query string (opzionale):
+    • idutente=<num>
+    • idprodotto=<num>
+    • valutazione_gte=<num>
+    • valutazione_lte=<num>
+    • data_gte=YYYY-MM-DD
+    • data_lte=YYYY-MM-DD
+    • username_like=<string>
+    • nomeprodotto_like=<string>
+    • sort=<campo>[,ASC|DESC]
+
+Output (200 OK):
+  [
+    { /* recensione 1, trasformata */ },
+    { /* recensione 2, … */ }
+  ]
+
+Errori:
+  - 500 Internal Server Error:
+    { "error": "Server error while fetching all reviews" }
+
+--------------------------------------------------------------------------------
+#3 Update Review
+Endpoint:
+  PUT /api/reviews/:id
+
+Descrizione:
+  - Aggiorna “testo” e/o “valutazione” di una recensione esistente.
+  - Solo proprietario o Admin.
+
+Accesso:
+  - isAuthenticated
+
+Validazioni:
+  - :id intero → 400 Bad Request: { "error": "Invalid review ID format." }
+  - Nessun campo da aggiornare → 400 Bad Request:
+    { "error": "No fields to update provided (testo or valutazione)." }
+  - Valutazione, se presente, intero 1–5 → 400 Bad Request
+
+Processo:
+  1. checkReviewOwnershipOrAdmin(reviewId, req.user.idutente, req.user.tipologia):
+     • 'not_found' → 404
+     • 'Forbidden' → 403
+  2. SELECT Testo, Valutazione da Recensione (ricavo campi correnti)
+  3. Calcola nuovi valori:
+     newTesto = testo ◇ existing.testo
+     newValutazione = parsedValutazione ◇ existing.valutazione
+  4. UPDATE Recensione SET Testo = $1, Valutazione = $2 WHERE IDRecensione = $3 RETURNING *
+  5. Risponde con recensione trasformata (200 OK)
+
+Output (200 OK):
+  {
+    "idrecensione": 123,
+    "idutente": 45,
+    "idprodotto": 10,
+    "testo": "Testo aggiornato",
+    "valutazione": 4,
+    "data": "2025-06-01",
+    "ora": "13:45:00",
+    "username": "mariorossi",
+    "nomeprodotto": "Ciotola in Ceramica",
+    "immagine_url": null
+  }
+
+Errori:
+  - 400 Bad Request:
+    • ID non numerico → { "error": "Invalid review ID format." }
+    • Nessun campo da aggiornare → { "error": "No fields to update provided (testo or valutazione)." }
+    • Valutazione non valida → { "error": "Valutazione must be an integer between 1 and 5" }
+  - 403 Forbidden: { "error": "Forbidden: You do not have permission to update this review." }
+  - 404 Not Found: { "error": "Review not found." }
+  - 500 Internal Server Error: { "error": "Server error while updating review" }
+
+--------------------------------------------------------------------------------
+#4 Delete Review
+Endpoint:
+  DELETE /api/reviews/:id
+
+Descrizione:
+  - Elimina una recensione.
+  - Solo proprietario o Admin.
+
+Accesso:
+  - isAuthenticated
+
+Validazioni:
+  - :id intero → 400 Bad Request: { "error": "Invalid review ID format." }
+
+Processo:
+  1. checkReviewOwnershipOrAdmin → autorizzazione o errore
+  2. DELETE FROM Recensione WHERE IDRecensione = $1 RETURNING *
+  3. Se rowCount = 0 → 404 Not Found
+  4. Risponde con:
+     {
+       "message": "Review deleted successfully",
+       "deletedReview": { /* recensione trasformata */ }
+     }
+
+Errori:
+  - 400 Bad Request: { "error": "Invalid review ID format." }
+  - 403 Forbidden: { "error": "Forbidden: You do not have permission to delete this review." }
+  - 404 Not Found: { "error": "Review not found." }
+  - 500 Internal Server Error: { "error": "Server error while deleting review" }
+
+--------------------------------------------------------------------------------
+#5 Image Handling Routes
+
+## 5.1 GET Review Image Content
+Endpoint:
+  GET /api/reviews/:id/image_content
+
+Descrizione:
+  - Restituisce il BYTEA “Immagine” se presente, col Content-Type corretto (file-type).
+
+Accesso:
+  - Pubblico
+
+Validazioni:
+  - :id intero → 400 Bad Request: { "error": "Invalid review ID format." }
+
+Processo:
+  1. SELECT Immagine FROM Recensione WHERE IDRecensione = $1
+  2. Se nessun record o immagine NULL → 404: { "error": "Image not found for this review." }
+  3. Se non è Buffer → 500: { "error": "Image data corrupted or invalid format." }
+  4. FileType.fromBuffer(buffer) → setHeader('Content-Type', mime) o ‘application/octet-stream’
+  5. res.send(buffer)
+
+Errori:
+  - 400 Bad Request: { "error": "Invalid review ID format." }
+  - 404 Not Found: { "error": "Image not found for this review." }
+  - 500 Internal Server Error: { "error": "Server error while retrieving image content." }
+
+---
+
+## 5.2 PUT Review Image
+Endpoint:
+  PUT /api/reviews/:id/image
+
+Descrizione:
+  - Carica/Aggiorna immagine di una recensione, raw up to 10 MB (rawImageParser).
+
+Accesso:
+  - isAuthenticated
+
+Validazioni:
+  - :id intero → 400 Bad Request: { "error": "Invalid review ID format." }
+  - Body non vuoto → 400: { "error": "No image data received." }
+  - (Difesa in profondità) Content-Type deve iniziare con “image/” → 415 se no
+  - checkReviewOwnershipOrAdmin → 404 o 403
+
+Processo:
+  1. UPDATE Recensione SET Immagine = $1 WHERE IDRecensione = $2
+  2. Se rowCount = 0 → 404: { "error": "Review not found, image update failed." }
+  3. 200 OK: { "message": "Image updated successfully for review ID <id>" }
+
+Errori:
+  - 400 Bad Request:
+    • ID non numerico
+    • Nessun body
+  - 413 Payload Too Large: { "error": "Image too large. Limit: 10mb." }
+  - 403 Forbidden
+  - 404 Not Found
+  - 500 Internal Server Error: { "error": "Server error while updating image." }
+
+---
+
+## 5.3 DELETE Review Image
+Endpoint:
+  DELETE /api/reviews/:id/image
+
+Descrizione:
+  - Rimuove immagine di una recensione (Immagine = NULL).
+
+Accesso:
+  - isAuthenticated
+
+Validazioni:
+  - :id intero → 400 Bad Request: { "error": "Invalid review ID format." }
+
+Processo:
+  1. checkReviewOwnershipOrAdmin → 404 o 403
+  2. SELECT Immagine FROM Recensione WHERE IDRecensione = $1
+     • Se nessun record → 404: { "error": "Review not found." }
+     • Se immagine NULL → 404: { "error": "Review does not have an image to delete." }
+  3. UPDATE Recensione SET Immagine = NULL WHERE IDRecensione = $1
+     • Se rowCount = 0 → 404: { "error": "Review not found, image deletion failed." }
+  4. 200 OK: { "message": "Image deleted successfully for review ID <id>" }
+
+Errori:
+  - 400 Bad Request: { "error": "Invalid review ID format." }
+  - 403 Forbidden
+  - 404 Not Found: come sopra
+  - 500 Internal Server Error: { "error": "Server error while deleting image." }

@@ -1,0 +1,3 @@
+Middleware per gestire le richieste e le risposte HTTP che hanno bisogno di caricare un file,
+
+Setta un limite per la dimensione e permette di caricare file in modo "raw" per poi immagazzinarli nel DB

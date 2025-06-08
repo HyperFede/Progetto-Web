@@ -1,4 +1,13 @@
+// Questo script gestisce l'anteprima delle immagini caricate in un input di tipo file.
+// Assicurati di resettare l'anteprima mettendo
+
+/**
+ *  const photoPreviewContainer = document.getElementById('photoPreview');
+ *  photoPreviewContainer.innerHTML = ''; // Pulisci preview foto
+ */
+
 document.addEventListener('DOMContentLoaded', function () {
+    // assicurati che il nominativo delle variabili corrisponda agli ID degli elementi nel tuo HTML 
     const photoUploadInput = document.getElementById('photoUploadInput');
     const photoPreviewContainer = document.getElementById('photoPreview');
 

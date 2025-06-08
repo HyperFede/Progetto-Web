@@ -12,11 +12,14 @@
 </head>
 <body>
     <div class="container-rel">
+        <a href="/" class="d-flex align-items-center mb-4 text-dark text-decoration-none">
+            <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 100px;">
+        </a>
         <h1 class="title-center" id="title-login">Accedi su Piattaforma</h1>
-        <form action="" method="post">
+        <form>
             <div class="input-group">
-                <label>Email</label>
-                <input type="email" placeholder="Email" name="email" required>
+                <label>Username</label>
+                <input type="text" placeholder="Username" name="username" id="username" required>
             </div>
             <div class="input-group password-wrapper">
                 <label>Password</label>
@@ -26,11 +29,42 @@
                         <i class="bi bi-eye-slash toggle-icon" id="icon-pass"></i>
                     </button>
                 </div>
+                <!-- Questo div deve essere visibile quando l'esito di api/auth/login è errato (anche se ) -->
+                
+                    <div id="error-message" class = "error-message invisible">
+                        <span class="error-text" id="user-error">Username o password errati</span>
+                    </div>
+               
             </div>
-            <button type="submit" class="submit-btn">Accedi</button>
+            <!-- Link to password recovery -->
+            <div style="text-align: right; margin-bottom: 1rem; margin-top: 0.5rem;">
+                <a href="recuperoPassword.html">Password dimenticata?</a>
+            </div>
+            <button id="loginButton" type="button" class="submit-btn">Accedi</button>
         </form>
         <span class="signup-text">Prima volta? <a href="registrati.html">Registrati</a></span>
     </div>
     <script src="js/passwordFieldShower.js"></script>
+    <script src="js/fetcher.js"></script>
+    <script>
+        document.getElementById("loginButton").addEventListener('click', async () => {
+            errorText = document.getElementById("error-message");
+            errorText.classList.add("invisible")
+            const formData = {
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value
+            };
+
+            let result = await fetchData("/api/auth/login", "POST", formData);
+            console.log(result);
+            if(result.status == 200){
+                window.location.replace("/")
+            }else{
+                console.log()
+                errorText.classList.remove("invisible");
+            }
+        })
+
+    </script>
 </body>
 </html>

@@ -73,12 +73,6 @@ min-height: 400px;
     }
 }
 
-@media (max-width: 991.98px) { /* Il breakpoint 'lg' di Bootstrap è 992px */
-    main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
-        padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
-    }
-}
-
 /* Sidebar Dashboard */
 .dashboard-sidebar {
     background-color: var(--border-color);
@@ -144,7 +138,7 @@ min-height: 400px;
 .dashboard-content .content-title {
     color: var(--text-dark);
     font-weight: 600;
-    border-bottom: 1px solid var(--divider-color);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.75rem;
 }
 
@@ -206,19 +200,4 @@ min-height: 400px;
     background-color: var(--dark-moss-green);
     color: white;
 
-}
-
-.fixed-bottom-add-button {
-  background-color: var(--primary-color);
-  position: sticky;
-  bottom: 20px; /* Puoi aggiustare questa distanza dal fondo se necessario */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.fixed-bottom-add-button:hover {
-  background-color: var(--dark-moss-green);
-  color: white;
 }

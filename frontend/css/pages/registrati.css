@@ -1,44 +1,48 @@
-body{
-    overflow: hidden;
+
+/* Stile per il focus delle caselle di testo (input e textarea) */
+.form-control:focus {
+    border-color:var(--primary-color); /* Colore del bordo quando l'input è selezionato */
+    box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.1);
 }
 
-.form-group {
-    margin-bottom: 1.5rem;
+/* Rimuove l'outline predefinito che alcuni browser potrebbero aggiungere */
+.form-control:focus { outline: 0; }
+
+#toggleSwitch{
+    border-color: var(--dark-moss-green);     /* Consigliato: usa lo stesso colore per il bordo */
+    box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.1);
 }
 
-.form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--dark-moss-green);
-    font-weight: 500;
+/* Stile per lo switch specifico con id="toggleSwitch" quando è attivo */
+#toggleSwitch:checked {
+    background-color: var(--dark-moss-green); /* Sostituisci con il colore che preferisci */
+    border-color: var(--dark-moss-green);     /* Consigliato: usa lo stesso colore per il bordo */
+    box-shadow: 0 0 0 3px rgba(221, 161, 94, 0.1);
 }
 
-.form-check {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+/* Stili per centrare il contenuto della pagina */
+body {
+    display: flex; /* Abilita Flexbox */
+    justify-content: center; /* Centra il figlio (.container-rel) orizzontalmente */
+    align-items: center;     /* Centra il figlio (.container-rel) verticalmente */
+    min-height: 100vh;       /* Imposta l'altezza minima del body all'intera altezza della viewport */
+    margin: 0;               /* Rimuove i margini predefiniti del body */
+    padding: 20px;           /* Aggiunge un po' di spazio ai lati del container principale */
+    box-sizing: border-box;  /* Fa sì che il padding non aumenti la dimensione totale del body */
 }
 
-
-.form-text {
-    display: block;
-    margin-top: 0.5rem;
+.container-rel {
+    display: flex; /* Abilita Flexbox per il container del form */
+    flex-direction: column; /* Dispone i figli (logo, titolo, form) in colonna */
+    align-items: center; /* Centra i figli orizzontalmente */
+    width: 100%; /* Fa sì che il container occupi la larghezza disponibile (limitata dal padding del body) */
+    /* Potresti voler aggiungere una max-width per una migliore leggibilità su schermi molto grandi,
+       ad esempio: max-width: 600px;
+       Questo farebbe sì che il contenuto non diventi eccessivamente largo. */
 }
 
-.form-check.form-switch.d-flex {
-    padding: 0;
-    margin: 0;
-    gap: 15px;
-}
-
-.form-check-label {
-    flex-grow: 1;
-    margin: 0;
-    line-height: 1.5;
-    padding-top: 2px;
-}
-
-.form-check-input {
-    position: static;
-    margin-left: 0 !important;
+.error-text {
+    color: red;    /* Text color for errors */
+    font-size: 0.875em; /* Optional: makes the error text a bit smaller */
+    margin-top: 0.25rem; /* Optional: adds a little space above the error message */
 }
