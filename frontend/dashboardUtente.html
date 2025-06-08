@@ -197,13 +197,12 @@
                             <div class = "text-center mt-4">
                                 <!-- Caso in cui la PUT restituisca un errore di UNIQUE (email/username gia esistenti, a quel punto cambia lo stile delle checkbox corrispondenti)-->
                                 
-                                <span class="error-text invisible" id="error">Errore: almeno uno dei campi è già esistente</span>  
-                               
-
+                                <span class="error-text" id="error">Errore: almeno uno dei campi è già esistente</span>  
+                            </div>
+                            <div class = "text-center mb-1">
                                 <!-- Caso in cui la PUT è andato a buon fine -->
-                                
-                                <span class="success-text invisible" id="success">Modifica avvenuta con successo</span>
-                               
+
+                                <span class="success-text" id="success">Modifica avvenuta con successo</span>
                             </div>
                             <button type="button" onclick="saveData()" class="btn rounded-pill save-changes-btn">SALVA CAMBIAMENTI</button>
                         </div>
