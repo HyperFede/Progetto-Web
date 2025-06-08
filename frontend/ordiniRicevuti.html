@@ -17,7 +17,7 @@
             <ul class="nav nav-pills align-items-center">
                 <li class="nav-item dropdown">
                     <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle fs-3 me-2"></i> Username
+                        <i class="bi bi-person-circle fs-3 me-2"></i> <span id="usernameProfilo">Username</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
                         <li><a class="dropdown-item" href="dashboardArtigiano.html"><i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO</a></li>
@@ -133,7 +133,7 @@
                                     <th scope="col" class="text-end">Importo Totale</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="ordini">
                                 <!-- Esempio Ordine 1 -->
                                 <tr>
                                     <td><a href="dettaglioOrdine.html">#ORD12345</a></td>
@@ -168,5 +168,46 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/fetcher.js"></script>
+    <script src="js/getUsernameArt.js"></script>
+    <script>
+        function showOrders(result){
+            let ordersRes = ``;
+                const orders = result.data.map((order) => {
+                    let color;
+                    if(order.SubOrdineStatus == "In Lavorazione" || order.SubOrdineStatus == "Spedito" || order.SubOrdineStatus == "Da spedire"){
+                        color = "badge bg-warning text-dark";
+                    }else if(order.SubOrdineStatus == "Completato"){
+                        color = "badge bg-success"
+                    }else{
+                        color = "badge bg-danger";
+                    }
+                    ordersRes += (
+                        `<tr>
+                            <td><a href="dettaglioOrdine.html">#${order.IDOrdine}</a></td>
+                            <td>${order.DataOrdine.split('T')[0]}</td>
+                            <td>${order.usernameCliente}</td>
+                            <td class="text-center"><span class="${color}">${order.SubOrdineStatus}</span></td>
+                            <td class="text-end">€ ${order.prezzoTotale}</td>
+                        </tr>`
+                    )
+                });
+
+
+                document.getElementById("ordini").innerHTML = ordersRes;
+        }
+
+        document.addEventListener("DOMContentLoaded", async function(){
+
+            let id = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
+            let result = await fetchData(`/api/suborders/artisan/${id}`, "GET");
+            console.log(result);
+            if(result.status == 200){
+                showOrders(result);
+            }else{
+                console.log("Errore caricamento dati!")
+            }
+        });
+    </script>
 </body>
 </html>

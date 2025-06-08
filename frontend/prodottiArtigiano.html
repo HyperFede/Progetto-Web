@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/pages/prodottiArtigiano.css"> <!-- Mantenendo lo stile del dashboardArtigiano -->
+    <link rel="stylesheet" href="css/pages/prodottiArtigiano.css">
 </head>
 <body>
     <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
@@ -17,7 +17,7 @@
             <ul class="nav nav-pills align-items-center">
                 <li class="nav-item dropdown">
                     <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle fs-3 me-2"></i> Username
+                        <i class="bi bi-person-circle fs-3 me-2"></i> <span id="usernameProfilo">Username</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
                         <li><a class="dropdown-item" href="dashboardArtigiano.html"><i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO</a></li>
@@ -132,7 +132,7 @@
                                     <th scope="col" class="text-center"></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="products">
                                 <!-- Esempio Prodotto 1 -->
                                 <tr>
                                     <td><a href="modificaProdotto.html" class="product-link"><i class="bi bi-pencil-square"></i> Vaso in Ceramica Dipinto a Mano</a></td>
@@ -175,5 +175,58 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/fetcher.js"></script>
+    <script src="js/getUsernameArt.js"></script>
+    <script>
+        function showProducts(result){
+            let productsRes = ``;
+                const products = result.data.map((product) => {
+                    productsRes += (
+                        `<tr>
+                            <td><a href="modificaProdotto.html?id=${product.idprodotto}" class="product-link"><i class="bi bi-pencil-square"></i> ${product.nome}</a></td>
+                            <td class="text-center">${product.quantitadisponibile}</td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <input id="numProd-${product.idprodotto}" type="number" class="form-control" placeholder="Q.tà" value="0" min="0" aria-label="Aggiungi quantità">
+                                    <button onclick="addProduct(${product.idprodotto})" class="btn btn-outline-primary btn-sm" type="button">Aggiungi</button>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" onclick="deleteProduct(${product.idprodotto})" class="delete-product-icon" title="Elimina Prodotto">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`
+                    )
+                });
+
+
+                document.getElementById("products").innerHTML = productsRes;
+        }
+
+        document.addEventListener("DOMContentLoaded", async function(){
+
+            let id = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
+            let result = await fetchData(`/api/products/notdeleted?idartigiano=${id}`, "GET");
+            console.log(result);
+            if(result.status == 200){
+                showProducts(result);
+            }else{
+                console.log("Errore caricamento dati!")
+            }
+        });
+    </script>
+    <script>
+        async function addProduct(id){
+            const numAdding = parseInt(document.getElementById(`numProd-${id}`).value);
+            console.log(id);
+            let result = await fetchData(`/api/products/${id}/stock/add`, "PUT", {"quantitadaaggiungere": numAdding});
+            window.location.reload();
+        }
+        async function deleteProduct(id){
+            let result = await fetchData(`/api/products/${id}`, "DELETE");
+            window.location.reload();
+        }
+    </script>
 </body>
 </html>
