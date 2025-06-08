@@ -68,8 +68,8 @@ const createStripeCheckoutSession = async (orderId, orderItems, customerEmail, e
         line_items,
         mode: 'payment',
         customer_email: customerEmail, // Opzionale: precompila il campo email di Stripe
-        success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
-        cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled?order_id=${orderId}`,
+        success_url: `${process.env.FRONTEND_URL}/pagamentoSuccesso.html?order_id=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.FRONTEND_URL}/checkout.html`,
         client_reference_id: orderId.toString(), // Collega la sessione Stripe al tuo ID ordine
         metadata: {
             orderId: orderId.toString(),
@@ -662,7 +662,7 @@ router.post('/:id/cancel', isAuthenticated, hasPermission(['Cliente']), async (r
         }
         
         await commitTransaction(client);
-        res.status(200).json({ message: `Ordine ID ${orderId} annullato con successo (Status=Scaduto) e articoli riassortiti.` });
+        res.status(200).json({ message: `Ordine ID ${orderId} annullato con successo (Status=Scaduto) e articoli riassortiti. Il tuo carrello è rimasto intatto` });
 
     } catch (error) {
         if (client) await rollbackTransaction(client);
