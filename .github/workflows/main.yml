@@ -1,5 +1,6 @@
-name: Simple CI Check
+name: Basic CI
 
+# When to run this workflow:
 on:
   push:
     branches: [ main ]
@@ -7,20 +8,23 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # 1. Check out your code
+      - uses: actions/checkout@v3
 
+      # 2. (Example for Node.js) install the right runtime
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '18'
 
+      # 3. Install dependencies
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Run lint (if you have one)
-        run: npm run lint || echo "No linter configured"
+      # 4. Run your tests
+      - name: Run tests
+        run: npm test
