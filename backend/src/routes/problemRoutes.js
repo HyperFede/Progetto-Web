@@ -38,6 +38,19 @@ const transformProblemaForResponse = (problema, req) => {
     if (transformedProblema.idadmin !== undefined && transformedProblema.idadmin !== null) {
         transformedProblema.idadmin = parseInt(transformedProblema.idadmin, 10);
     }
+
+    //divide timestampsegnalazione into data and ora
+    if (transformedProblema.timestampsegnalazione) {
+        const dateObj = new Date(transformedProblema.timestampsegnalazione);
+        // Format date as YYYY-MM-DD
+        transformedProblema.data = dateObj.toISOString().split('T')[0];
+        // Format time as HH:MM:SS
+        transformedProblema.ora = dateObj.toTimeString().split(' ')[0];
+    }
+    // Remove the original timestamp field if you prefer the split fields
+    delete transformedProblema.timestampsegnalazione;
+
+
     return transformedProblema;
 };
 

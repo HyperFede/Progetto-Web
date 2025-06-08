@@ -1,17 +1,30 @@
-async function fetchData(url, method="POST", body=null){
+async function fetchData(url, method = "POST", body = null, fetchOptions = {}) {
     try{
-        //setup headers
-        const options = {
-            method: method,
-            headers: {
-                "Content-Type": "application/json"
-            }
-        };
+        // Default headers
+        const headers = { ...fetchOptions.customHeaders }; // Allow for other custom headers
 
-        if(body){
-            options.body = JSON.stringify(body);
+        if (fetchOptions.isRawBody) {
+            if (fetchOptions.customContentType) {
+                headers['Content-Type'] = fetchOptions.customContentType;
+            }
+            // For raw body, Content-Type should be set by the caller if needed, or browser might infer.
+            // If not set, some servers might default to application/octet-stream or reject.
+        } else if (body !== null) { // Only set JSON content type if body is not raw and not null
+            headers['Content-Type'] = fetchOptions.customContentType || 'application/json';
         }
 
+        const options = {
+            method: method,
+            headers: headers
+        };
+
+        if (body !== null) { // Check for null explicitly
+            if (fetchOptions.isRawBody) {
+                options.body = body; // Send body as-is (e.g., File, Blob, ArrayBuffer)
+            } else {
+                options.body = JSON.stringify(body); // Default to JSON stringify
+            }
+        }
         const response = await fetch(url, options);
         let data = null;
         try{
