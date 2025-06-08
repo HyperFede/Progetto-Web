@@ -50,7 +50,7 @@
 
 ####Criteri di accettazione:
 - le segnalazioni e il loro stato può essere visto dall'area appostita nella propria area personale.
-- Ogni segnalazione contiene descrizione del problema, 
+- Ogni segnalazione contiene descrizione del problema, stato della segnalazione, data, id ordine associato, l'admin risolutore e l'immagine opzionale aggiunta dall'utente.
 
 
 [========]
@@ -64,8 +64,8 @@
 **per** presentarmi ai clienti.
 
 ####Criteri di accettazione:
-- La registrazione richiede i campi obbligatori: nome, cognome, email, indirizzo, username, password, e partita IVA.
-- L’artigiano autenticato può aggiornare le informazioni del profilo dal pannello di controllo.
+- La registrazione richiede i campi obbligatori: nome, cognome, email, indirizzo, username, password, partita IVA e presentazione attività.
+- L’artigiano autenticato può aggiornare le informazioni del profilo dal pannello apposito nell'area personale.
 - Le informazioni del profilo sono visibili nella pagina dei dettagli dell’artigiano.
 
 
@@ -77,26 +77,17 @@
 ####Criteri di accettazione:
 - Il sistema consente di caricare un nuovo prodotto con: nome, descrizione, prezzo, categoria, quantità e immagine.
 - È possibile modificare o eliminare prodotti esistenti dal pannello di controllo.
-- Il sistema evidenzia l’artigiano se la quantità di un prodotto scende sotto una soglia preimpostata.
 
 
 ###-Monitoraggio Ordini:
 **Come** artigiano, 
 **voglio** visualizzare e gestire gli ordini ricevuti
+**per** monitorare le performance dei miei prodotti .
 
 ####Criteri di accettazione:
-- Gli ordini sono visualizzati con ID ordine, data, cliente, (stato ?) e importo totale.
+- Gli ordini sono visualizzati con ID ordine, data, cliente, stato e importo totale.
 - L’artigiano può aggiornare lo stato di un ordine (es. “In lavorazione”, “Spedito”).
-- Il sistema invia una notifica al cliente in caso di aggiornamento dello stato dell’ordine.
-
-
-###-Analisi Vendite:
-**Come** artigiano, 
-**voglio** accedere a una dashboard con statistiche sulle vendite, 
-**per** monitorare le performance dei miei prodotti.
-
-####Criteri di accettazione:
-Da definire
+- L'artigiano può visualizzare i suoi incassi dalla pagina dei suoi ordini.
 
 
 [========]
@@ -123,12 +114,3 @@ Da definire
 - I nuovi profili di artigiani sono contrassegnati con lo stato “In attesa di approvazione”.
 - L’amministratore può approvare o rifiutare un profilo dalla dashboard di gestione utenti.
 - Il sistema notifica l’artigiano in caso di approvazione o rifiuto del profilo.
-
-
-###-Monitoraggio Attività:
-**Come** amministratore, 
-**voglio** monitorare le attività sulla piattaforma, 
-**per** garantire che tutto funzioni correttamente.
-
-####Criteri di accettazione:
-Da definire
