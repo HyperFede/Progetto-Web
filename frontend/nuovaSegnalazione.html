@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/pages/nuovaSegnalazione.css">
     <script src = "js/imagePreview.js"> </script>
+    <script src = "js/fetcher.js"></script>
+    <script src = "js/nuovaSegnalazione.js"></script> 
 
 </head>
 <body>
@@ -26,7 +28,7 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
                         <li><a class="dropdown-item" href="dashboardUtente.html"><i class="bi bi-person-fill me-2"></i>IL MIO PROFILO</a></li>
                         <li><a class="dropdown-item" href="dashboardStoricoOrdini.html"><i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                        <li><a class="dropdown-item" href="/leMieSegnalazioni.html"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
                     </ul>
@@ -59,16 +61,16 @@
                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
                         <ul class="nav nav-pills flex-column mb-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="dashboardUtente.html">
+                            <a class="nav-link" href="/dashboardUtente.html">
                                 <i class="bi bi-person-fill me-2"></i>IL MIO PROFILO
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="dashboardStoricoOrdini.html"> <i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
+                            <a class="nav-link" aria-current="page" href="/dashboardStoricoOrdini.html"> <i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#"> <i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI
+                                <a class="nav-link" href="/leMieSegnalazioni.html"> <i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI
                                 </a>
                             </li>
                             </ul>
@@ -110,7 +112,7 @@
                 <h2 class="tell-us-more-text">Dicci di più?</h2>
             </div>
 
-            <form id="problem-Form">
+            <form id="problemForm">
                 <div class="mb-4">
                     <label for="orderIdInput" class="form-label order-id-text-label">ID Ordine di riferimento:</label>
                     <input type="text" class="form-control dashboard-input" id="orderIdInput" name="order-id" required placeholder=>
@@ -138,7 +140,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button type="submit" class="btn rounded-pill submit-segnalazione-btn">INVIA SEGNALAZIONE</button>
+                    <button type="submit" class="btn rounded-pill submit-segnalazione-btn" id="btnSubmit">INVIA SEGNALAZIONE</button>
                 </div>
             </form>
         </div>
@@ -148,67 +150,5 @@
 
     
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Gestione invio form segnalazione
-            const problemForm = document.getElementById('problem-Form');
-            const successMessageDiv = document.getElementById('successMessage');
-            const orderIdInput = document.getElementById('orderIdInput');
-            const problemDescriptionInput = document.getElementById('problemDescriptionInput');
-            const photoPreviewContainer = document.getElementById('photoPreview');
-
-            // Pre-fill order ID if passed in URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const idOrdineFromUrl = urlParams.get('idordine'); // Ensure 'idordine' matches the parameter name in your link
-
-            if (idOrdineFromUrl && orderIdInput) {
-                orderIdInput.value = idOrdineFromUrl;
-            }
-
-            if (problemForm) {
-                problemForm.addEventListener('submit', function(event) {
-                    event.preventDefault(); // Previene l'invio tradizionale del form
-
-                    // Validazione
-                    if (!orderIdInput.value.trim()) {
-                        alert('Per favore, inserisci l\'ID Ordine.');
-                        orderIdInput.focus();
-                        return;
-                    }
-                    if (!problemDescriptionInput.value.trim()) {
-                        alert('Per favore, fornisci una descrizione del problema.');
-                        problemDescriptionInput.focus();
-                        return;
-                    }
-
-                    // Simulazione invio dati (qui potresti fare una chiamata API)
-                    console.log('Segnalazione da inviare:');
-                    console.log('ID Ordine:', orderIdInput.value);
-                    console.log('Descrizione:', problemDescriptionInput.value);
-                    const photoInput = document.getElementById('photoUploadInput');
-                    console.log('Numero immagini:', photoInput.files.length);
-
-                    // Mostra messaggio di successo
-                    if (successMessageDiv) {
-                        successMessageDiv.textContent = 'Segnalazione inviata con successo!'; // Puoi personalizzare il messaggio
-                        successMessageDiv.style.display = 'block';
-                    }
-                    // alert('Segnalazione inviata con successo! (simulazione)'); // Rimosso alert duplicato
-
-                    // Reset del form
-                    problemForm.reset();
-                    if (photoPreviewContainer) {
-                        photoPreviewContainer.innerHTML = ''; // Pulisci preview foto
-                    }
-
-                    // Nascondi messaggio di successo dopo qualche secondo
-                    setTimeout(() => {
-                        if (successMessageDiv) successMessageDiv.style.display = 'none';
-                    }, 5000); // Nasconde dopo 5 secondi
-                });
-            }
-        });
-
-    </script>
 </body>
 </html>
