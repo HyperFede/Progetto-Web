@@ -190,13 +190,18 @@ min-height: 400px;
     margin-top: 0.25rem;
 }
 
-#saveChangesButton {
+#aggiungiSegnalazioneBtn {
     background-color: var(--primary-color);
     color: white;
-    /* border: 1px solid var(--primary-color); /* Optional: if you want a border in the base state */
+    border: 1px solid var(--primary-color);
+    position: sticky;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1030;
 }
 
-#saveChangesButton:hover{
+#aggiungiSegnalazioneBtn:hover{
     background-color: var(--dark-moss-green);
     color: white;
 
