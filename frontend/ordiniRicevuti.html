@@ -184,7 +184,7 @@
                     }
                     ordersRes += (
                         `<tr>
-                            <td><a href="dettaglioOrdine.html">#${order.IDOrdine}</a></td>
+                            <td><a href="dettaglioOrdine.html?idordine=${order.IDOrdine}">#${order.IDOrdine}</a></td>
                             <td>${order.DataOrdine.split('T')[0]}</td>
                             <td>${order.usernameCliente}</td>
                             <td class="text-center"><span class="${color}">${order.SubOrdineStatus}</span></td>
