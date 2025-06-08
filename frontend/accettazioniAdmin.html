@@ -112,191 +112,24 @@
 
             <!-- === INIZIO BLOCCO SOSTITUITO === -->
             <div class="col-md-9">
+
+
                 <div class="dashboard-content p-4">
 
                     <!-- TITOLO -->
                     <h3 class="content-title mb-4">Gestione Accettazioni Artigiani</h3>
-
-                    <!-- DETTAGLIO ARTIGIANO 1 (panel/detail) -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <!-- Nome Artigiano (colonna sinistra) -->
-                                <div class="col-md-6">
-                                    <h5 class="card-title mb-0">
-                                        Username: <strong>mario_rossi_arte</strong>
-                                    </h5>
-                                </div>
-                                <!-- P.IVA (colonna destra, allineata a destra su schermi medi+) -->
-                                <div class="col-md-6 text-md-end">
-                                    <p class="card-text mb-0">
-                                        <strong>P.IVA:</strong> 01234567890 <!-- Esempio P.IVA -->
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- DESCRIZIONE ARTIGIANO (sotto nome e P.IVA) -->
-                            <!-- Aggiunto mb-3 per spazio sotto la descrizione -->
-                            <!-- Rimosso mb-1 dalle p interne per compattare -->
-                            <!-- Aggiunto mt-3 per spazio sopra la descrizione -->
-                            <div class="mb-3">
-                                <p class="card-text mb-1">
-                                    <strong>Descrizione Artigiano:</strong>
-                                </p>
-                                <p class="card-text">
-                                    Mario Rossi è un artigiano con oltre 10 anni di esperienza nella
-                                    lavorazione del legno. È specializzato nella creazione di mobili
-                                    su misura e oggetti di design. Ha superato tutti i controlli di
-                                    qualità e possiede le certificazioni necessarie. I clienti lo
-                                    apprezzano per professionalità e tempi di consegna rapidi.
-                                </p>
-                            </div>
-
-                            <!-- PULSANTI “APPROVA” e “RIFIUTA” (sotto la descrizione) -->
-                            <!-- Aggiunto mt-3 per spazio sopra i pulsanti -->
-                            <div class="d-flex gap-2 justify-content-center mt-3">
-                                <button id="approva-mario_rossi_arte" class="btn btn-success btn-sm px-4" title="Approva Artigiano">
-                                    <i class="bi bi-check-lg me-1"></i>Approva
-                                </button>
-                                <button id="rifiuta-mario_rossi_arte" class="btn btn-danger btn-sm px-4" title="Rifiuta Artigiano">
-                                    <i class="bi bi-x-lg me-1"></i>Rifiuta
-                                </button>
-                            </div>
-                        </div>
+                    <div id="pendingApprovalsContainer" class="row mt-3">
+                        <!-- Le card delle richieste di approvazione verranno caricate qui dal JavaScript -->
+                        <p>Caricamento richieste...</p> <!-- Messaggio di caricamento iniziale -->
                     </div>
-                    <!-- /DETTAGLIO ARTIGIANO 1 -->
 
-                    <!-- DETTAGLIO ARTIGIANO 2 (Esempio) -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <!-- Nome Artigiano (colonna sinistra) -->
-                                <div class="col-md-6">
-                                    <h5 class="card-title mb-0">
-                                        Username: <strong>creazioni_uniche_gio</strong>
-                                    </h5>
-                                </div>
-                                <!-- P.IVA (colonna destra, allineata a destra su schermi medi+) -->
-                                <div class="col-md-6 text-md-end">
-                                    <p class="card-text mb-0">
-                                        <strong>P.IVA:</strong> 98765432100 <!-- Esempio P.IVA -->
-                                    </p>
-                                </div>
-                            </div>
 
-                            <!-- DESCRIZIONE ARTIGIANO (sotto nome e P.IVA) -->
-                            <!-- Aggiunto mb-3 per spazio sotto la descrizione -->
-
-                            <!-- DESCRIZIONE ARTIGIANO -->
-                            <div class="mb-3">
-                                <p class="card-text mb-1">
-                                    <strong>Descrizione Artigiano:</strong>
-                                </p>
-                                <p class="card-text">
-                                    Giovanna Verdi è una talentuosa artigiana specializzata in ceramiche artistiche e gioielli fatti a mano.
-                                    Le sue creazioni sono note per l'originalità e la cura dei dettagli.
-                                    Utilizza materiali ecocompatibili e tecniche tradizionali.
-                                </p>
-                            </div>
-
-                            <!-- PULSANTI “APPROVA” e “RIFIUTA” (sotto la descrizione) -->
-                            <!-- Aggiunto mt-3 per spazio sopra i pulsanti -->
-                            <div class="d-flex gap-2 justify-content-center mt-3">
-                                <button id="approva-creazioni_uniche_gio" class="btn btn-success btn-sm px-4" title="Approva Artigiano">
-                                    <i class="bi bi-check-lg me-1"></i>Approva
-                                </button>
-                                <button id="rifiuta-creazioni_uniche_gio" class="btn btn-danger btn-sm px-4" title="Rifiuta Artigiano">
-                                    <i class="bi bi-x-lg me-1"></i>Rifiuta
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- /DETTAGLIO ARTIGIANO 2 -->
-
-                    <!-- DETTAGLIO ARTIGIANO 3 (Esempio) -->
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <!-- Nome Artigiano (colonna sinistra) -->
-                                <div class="col-md-6">
-                                    <h5 class="card-title mb-0">
-                                        Username: <strong>legno_maestro</strong>
-                                    </h5>
-                                </div>
-                                <!-- P.IVA (colonna destra, allineata a destra su schermi medi+) -->
-                                <div class="col-md-6 text-md-end">
-                                    <p class="card-text mb-0"><strong>P.IVA:</strong> 11223344556</p>
-                                </div>
-                            </div>
-
-                            <!-- DESCRIZIONE ARTIGIANO (sotto nome e P.IVA) -->
-                            <!-- Aggiunto mb-3 per spazio sotto la descrizione -->
-                            <div class="mb-3">
-                                <p class="card-text mb-1"><strong>Descrizione Artigiano:</strong></p>
-                                <p class="card-text">
-                                    Esperto falegname con una passione per il restauro di mobili antichi e la creazione di pezzi unici in legno massello.
-                                    Ogni opera è frutto di anni di esperienza e dedizione all'arte della falegnameria.
-                                </p>
-                            </div>
-                            <!-- PULSANTI “APPROVA” e “RIFIUTA” (sotto la descrizione) -->
-                            <!-- Aggiunto mt-3 per spazio sopra i pulsanti -->
-                            <div class="d-flex gap-2 justify-content-center mt-3">
-                                <button id="approva-legno_maestro" class="btn btn-success btn-sm px-4" title="Approva Artigiano"><i class="bi bi-check-lg me-1"></i>Approva</button>
-                                <button id="rifiuta-legno_maestro" class="btn btn-danger btn-sm px-4" title="Rifiuta Artigiano"><i class="bi bi-x-lg me-1"></i>Rifiuta</button>
-                            </div>
-                        </div>
-
-                    </div>
-                    <!-- /DETTAGLIO ARTIGIANO 3 -->
                 </div>
-            </div>
-            <!-- === FINE BLOCCO SOSTITUITO === -->
-
-        </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Funzione generica per gestire l'azione e rimuovere la card
-            function handleArtisanAction(event, artisanName, action) {
-                console.log(`Azione: ${action}, Artigiano: ${artisanName}`);
-                alert(`Hai ${action.toLowerCase()} l'artigiano: ${artisanName}`);
-
-                // Trova l'elemento card più vicino al bottone cliccato
-                const cardElement = event.target.closest('.card');
-                if (cardElement) {
-                    cardElement.remove(); // Rimuove la card dal DOM
-                }
-
-                // Qui potresti aggiungere logica più complessa, come una chiamata API
-            }
-
-            // Artigiano 1: mario_rossi_arte
-            const approvaMario = document.getElementById('approva-mario_rossi_arte');
-            const rifiutaMario = document.getElementById('rifiuta-mario_rossi_arte');
-            
-            if (approvaMario) approvaMario.addEventListener('click', (event) => handleArtisanAction(event, 'mario_rossi_arte', 'Approvato'));
-            if (rifiutaMario) rifiutaMario.addEventListener('click', (event) => handleArtisanAction(event, 'mario_rossi_arte', 'Rifiutato'));
-
-            // Artigiano 2: creazioni_uniche_gio
-            const approvaGio = document.getElementById('approva-creazioni_uniche_gio');
-            const rifiutaGio = document.getElementById('rifiuta-creazioni_uniche_gio');
-
-            if (approvaGio) approvaGio.addEventListener('click', (event) => handleArtisanAction(event, 'creazioni_uniche_gio', 'Approvato'));
-            if (rifiutaGio) rifiutaGio.addEventListener('click', (event) => handleArtisanAction(event, 'creazioni_uniche_gio', 'Rifiutato'));
-
-            // Artigiano 3: legno_maestro
-            const approvaLegno = document.getElementById('approva-legno_maestro');
-            const rifiutaLegno = document.getElementById('rifiuta-legno_maestro');
-            
-            if (approvaLegno) approvaLegno.addEventListener('click', (event) => handleArtisanAction(event, 'legno_maestro', 'Approvato'));
-            if (rifiutaLegno) rifiutaLegno.addEventListener('click', (event) => handleArtisanAction(event, 'legno_maestro', 'Rifiutato'));
-
-            // Potresti rendere questo più dinamico se le card fossero generate da JavaScript
-            // Ad esempio, usando classi comuni per i bottoni e data-attributes per l'ID dell'artigiano.
-        });
-    </script>
+    <script src="js/fetcher.js"></script>
+    <script src="js/acettazioniAdmin.js"></script>
 </body>
 
 </html>

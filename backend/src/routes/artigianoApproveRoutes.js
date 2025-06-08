@@ -85,7 +85,9 @@ router.get('/', isAuthenticated, hasPermission(['Admin']), createQueryBuilderMid
             SELECT sa.*,
                    u_art.username AS username_artigiano,
                    u_art.email AS email_artigiano,
-                   u_adm.username AS username_admin
+                   u_adm.username AS username_admin,
+                   u_art.artigianodescrizione as artigianodescrizione,
+                   u_art.piva AS piva
             FROM StoricoApprovazioni sa
             JOIN Utente u_art ON sa.IDArtigiano = u_art.idutente
             LEFT JOIN Utente u_adm ON sa.IDAdmin = u_adm.idutente

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { isAuthenticated } = require('../middleware/authMiddleWare.js'); // Import isAuthenticated
+const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare.js'); // Import isAuthenticated
 const pool = require('../config/db-connect.js'); // Assuming your db connection pool is here
 
 // Helper function for transaction management (optional but good practice)
@@ -337,7 +337,89 @@ router.get('/artisan/:artisanId', isAuthenticated, async (req, res) => {
     }
 });
 
-// --- Update Endpoint ---
+router.get('/order/:orderId/artisan/:artisanId', isAuthenticated, hasPermission(['Artigiano']), async (req, res) => {
+    const { orderId, artisanId } = req.params;
+    idordine = orderId;
+    idartigiano = artisanId;
+
+    if (isNaN(idordine) || isNaN(idartigiano)) {
+        return res.status(400).json({ message: 'Invalid Order ID or Artisan ID format.' })
+    }
+
+    const client = await pool.connect();
+
+
+    try {
+    query = `SELECT
+        
+        o.IDOrdine,                                     -- Main Order ID (for reference)
+        so.IDArtigiano,                                 -- Artisan ID for this SubOrder (for reference)
+        u_cli.Nome AS NomeCliente,
+        u_cli.Cognome AS CognomeCliente,
+        u_cli.Indirizzo AS IndirizzoCliente,
+        so.SubOrdineStatus,
+        p.IDProdotto,
+        p.Nome AS NomeProdotto,
+        dor.Quantita,
+        dor.PrezzoStoricoUnitario,
+        SUM(dor.PrezzoStoricoUnitario * dor.Quantita)
+                    OVER (PARTITION BY so.IDArtigiano, so.IDOrdine)
+                AS prezzototalesubordine,
+        (dor.Quantita * dor.PrezzoStoricoUnitario) AS TotaleParzialeProdotto
+        FROM
+            SubOrdine so
+        JOIN
+            Ordine o ON so.IDOrdine = o.IDOrdine
+        JOIN
+            Utente u_cli ON o.IDUtente = u_cli.IDUtente  -- To get the Client's details
+        JOIN
+            DettagliOrdine dor ON so.IDOrdine = dor.IDOrdine -- To get the items in the order
+        JOIN
+            Prodotto p ON dor.IDProdotto = p.IDProdotto
+                        AND p.IDArtigiano = so.IDArtigiano -- CRITICAL: Ensures that items from DettagliOrdine are filtered for THIS artisan's part of the sub-order
+        WHERE
+            so.IDOrdine = $1::INTEGER      -- Parameter for the main Order ID
+            AND so.IDArtigiano = $2::INTEGER -- Parameter for the Artisan ID
+            AND o.Deleted = FALSE          -- Typically, you'd only want to show details for non-deleted orders`;
+
+
+                const result = await client.query(query, [idordine, idartigiano]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Sub-order details not found for this order and artisan, or order is deleted.' });
+        }
+
+        // Structure the response
+        const firstRow = result.rows[0]; // Client and suborder status are the same for all rows
+        const responseData = {
+            nomeCliente: firstRow.nomecliente,
+            cognomeCliente: firstRow.cognomecliente,
+            indirizzoCliente: firstRow.indirizzocliente,
+            subOrdineStatus: firstRow.subordinestatus,
+            prezzototalesubordine: parseFloat(firstRow.prezzototalesubordine).toFixed(2),
+            prodotti: result.rows.map(row => ({
+                idprodotto: row.idprodotto,
+                nomeProdotto: row.nomeprodotto,
+                quantita: row.quantita,
+                prezzoStoricoUnitario: parseFloat(row.prezzostoricounitario).toFixed(2),
+                totaleParzialeProdotto: parseFloat(row.totaleparzialeprodotto).toFixed(2)
+            }))
+        };
+
+        res.status(200).json(responseData);
+
+    }
+    catch(error){
+        console.error(`Error fetching sub-order details for Order ID ${orderId}, Artisan ID ${artisanId}:`, error);
+        res.status(500).json({ message: 'Error fetching sub-order details.', error: error.message });
+    } finally {
+        client.release();
+    }
+
+    
+
+
+});
 
 
 /**

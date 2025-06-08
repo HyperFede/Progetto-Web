@@ -141,6 +141,36 @@ min-height: 400px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.75rem;
 }
+/* Make the labels (email & P.IVA) stand out */
+#approval-card-${approval.idstorico} .card > .d-flex > div strong {
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+
+#approval-card-${approval.idstorico} .card > .d-flex > div .text-body {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Center the buttons and give them equal width */
+#approval-card-${approval.idstorico} .card .d-flex.gap-2 {
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+#approval-card-${approval.idstorico} .card .btn {
+  min-width: 120px;
+}
+
+/* Optional: hover effect on the whole card */
+#approval-card-${approval.idstorico} .card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+#approval-card-${approval.idstorico} .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+}
 
 .dashboard-input {
     background-color: #e9ecef;
