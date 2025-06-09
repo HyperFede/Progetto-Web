@@ -19,9 +19,9 @@ jobs:
       postgres:
         image: postgres:14                # version of Postgres
         env:
-          POSTGRES_USER: postgres        # username for CI
+          POSTGRES_USER: postgres            # username for CI
           POSTGRES_PASSWORD: postgres    # password for CI
-          POSTGRES_DB: officialtesting            # database name for CI
+          POSTGRES_DB: postgres            # database name for CI
         ports:
           - 5432:5432                     # map container port 5432 → runner localhost:5432
         options: >-
@@ -62,9 +62,9 @@ jobs:
         env:
           PGHOST: localhost
           PGPORT: 5432
-          PGUSER: testuser
-          PGPASSWORD: testpass
-          PGDATABASE: testdb
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: postgres
         run: npm test
 
   # Optional deploy job, only runs if tests pass
