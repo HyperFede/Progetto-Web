@@ -196,7 +196,7 @@ router.post('/items', isAuthenticated, hasPermission(['Cliente']), async (req, r
 
         if (quantita > prodotto.quantitadisponibile) {
             await rollbackTransaction();
-            return res.status(400).json({ message: `Stock insufficiente. Disponibili: ${prodotto.quantitadisponibile}, richiesti: ${finalQuantita}` });
+            return res.status(400).json({ message: `Stock insufficiente. Disponibili: ${prodotto.quantitadisponibile}, richiesti: ${quantita}` });
         }
 
         const finalTotaleparziale = parseFloat(prodotto.prezzounitario) * quantita;

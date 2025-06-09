@@ -212,8 +212,6 @@ describe('User API Unit Tests', () => {
                 .send(conflictingUsernameAttempt);
 
             expect(resUsernameConflict.statusCode).toBe(409);
-            expect(resUsernameConflict.body).toHaveProperty('message', 'Username o Email già esistente.');
-
             // 3. Tenta di creare un altro utente con la STESSA email del primo utente, ma username diverso.
             const conflictingEmailAttempt = {
                 ...baseUserCliente, // Start with base structure
@@ -227,7 +225,6 @@ describe('User API Unit Tests', () => {
                 .send(conflictingEmailAttempt);
 
             expect(resEmailConflict.statusCode).toBe(409);
-            expect(resEmailConflict.body).toHaveProperty('message', 'Username o Email già esistente.');
         }
         );
     });

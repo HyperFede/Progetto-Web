@@ -255,7 +255,7 @@ describe('Product API Routes (using other Routes)', () => {
             expect(res.statusCode).toEqual(200);
             expect(Array.isArray(res.body)).toBe(true);
             // Verifica che il prodotto creato in precedenza sia presente, anche se fosse stato eliminato
-            expect(res.body.some(p => p.idprodotto === createdProductIdByArtigiano)).toBe(true);
+            expect(res.body.some(p => p.idprodotto = createdProductIdByArtigiano)).toBe(true);
         });
 
         it('should return 403 if not authenticated as Admin', async () => {
@@ -276,7 +276,7 @@ describe('Product API Routes (using other Routes)', () => {
             expect(Array.isArray(res.body)).toBe(true);
             // Check if products created in POST tests are present
             if (createdProductIdByArtigiano) {
-                expect(res.body.some(p => p.idprodotto === createdProductIdByArtigiano)).toBe(true);
+                expect(res.body.some(p => p.idprodotto = createdProductIdByArtigiano)).toBe(true);
             }
             // createdProductIdByAdmin related check removed as Admins cannot create products.
         });

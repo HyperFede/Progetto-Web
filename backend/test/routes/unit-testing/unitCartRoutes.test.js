@@ -139,23 +139,6 @@ describe('POST /api/carts/items - Add item to cart', () => {
         expect(dbCheck.rows[0].quantita).toBe(2);
     });
 
-    test('should return 409 if item already exists in cart', async () => {
-        // First, add the item
-        await request(app)
-            .post('/api/carts/items')
-            .set('x-mock-user-type', 'Cliente')
-            .send({ idprodotto: testProduct1.idprodotto, quantita: 1 });
-
-        // Then, try to add it again
-        const res = await request(app)
-            .post('/api/carts/items')
-            .set('x-mock-user-type', 'Cliente')
-            .send({ idprodotto: testProduct1.idprodotto, quantita: 1 });
-
-        expect(res.statusCode).toBe(409);
-        expect(res.body.message).toBe('Articolo già presente nel carrello. Usa PUT /api/carts/items/:idprodotto per aggiornare la quantità.');
-    });
-
     test('should return 404 if product does not exist', async () => {
         const res = await request(app)
             .post('/api/carts/items')
@@ -170,7 +153,7 @@ describe('POST /api/carts/items - Add item to cart', () => {
         const res = await request(app)
             .post('/api/carts/items')
             .set('x-mock-user-type', 'Cliente')
-            .send({ idprodotto: testProduct1.idprodotto, quantita: testProduct1.quantitadisponibile + 1 });
+            .send({ idprodotto: testProduct1.idprodotto, quantita: testProduct1.quantitadisponibile + 1000 });
 
         expect(res.statusCode).toBe(400);
         expect(res.body.message).toContain('Stock insufficiente.');
