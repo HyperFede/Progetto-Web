@@ -55,4 +55,4 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ needs.backend-test.result == 'success' }}
     steps:
-      - run: echo "↪️ Here you’d SSH, push a Docker image, or call your cloud provider’s action"
+      - run: echo "↪️ Here you’d SSH, push a Docker image, or call your cloud provider’s action d"
