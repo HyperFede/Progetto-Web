@@ -41,17 +41,17 @@ jobs:
         run: npm ci
 
       - name: Install backend dependencies
-        working-directory: progettoWeb/backend
+        working-directory: backend
         run: npm install
 
       - name: Initialize test database
-        working-directory: progettoWeb/backend
+        working-directory: backend
         env:
           NODE_ENV: test
         run: node src/config/init-db.js
 
       - name: Run backend tests
-        working-directory: progettoWeb/backend
+        working-directory: backend
         env:
           NODE_ENV: test
           PGHOST:     localhost
