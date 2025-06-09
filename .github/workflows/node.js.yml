@@ -16,7 +16,7 @@ jobs:
     # all `run:` steps will execute from your backend folder
     defaults:
       run:
-        working-directory: progettoWeb/backend
+        working-directory: backend
 
     steps:
       # 1) pull down your code
