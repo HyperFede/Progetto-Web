@@ -32,6 +32,7 @@ jobs:
       # 3) install dependencies
       - name: Install backend deps
         run: npm ci
+        --comment
 
       # 4) (optional) bring up a test‐DB or seed data
       - name: Initialize test database
