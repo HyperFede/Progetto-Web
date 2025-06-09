@@ -64,7 +64,8 @@
                 }
                 else{
                     if (session.data.tipologia == "Artigiano"){
-                        let approval = (await fetchData("/api/approvals/me")).data.esito;
+                        let approval = (await fetchData("/api/approvals/me", "GET")).data[0].esito;
+                        console.log(approval)
                         if(approval == "In attesa"){
                             window.location.replace("artigianoInAttesa.html")
                         }else if(approval == "Rifiutato"){
