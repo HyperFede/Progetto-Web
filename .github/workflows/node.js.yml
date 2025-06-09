@@ -37,15 +37,12 @@ jobs:
           node-version: 18.x
           cache: npm
 
-      # Install any deps in the root (if you have a package.json there)
       - name: Install root dependencies
         run: npm ci
 
-      # All backend commands run inside the `backend` folder:
       - name: Install & Test Backend
         working-directory: backend
         env:
-          # Ensure your init and test logic picks up the right environment:
           NODE_ENV: test
           PGHOST:     localhost
           PGPORT:     5432
@@ -57,8 +54,8 @@ jobs:
           npm install
           # 2) Initialize the test database
           node src/config/init-db.js
-          # 3) Run the real Jest tests
-          npm test
+          # 3) Run Jest directly (no cross-env)
+          npx jest --runInBand --detectOpenHandles
 
   deploy:
     name: Dummy Deploy
@@ -67,4 +64,4 @@ jobs:
     if: ${{ needs.test-backend.result == 'success' }}
     steps:
       - name: Deploy placeholder
-        run: echo "→ Here you would SSH, push a Docker image, or call a cloud‐provider action."
+        run: echo "→ Here you would deploy your service (SSH, Docker push, or cloud action)"
