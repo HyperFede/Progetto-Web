@@ -48,17 +48,17 @@ jobs:
 
       # 4. Install backend dependencies
       - name: Install backend dependencies
-        working-directory: progettoWeb/backend
+        working-directory: backend
         run: npm install
 
       # 5. Initialize the test database (if you have a script)
       - name: Initialize test database
-        working-directory: progettoWeb/backend
+        working-directory: backend
         run: npm run db:init:test
 
       # 6. Run your Jest tests against the Postgres service
       - name: Run backend tests
-        working-directory: progettoWeb/backend
+        working-directory: backend
         env:
           PGHOST: localhost
           PGPORT: 5432
