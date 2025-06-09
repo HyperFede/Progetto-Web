@@ -1,58 +1,47 @@
-name: Backend CI
-
-# Trigger on pushes & PRs to main, and allow manual runs
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-
 jobs:
-  backend-test:
-    name: Test Backend
+  test:
     runs-on: ubuntu-latest
 
-    # all `run:` steps will execute from your backend folder
-    defaults:
-      run:
-        working-directory: backend
+    services:
+      postgres:
+        image: postgres:14           # pick the version you want
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuser -d testdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      # 1) pull down your code
       - uses: actions/checkout@v4
 
-      # 2) set up Node
       - name: Use Node.js 18.x
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
           cache: npm
 
-      # 3) install dependencies
-      - name: Install backend deps
+      # root install (if needed)
+      - name: Install root deps
         run: npm ci
 
-      # 4) (optional) bring up a test‐DB or seed data
-      - name: Initialize test database
-        run: npm run db:init:test
+      # backend install & test
+      - name: Install backend deps
+        run: npm install
+        working-directory: progettoWeb/backend
 
-      # 5) run your Jest tests
       - name: Run backend tests
         run: npm test
-
-      # 6) upload your build output (if you build)
-      #- name: Upload build artifact
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: backend-build
-      #    path: dist/
-
-  # (Optional) A deploy job that only runs if tests pass
-  deploy:
-    name: Deploy to Staging
-    needs: backend-test
-    runs-on: ubuntu-latest
-    if: ${{ needs.backend-test.result == 'success' }}
-    steps:
-      - run: echo "↪️ Here you’d SSH, push a Docker image, or call your cloud provider’s action d"
+        working-directory: progettoWeb/backend
+        env:
+          # point your tests at the service
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: testuser
+          PGPASSWORD: testpass
+          PGDATABASE: testdb
