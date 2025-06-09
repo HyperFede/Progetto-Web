@@ -1,0 +1,59 @@
+name: Backend CI
+
+# Trigger on pushes & PRs to main, and allow manual runs
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  backend-test:
+    name: Test Backend
+    runs-on: ubuntu-latest
+
+    # all `run:` steps will execute from your backend folder
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      # 1) pull down your code
+      - uses: actions/checkout@v4
+
+      # 2) set up Node
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: npm
+
+      # 3) install dependencies
+      - name: Install backend deps
+        run: npm ci
+        --comment
+
+      # 4) (optional) bring up a test‐DB or seed data
+      - name: Initialize test database
+        run: npm run db:init:test
+
+      # 5) run your Jest tests
+      - name: Run backend tests
+        run: npm test
+
+      # 6) upload your build output (if you build)
+      #- name: Upload build artifact
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: backend-build
+      #    path: dist/
+
+  # (Optional) A deploy job that only runs if tests pass
+  deploy:
+    name: Deploy to Staging
+    needs: backend-test
+    runs-on: ubuntu-latest
+    if: ${{ needs.backend-test.result == 'success' }}
+    steps:
+      - run: echo "↪️ Here you’d SSH, push a Docker image, or call your cloud provider’s action d"
