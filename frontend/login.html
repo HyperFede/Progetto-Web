@@ -56,7 +56,6 @@
             };
 
             let result = await fetchData("/api/auth/login", "POST", formData);
-            console.log(result);
             if(result.status == 200){
 
                 let session = await fetchData("/api/auth/session-info","GET");
@@ -81,7 +80,6 @@
                 }
 
             }else{
-                console.log()
                 errorText.classList.remove("invisible");
             }
         })

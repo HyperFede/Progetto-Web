@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    console.log('pagamentoSuccesso.js caricato e DOM pronto.');
 
     const successMessageContainer = document.querySelector('.card-body'); // Target for potential message updates
     const successIcon = successMessageContainer ? successMessageContainer.querySelector('.bi-check-circle-fill') : null;
@@ -27,7 +26,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         return;
     }
 
-    console.log(`Verifica sessione per Order ID: ${orderId}, Session ID: ${sessionId}`);
 
     try {
         const response = await fetchData("/api/payments/verify-session", "POST", {
@@ -35,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
 
         if (response.status === 200 && response.data.success) {
-            console.log('Verifica sessione Stripe completata con successo:', response.data);
         } else {
             console.error('Verifica sessione Stripe fallita o risposta inattesa:', response);
             const errorMessage = (response.data && response.data.message) || response.message || 'La verifica del pagamento non è andata a buon fine.';

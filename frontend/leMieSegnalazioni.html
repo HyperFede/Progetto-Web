@@ -323,11 +323,10 @@
             }
 
             let result = await fetchData(`/api/problems/me`, "GET");
-            console.log(result);
             if(result.status == 200){
                 showProblems(result);
             }else{
-                console.log("Errore caricamento dati!")
+                //console.log("Errore caricamento dati!")
             }
         });
     </script>

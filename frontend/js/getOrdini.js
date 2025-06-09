@@ -50,11 +50,10 @@ function showOrdini(result){
 document.addEventListener("DOMContentLoaded", async function(){
 
     let result = await fetchData(`/api/orders/my-orders`, "GET");
-    console.log(result);
     if(result.status == 200){
         showOrdini(result);
 
     }else{
-        console.log("Errore caricamento ordini!")
+        //console.log("Errore caricamento ordini!")
     }
 })

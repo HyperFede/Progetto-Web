@@ -30,6 +30,5 @@ document.addEventListener('DOMContentLoaded', async function(){
 
                 }else{
                     //non loggato
-                    console.log(result);
                 }
 })

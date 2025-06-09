@@ -47,12 +47,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 requestBody.piva = emailOrPivaValue;
             }
 
-            console.log('Attempting to verify identity with:', requestBody);
             const response = await fetchData("/api/auth/recover-password/verify-identity", "POST", requestBody);
 
             if (response.status === 200 && response.data && response.data.resetToken) {
                 recoveryToken = response.data.resetToken; // Store the token
-                console.log('Verification successful. Token:', response.data.resetToken);
 
                 verifyMessageDiv.innerHTML = `<span class="success-text">${response.message || 'Verifica completata. Inserisci la nuova password.'}</span>`;
 
@@ -104,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             try {
-                console.log('Attempting to reset password with token:', recoveryToken);
                 const response = await fetchData("/api/auth/recover-password/reset", "POST", requestBody);
 
                 if (response.status === 200) {
@@ -119,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     resetMessageDiv.innerHTML = `<span class="success-text">${response.message || 'Password aggiornata con successo!'}</span>`;
 
                     setTimeout(() => { window.location.href = 'login.html'; }, 2500); // 2.5 seconds delay
-                    console.log('Password reset successful:', response)
 
                 } else {
                     // This case might be less likely if fetchData throws for non-200, error handled in catch.

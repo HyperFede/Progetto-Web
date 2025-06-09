@@ -123,7 +123,6 @@ beforeEach(async () => {
 
     originalPoolQuery = pool.query;
     pool.query = (...args) => testClient.query(...args);
-    console.log("INFO: Mocked pool.query to use testClient for queries", pool.query, args);
 
     originalPoolConnect = pool.connect;
     // Mock pool.connect for the SUT. If the SUT calls pool.connect()

@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function(){
                     formObj.tipologia = "Cliente";
                 }
     
-                console.log(formObj);
                 let result = await fetchData("/api/users", "POST", formObj);
                 if(result.status == 200){
                     if(formObj.tipologia == "Cliente"){

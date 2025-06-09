@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('checkout.js caricato e DOM pronto.');
 
     const buyNowButton = document.getElementById('buyNowButton');
     const cancelOrderButton = document.getElementById('cancelOrderButton');
@@ -30,14 +29,12 @@ document.addEventListener('DOMContentLoaded', function () {
     async function populateWithUserData() {
         let idutente;
         userdata= await fetchData("api/auth/session-info", "GET");
-        console.log(userdata);
 
         if (userdata.status == 200) {
             const nomeCognomeValue = `${userdata.data.nome}, ${userdata.data.cognome}`;
             nomeCognomeUtenteText.textContent = nomeCognomeValue;
             indirizzoUtenteText.textContent = userdata.data.indirizzo;
             idutente=userdata.data.idutente;
-            console.log(idutente)
         } else {
             console.warn("Utente non autorizzato errore", userdata.status)
         }
@@ -47,9 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (usercartResponse && usercartResponse.data && usercartResponse.data.items) {
             const usercartItems = usercartResponse.data.items;
             const cartTotal = usercartResponse.data.totaleCarrello;
-
-            console.log('Cart items:', usercartItems);
-            console.log('Cart total:', cartTotal);
 
             if (orderReviewItemsList) {
                 orderReviewItemsList.innerHTML = ''; // Clear any existing static items
@@ -112,11 +106,9 @@ document.addEventListener('DOMContentLoaded', function () {
     async function handleBuyNow() {
         numberOfClicksinBuyButton++;
         let errorMessage
-        console.log('Bottone "ACQUISTA ORA" cliccato.');
         clearCheckoutMessages(); // Clear previous messages
 
         let response = await fetchData("api/orders/reserve-and-create-checkout-session", "POST");
-        console.log(response);
 
         if (response.status==201){
             let redirectLink = response.data.stripeSessionUrl;
@@ -148,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Placeholder function for "ANNULLA ORDINE"
     async function handleCancelOrder() {
-        console.log('Bottone "ANNULLA ORDINE" cliccato.');
         clearCheckoutMessages(); // Clear previous messages
 
         let response = await fetchData("api/orders/my-orders?status=In attesa", "GET");
@@ -157,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function () {
             let idordine = response.data[0].idordine;
 
             let responseToCancel = await fetchData(`api/orders/${idordine}/cancel`, "POST");
-            console.log(responseToCancel);
             let errorMessage = "Ordine con ID: " + idordine + " annullato con successo. Il tuo carrello è rimasto intatto e puoi procedere con un nuovo ordine";
             displayCheckoutMessage(errorMessage, 'success');
             

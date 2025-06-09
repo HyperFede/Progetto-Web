@@ -126,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await fetchData('api/problems/', 'GET');
-            console.log(response);
             if (response.status === 200 && response.data) {
                 problemsTableBody.innerHTML = ''; // Pulisci il messaggio di caricamento
                 if (response.data.length > 0) {
@@ -160,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (newStatus !== 'Aperto') {
             clearAdminMessages();
-            console.log(`(Placeholder) Tentativo di aggiornare lo stato per la segnalazione ID ${problemId} a: ${newStatus}`);
             // La logica effettiva per la chiamata PUT a /api/problems/:idproblem/status
             // verrà implementata quando richiesto.
             // Esempio di come potrebbe essere (da scommentare e adattare quando si implementa il backend):

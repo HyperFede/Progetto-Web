@@ -1,5 +1,4 @@
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('document.js caricato e DOM pronto.');
         let addProductForm = document.getElementById("addProductForm");
         let productCategory = document.getElementById("productCategory");
 
@@ -52,7 +51,7 @@
 
                     try {
                         let response = await fetchData("/api/products", "POST", bodyreq);
-                        console.log('Product creation response:', response);
+                        //console.log('Product creation response:', response);
 
                         if (response.status === 201 && response.data && response.data.idprodotto) { // Check for 201 Created
                             let successMsg = `Prodotto "${response.data.nome}" aggiunto con successo!`;
@@ -62,7 +61,7 @@
                             const imageFile = image.files[0]; // Get the first selected file
 
                             if (imageFile) { // Only attempt to upload if an image file is present
-                                console.log("Tentativo di caricamento immagine per prodotto ID:", productId);
+                                //console.log("Tentativo di caricamento immagine per prodotto ID:", productId);
                                 let putResponse = await fetchData(
                                     `/api/products/${productId}/image`,
                                     "PUT",
@@ -75,7 +74,6 @@
 
                                 if (putResponse.status === 200) {
                                     successMsg += ' Immagine caricata con successo.';
-                                    console.log("Immagine caricata con successo.");
                                 } else {
                                     const imageErrorMessage = putResponse.message || (putResponse.body && (putResponse.body.message || putResponse.body.error)) || "Dettagli non disponibili.";
                                     successMsg += ` Errore nel caricamento dell'immagine: ${imageErrorMessage}`;

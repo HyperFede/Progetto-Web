@@ -40,11 +40,10 @@ document.addEventListener("DOMContentLoaded", async function(){
     let result = await fetchData(`/api/cart/${id}`, "GET");
     const totalText = document.getElementById("total");
     totalText.textContent = `€${result.data.totaleCarrello}`;
-    console.log(result);
     if(result.status == 200){
         showProducts(result);
 
     }else{
-        console.log("Errore caricamento prodotti!")
+        //console.log("Errore caricamento prodotti!")
     }
 })

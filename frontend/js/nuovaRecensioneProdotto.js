@@ -164,7 +164,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             );
                             if (imageUploadResponse.status === 200) {
                                 imageUploadMessage = ' Immagine caricata con successo.';
-                                console.log('Image uploaded successfully for review:', createdReview.idrecensione);
                             } else {
                                 imageUploadMessage = ` Errore nel caricamento dell'immagine: ${imageUploadResponse.message || (imageUploadResponse.data && imageUploadResponse.data.message) || 'Errore sconosciuto'}.`;
                                 console.error('Image upload failed:', imageUploadResponse);

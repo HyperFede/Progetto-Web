@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('nuovaSegnalazione.js caricato e DOM pronto.');
 
     const segnalazioneForm = document.getElementById('problemForm');
     const idOrdineInput = document.getElementById('orderIdInput'); // Assuming you have an input for Order ID
@@ -73,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     const idproblema = response.data.idproblema;
 
                     if (image && idproblema) {
-                        console.log("Tentativo di caricamento immagine per problema ID:", idproblema);
                         let putResponse = await fetchData(
                             `/api/problems/${idproblema}/image`, // Ensure endpoint is correct
                              "PUT", 

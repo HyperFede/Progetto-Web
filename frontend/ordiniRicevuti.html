@@ -201,11 +201,10 @@
 
             let id = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
             let result = await fetchData(`/api/suborders/artisan/${id}`, "GET");
-            console.log(result);
             if(result.status == 200){
                 showOrders(result);
             }else{
-                console.log("Errore caricamento dati!")
+                //console.log("Errore caricamento dati!")
             }
         });
     </script>

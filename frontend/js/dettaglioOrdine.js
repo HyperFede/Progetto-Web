@@ -143,14 +143,12 @@ async function populateOrderDetails() {
 
         let response = await fetchData(`api/suborders/order/${idordine}/artisan/${idartigiano}`, "GET",)
         orderData = response.data;
-        console.log(response);
 
         populateCustomerInfo(orderData);
         populateOrderedProducts(orderData);
         populateSubOrderStatus(orderData);
     }
     catch (error) {
-        console.log(errore);
         console.error(error);
     }
 }

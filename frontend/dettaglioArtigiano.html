@@ -264,8 +264,6 @@
             let productsRes = ``;
                 const products = result.data.map((product) => {
                     
-                    console.log("img",product.immagine)
-                    console.log("imgurl",product.immagine_url)
                     productsRes += (
                         `<div class="col">
                             <div class="card h-100 product-card-artisan">
@@ -312,22 +310,20 @@
             id = urlParams.get('id');
 
             let result = await fetchData(`/api/users/${id}`, "GET");
-            console.log(result);
             if(result.status == 200){
                 document.getElementById("nomeArtigiano").textContent = result.data.username;
                 document.getElementById("indirizzoArtigiano").textContent = result.data.indirizzo;
                 document.getElementById("descArtigiano").textContent = result.data.artigianodescrizione;
             }else{
-                console.log("Errore caricamento dati!")
+                //console.log("Errore caricamento dati!")
             }
 
             let productsReq = await fetchData(`/api/products/notdeleted?idartigiano=${id}`, "GET");
-            console.log(productsReq);
             if(result.status == 200){
                 showProducts(productsReq);
 
             }else{
-                console.log("Errore caricamento prodotti!")
+                //console.log("Errore caricamento prodotti!")
             }
 
             let info = await fetchData("/api/auth/session-info", "GET");
