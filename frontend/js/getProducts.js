@@ -67,14 +67,12 @@ function getStarsHtml(rating, maxStars = 5){
 }
 
 document.addEventListener("DOMContentLoaded", async function(){
-    console.log('\n');
     let result = await fetchData("/api/products/notdeleted", "GET");
-    console.log(result);
     if(result.status == 200){
         showProducts(result);
 
     }else{
-        console.log("Errore caricamento prodotti!")
+        //console.log("Errore caricamento prodotti!")
     }
     
     document.getElementById('searchForm').addEventListener('submit', async function(event) {
@@ -85,8 +83,6 @@ document.addEventListener("DOMContentLoaded", async function(){
 
         const formObj = Object.fromEntries(formData.entries());
 
-        console.log(formObj);
-        console.log(formObj.priceMax, formObj.priceMin)
         let opt = "?";
         if(formObj.name != ""){
             opt += `nome_like=${formObj.name}&`
@@ -98,15 +94,12 @@ document.addEventListener("DOMContentLoaded", async function(){
             opt += `quantitadisponibile_gte=1&`
         }
         if(formObj.priceMin != ""){
-            console.log(formObj.priceMin)
             opt += `prezzounitario_gte=${formObj.priceMin}&`
         }
         if(formObj.priceMax != ""){
-            console.log(formObj.priceMax)
             opt += `prezzounitario_lte=${formObj.priceMax}`
         }
 
-        console.log(opt)
         let resultSearch = await fetchData("/api/products/notdeleted" + opt, "GET");
         showProducts(resultSearch);
     })

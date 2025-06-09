@@ -42,10 +42,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     formObj.tipologia = "Cliente";
                 }
     
-                console.log(formObj);
                 let result = await fetchData("/api/users", "POST", formObj);
                 if(result.status == 200){
-                    console.log(result);
                     //window.location.replace("/")
                 }else{
                     if(result.message == "Username già esistente."){

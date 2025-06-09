@@ -260,7 +260,6 @@
 
         async function addCartProductQta(id){
             let result = await fetchData(`api/cart/items/${id}/add`, "PUT", {"quantita": 1});
-            console.log(result);
             let counter = document.getElementById(`num-${id}`);
             counter.value = parseInt(counter.value) + 1;
 

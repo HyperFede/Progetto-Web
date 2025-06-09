@@ -91,7 +91,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     id = urlParams.get('id');
 
     let result = await fetchData(`/api/products/${id}`, "GET");
-    console.log(result);
     const nomeProdotto = document.querySelectorAll("#nomeProdotto");
     nomeProdotto.forEach((n) => {
         n.textContent = result.data.nome;
@@ -127,11 +126,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     //CARICO RECENSIONI
 
     let recensioni = await fetchData(`/api/reviews/product/${id}`, "GET");
-    console.log(recensioni);
     if(result.status == 200){
         showProducts(recensioni);
 
     }else{
-        console.log("Errore caricamento prodotti!")
+        //console.log("Errore caricamento prodotti!")
     }
 })

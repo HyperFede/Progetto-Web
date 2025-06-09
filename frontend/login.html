@@ -56,11 +56,9 @@
             };
 
             let result = await fetchData("/api/auth/login", "POST", formData);
-            console.log(result);
             if(result.status == 200){
 
                 let session = await fetchData("api/auth/session-info","GET");
-                console.log(session);
                 if (session.data.tipologia == "Cliente"){
                     window.location.replace("/")
                 }
@@ -74,7 +72,6 @@
                 }
 
             }else{
-                console.log()
                 errorText.classList.remove("invisible");
             }
         })

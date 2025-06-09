@@ -63,20 +63,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!productId) {
             alert("prodotto non trovato, invalid format")
-            console.log("Product ID not found in URL.");
             if (currentImageDisplay) currentImageDisplay.innerHTML = '<span>IMG</span>';
             updateImageUI(false); // Set to default no-image state
             // Future: Handle cases where ID is missing (e.g., redirect or show error message to user)
             return;
         }
 
-        console.log("Populating data for Product ID:", productId);
         try {
             let response = await fetchData("api/products/" + productId, "GET");
 
             if (response.status === 200 && response.data) {
                 const product = response.data;
-                console.log("Product data received:", product);
 
                 if (productCategory) productCategory.value = product.categoria;
                 if (productName) productName.value = product.nome;
@@ -125,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function populateReviews() {
         const productId = getProductIdFromURL(); // Assuming you have this function
         if (!productId) {
-            console.log("Product ID not found in URL for reviews.");
             return;
         }
 
@@ -164,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function populateProductAverageRating() {
         const productId = getProductIdFromURL();
         if (!productId) {
-            console.log("Product ID not found in URL for average rating.");
             return;
         }
 
@@ -209,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Error fetching average rating:", error);
             if (error.status === 404) {
-                console.log(`No average rating found for product ${productId} (404).`);
                 ratingContainer.innerHTML = `
                     <span class="stars-display me-2">${getReviewStarsHtml(0)}</span>
                     <span class="average-rating-text">(Nessuna valutazione)</span>
