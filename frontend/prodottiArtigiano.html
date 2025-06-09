@@ -218,7 +218,8 @@
     <script>
         async function addProduct(id){
             const numAdding = parseInt(document.getElementById(`numProd-${id}`).value);
-            let result = await fetchData(`/api/products/${id}/stock/add`, "PUT", {"quantitadaaggiungere": numAdding});
+            console.log(id);
+            let result = await fetchData(`/api/products/${id}/stock/add`, "PUT", {"quantita": numAdding});
             window.location.reload();
         }
         async function deleteProduct(id){

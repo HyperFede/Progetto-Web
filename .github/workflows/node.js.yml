@@ -1,0 +1,71 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuser -d testdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Initialize test database
+        working-directory: backend
+        env:
+          NODE_ENV: test
+        run: node src/config/init-db.js
+
+      - name: Run backend tests
+        working-directory: backend
+        env:
+          NODE_ENV: test
+          PGHOST:     localhost
+          PGPORT:     5432
+          PGUSER:     testuser
+          PGPASSWORD: testpass
+          PGDATABASE: testdb
+        run: npm test
+
+  deploy:
+    name: Dummy Deploy
+    needs: test-backend
+    runs-on: ubuntu-latest
+    if: ${{ needs.test-backend.result == 'success' }}
+    steps:
+      - name: Deploy placeholder
+        run: echo "Here you would deploy your service (SSH, Docker push, cloud action, etc.)"

@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', function(){
     
                 if(formObj.checkArtigiano){
                     formObj.tipologia = "Artigiano";
+                    formObj.piva = pivaText.value;
+                    formObj.artigianodescrizione = descText.value;
                 }else{
                     formObj.tipologia = "Cliente";
                 }

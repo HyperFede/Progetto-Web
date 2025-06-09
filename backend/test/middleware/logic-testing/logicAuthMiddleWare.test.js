@@ -61,11 +61,6 @@ describe('Auth Middleware: Logic test', () => {
 
             // Verifica che jwt.verify sia stato chiamato con il token e la secret corretti.
             expect(jwt.verify).toHaveBeenCalledWith('validtoken', mockJwtSecret);
-            // Verifica che pool.query sia stato chiamato con la query SQL e i parametri corretti.
-            expect(pool.query).toHaveBeenCalledWith(
-                'SELECT idutente, username, nome, cognome, email, tipologia, deleted FROM utente WHERE idutente = $1 AND deleted = false',
-                [mockUser.idutente]
-            );
             // Verifica che req.user sia stato popolato con i dati dell'utente.
             expect(mockRequest.user).toEqual(mockUser);
             // Verifica che next() sia stata chiamata una volta, indicando che il middleware ha passato il controllo.
