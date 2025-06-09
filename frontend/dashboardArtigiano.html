@@ -73,7 +73,7 @@
                         </ul>
                         <hr class="sidebar-divider">
                         <button class="btn logout-btn w-100">
-                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                            <i class="bi bi-box-arrow-right me-2" href="logout.html"></i>LOGOUT
                         </button>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                     </ul>
                     <hr class="sidebar-divider">
                     <button class="btn logout-btn w-100">
-                        <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                        <i class="bi bi-box-arrow-right me-2" href="logout.html"></i>LOGOUT
                     </button>
                 </div>
             </div>
@@ -149,7 +149,7 @@
                         </div>
 
                         <div class="text-center mt-4">
-                            <button type="submit" class="btn rounded-pill save-changes-btn">SALVA CAMBIAMENTI</button>
+                            <button onclick="saveData()" type="button" class="btn rounded-pill save-changes-btn">SALVA CAMBIAMENTI</button>
                         </div>
                     </form>
                 </div>
@@ -179,7 +179,7 @@
                 cognome.value = infos.data.cognome;
                 email.value = infos.data.email;
                 indirizzo.value = infos.data.indirizzo;
-                descrizione.value = infos.data.descrizione;
+                descrizione.value = infos.data.artigianodescrizione;
             }else{
                 console.log("Errore caricamento prodotti!")
             }
@@ -205,8 +205,9 @@
                 "cognome": cognome,
                 "email": email,
                 "indirizzo": indirizzo,
-                "descrizione": descrizione
+                "artigianodescrizione": descrizione
             }
+            console.log(obj)
 
             let result = await fetchData(`/api/users/${infos.data.idutente}`, "PUT", obj)
 

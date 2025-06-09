@@ -61,11 +61,11 @@
 
                 let session = await fetchData("api/auth/session-info","GET");
                 console.log(session);
-                if (session.data.tipologia === "Cliente"){
+                if (session.data.tipologia == "Cliente"){
                     window.location.replace("/")
                 }
                 else{
-                    if (session.data.tipologia === "Artigiano"){
+                    if (session.data.tipologia == "Artigiano"){
                         window.location.replace("/dashboardArtigiano.html");
                     }
                     else{
