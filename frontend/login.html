@@ -59,14 +59,20 @@
             console.log(result);
             if(result.status == 200){
 
-                let session = await fetchData("api/auth/session-info","GET");
-                console.log(session);
+                let session = await fetchData("/api/auth/session-info","GET");
                 if (session.data.tipologia == "Cliente"){
                     window.location.replace("/")
                 }
                 else{
                     if (session.data.tipologia == "Artigiano"){
-                        window.location.replace("/dashboardArtigiano.html");
+                        let approval = (await fetchData("/api/approvals/me")).data.esito;
+                        if(approval == "In attesa"){
+                            window.location.replace("artigianoInAttesa.html")
+                        }else if(approval == "Rifiutato"){
+                            window.location.replace("artigianoRifiutato.html")
+                        }else{
+                            window.location.replace("/dashboardArtigiano.html");
+                        }
                     }
                     else{
                         window.location.replace("/segnalazioniAdmin.html");

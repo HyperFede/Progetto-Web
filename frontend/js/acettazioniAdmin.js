@@ -62,12 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- Buttons -->
                 <div class="d-flex gap-2">
                     <button 
-                        class="btn btn-success btn-sm px-4" 
+                        class="btn btn-success btn-sm px-4 approve-btn" 
                         data-idstorico="${approval.idstorico}">
                     <i class="bi bi-check-lg me-1"></i>Approva
                     </button>
                     <button
-                    class="btn btn-danger btn-sm px-4" 
+                    class="btn btn-danger btn-sm px-4 reject-btn" 
                     data-idstorico="${approval.idstorico}">
                     <i class="bi bi-x-lg me-1"></i>Rifiuta
                   </button>
