@@ -47,8 +47,11 @@ document.addEventListener('DOMContentLoaded', function(){
                 console.log(formObj);
                 let result = await fetchData("/api/users", "POST", formObj);
                 if(result.status == 200){
-                    console.log(result);
-                    //window.location.replace("/")
+                    if(formObj.tipologia == "Cliente"){
+                        window.location.replace("/")
+                    }else{
+                        window.location.replace("artigianoInAttesa.html")
+                    }
                 }else{
                     if(result.message == "Username già esistente."){
                         //TODO: mettere qualcosa in caso di failure della registrazione
