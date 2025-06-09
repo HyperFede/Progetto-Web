@@ -1,16 +1,29 @@
+# .github/workflows/ci-backend.yml
+name: Backend CI
+
+# Trigger on pushes and pull requests to main, and allow manual runs
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
-  test:
+  test-backend:
+    name: Test Backend
     runs-on: ubuntu-latest
 
+    # Start a PostgreSQL service container for your tests
     services:
       postgres:
-        image: postgres:14           # pick the version you want
+        image: postgres:14                # version of Postgres
         env:
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser        # username for CI
+          POSTGRES_PASSWORD: testpass    # password for CI
+          POSTGRES_DB: testdb            # database name for CI
         ports:
-          - 5432:5432
+          - 5432:5432                     # map container port 5432 → runner localhost:5432
         options: >-
           --health-cmd "pg_isready -U testuser -d testdb"
           --health-interval 10s
@@ -18,30 +31,48 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      # 1. Check out the code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      # 2. Set up Node.js and cache npm modules
       - name: Use Node.js 18.x
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
           cache: npm
 
-      # root install (if needed)
-      - name: Install root deps
+      # 3. Install dependencies in the root (if any)
+      - name: Install root dependencies
         run: npm ci
 
-      # backend install & test
-      - name: Install backend deps
-        run: npm install
+      # 4. Install backend dependencies
+      - name: Install backend dependencies
         working-directory: progettoWeb/backend
+        run: npm install
 
+      # 5. Initialize the test database (if you have a script)
+      - name: Initialize test database
+        working-directory: progettoWeb/backend
+        run: npm run db:init:test
+
+      # 6. Run your Jest tests against the Postgres service
       - name: Run backend tests
-        run: npm test
         working-directory: progettoWeb/backend
         env:
-          # point your tests at the service
           PGHOST: localhost
           PGPORT: 5432
           PGUSER: testuser
           PGPASSWORD: testpass
           PGDATABASE: testdb
+        run: npm test
+
+  # Optional deploy job, only runs if tests pass
+  deploy:
+    name: Dummy Deploy
+    needs: test-backend
+    runs-on: ubuntu-latest
+    if: ${{ needs.test-backend.result == 'success' }}
+    steps:
+      - name: Deploy placeholder
+        run: echo "Here you would deploy your service (SSH, Docker push, cloud action, etc.)"
