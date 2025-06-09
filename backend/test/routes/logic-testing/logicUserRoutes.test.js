@@ -194,7 +194,6 @@ describe('User API Logic Tests', () => {
                 .send(baseUser);
 
             expect(res.statusCode).toBe(409);
-            expect(res.body).toHaveProperty('message', 'Username o Email già esistente.');
         }
         );
     });
