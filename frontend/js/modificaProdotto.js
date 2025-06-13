@@ -277,9 +277,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         imageFile,
                         { isRawBody: true, customContentType: imageFile.type }
                     );
+                    console.log(imageUploadResponse);
                     if (imageUploadResponse.status === 200) {
                         overallMessage += " Immagine aggiornata.";
-                        productImageInput.value = ''; // Clear file input after successful upload
+                        //productImageInput.value = ''; // Clear file input after successful upload
                     } else {
                         overallMessage += ` Errore aggiornamento immagine: ${imageUploadResponse.message || 'Dettaglio non disponibile.'}`;
                         messageType = 'warning';

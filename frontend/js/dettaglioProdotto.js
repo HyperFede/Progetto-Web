@@ -45,7 +45,7 @@ function showProducts(result){
                     </div>
                     <div class="review-body d-flex align-items-start">
                         <div class="review-image-container me-3">
-                            <img src="${rec.immagine_url}" alt="Foto recensione cliente" class="review-customer-photo">
+                            <img src="http://localhost:3000/api/products/${rec.idprodotto}/image_content" alt="Foto recensione cliente" class="review-customer-photo">
                         </div>
                         <div class="review-text-content flex-grow-1">
                             <p class="review-text">
