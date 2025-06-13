@@ -14,11 +14,11 @@ function showProducts(result){
                                 <li><small class="text-muted">Artigiano: ${product.nomeartigiano}</small></li>
                                 <li><strong style="color: var(--primary-color);">Prezzo: €${product.prezzounitario}</strong></li>
                             </ul>
+                            <!-- LOGGED (aggiunge il prodotto al carrello)-->
+                            <button class="btn mt-auto invisible" onclick="aggiungiAlCarrello(${product.idprodotto})" style="background-color: var(--primary-color); color: white;">Aggiungi al carrello</button>
                             <!-- UNLOGGED -->
                             <button class="btn mt-auto unlogged" onclick="window.location.replace('/login.html')" style="background-color: var(--primary-color); color: white;">Aggiungi al carrello</button>
 
-                            <!-- LOGGED (aggiunge il prodotto al carrello)-->
-                            <button class="btn mt-auto invisible" onclick="aggiungiAlCarrello(${product.idprodotto})" style="background-color: var(--primary-color); color: white;">Aggiungi al carrello</button>
                         </div>
                     </div>
                 </div>`
