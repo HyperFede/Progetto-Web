@@ -3,7 +3,7 @@ function showProducts(result){
         const products = result.data.items.map((product) => {
             productsRes += (
                 `<div id="item-${product.idprodotto}" class="cart-item d-flex align-items-start py-3">
-                        <img src="localhost:3000/api/products/${product.idprodotto}/image_content" alt="${product.nomeprodotto}" class="cart-item-image me-3">
+                        <img src="api/products/${product.idprodotto}/image_content" alt="${product.nomeprodotto}" class="cart-item-image me-3">
                         <div class="cart-item-info flex-grow-1">
                             <h5 class="item-name mb-1">${product.nomeprodotto}</h5>
                             <div class="quantity-controls d-flex align-items-center mt-2">

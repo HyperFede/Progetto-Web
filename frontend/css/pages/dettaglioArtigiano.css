@@ -15,20 +15,11 @@
 }
 
 .imageProduct {
-    max-width: 100%;
-    /* Assicura che l'immagine non superi la larghezza del contenitore */
-    max-height: 500px;
-    /* Imposta un'altezza massima per l'immagine, aggiustala secondo necessità */
-    height: auto;
-    /* Mantiene le proporzioni dell'immagine quando si ridimensiona in larghezza */
-    object-fit: contain;
-    /* Assicura che l'intera immagine sia visibile all'interno delle dimensioni date,
-                           mantenendo le proporzioni. Potrebbe lasciare spazi vuoti se le proporzioni
-                           dell'immagine non corrispondono a quelle del contenitore.
-                           Alternativa: 'cover' per riempire lo spazio, tagliando l'immagine. */
-    display: block;
-    /* Rimuove eventuali spazi extra sotto l'immagine (comportamento inline) */
-    border-radius: 0.25rem;
+     width: 100%;
+  height: 100%;       /* <-- Crucial: force the image to fill the container */
+  object-fit: cover;  /* Fill container and crop if needed */
+  display: block;
+  border-radius: 0.25rem;
 }
 
 .artisan-info-box {
