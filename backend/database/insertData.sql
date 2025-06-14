@@ -17,15 +17,20 @@ BEGIN
         -- 2. Insert Products (Unchanged)
         INSERT INTO Prodotto (Nome, Descrizione, Categoria, PrezzoUnitario, QuantitaDisponibile, IDArtigiano)
         VALUES
-        ('Vaso Etrusco', 'Vaso in terracotta dipinto a mano', 'Ceramica', 45.00, 10, 2),
-        ('Piatto Decorato', 'Piatto da portata con motivi floreali', 'Ceramica', 30.00, 15, 2),
-        ('Anfora Greca', 'Riproduzione anfora antica', 'Ceramica', 65.00, 8, 2),
-        ('Collana Argento', 'Collana in argento sterling con pietre', 'Gioielli', 89.00, 20, 3),
-        ('Orecchini Turchesi', 'Orecchini con pietre naturali', 'Gioielli', 55.00, 25, 3),
-        ('Bracciale Intrecciato', 'Bracciale in argento lavorato', 'Gioielli', 75.00, 18, 3),
-        ('Scultura Cavallo', 'Scultura in legno di noce', 'Arredo', 120.00, 5, 4),
-        ('Bassorilievo', 'Decorazione muraria in legno di ciliegio', 'Arredo', 85.00, 7, 4),
-        ('Porta Gioie', 'Scatola intarsiata con coperchio', 'Arredo', 95.00, 12, 4);
+        -- Art1 products
+        ('Vaso Etrusco', 'Vaso in terracotta dipinto a mano', 'Mobili e arredamento', 45.00, 10, 2),
+        ('Piatto Decorato', 'Piatto da portata con motivi floreali', 'Mobili e arredamento', 30.00, 15, 2),
+        ('Anfora Greca', 'Riproduzione anfora antica', 'Mobili e arredamento', 65.00, 8, 2),
+
+        -- Art2 products
+        ('Collana Argento', 'Collana in argento sterling con pietre', 'Collane e bracciali', 89.00, 20, 3),
+        ('Orecchini Turchesi', 'Orecchini con pietre naturali', 'Collane e bracciali', 55.00, 25, 3),
+        ('Bracciale Intrecciato', 'Bracciale in argento lavorato', 'Collane e bracciali', 75.00, 18, 3),
+
+        -- Art3 products
+        ('Scultura Cavallo', 'Scultura in legno di noce', 'Sculture', 120.00, 5, 4),
+        ('Bassorilievo', 'Decorazione muraria in legno di ciliegio', 'Sculture', 85.00, 7, 4),
+        ('Porta Gioie', 'Scatola intarsiata con coperchio', 'Mobili e arredamento', 95.00, 12, 4);
 
         -- 3. MODIFIED: Changed order statuses to at least "Spedito" or "Consegnato"
         INSERT INTO Ordine (IDUtente, Data, Ora, ImportoTotale, Status,StripeCheckOutSessionID)
