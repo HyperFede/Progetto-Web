@@ -38,6 +38,9 @@ document.addEventListener("DOMContentLoaded", async function(){
     
 
     let result = await fetchData(`/api/cart/${id}`, "GET");
+    if(result.data.items.length == 0){
+        document.getElementById("btn-procedi").style.display = "none";
+    }
     const totalText = document.getElementById("total");
     totalText.textContent = `€${result.data.totaleCarrello}`;
     if(result.status == 200){

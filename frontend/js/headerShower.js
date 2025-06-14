@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', async function(){
                                 const selectorInvisible = document.querySelectorAll('.invisible');
                                 selectorInvisible.forEach(section => {
                                     if(result.data.tipologia != "Admin")
-                                    console.log("Rimuovo invisible")
                                     section.classList.remove("invisible")
                                     section.classList.add("logged")
                                 });
