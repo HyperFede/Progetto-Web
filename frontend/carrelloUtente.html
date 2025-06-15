@@ -218,7 +218,7 @@
                 <div class="order-summary-box p-3">
                     <h4 class="summary-title mb-3">TOTALE:</h4>
                     <p id="total" class="total-amount display-6 fw-bold my-3"></p>
-                    <a href="checkout.html" class="btn checkout-btn w-100 rounded-pill text-decoration-none" role="button">
+                    <a id="btn-procedi" href="checkout.html" class="btn checkout-btn w-100 rounded-pill text-decoration-none" role="button">
                         PROCEDI ALL'ORDINE
                     </a>
                 </div>
@@ -251,8 +251,13 @@
 
             if(result.status == 200){
                 document.getElementById(`price-${id}`).textContent = `€${result.data.totaleparziale}`;
-                let totalText = document.getElementById("total");
-                totalText.textContent = `€${result.data.totaleCarrello}`;
+                let idUser = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
+                let totCartUpdate = (await fetchData(`/api/cart/${idUser}`, "GET")).data.totaleCarrello;
+                document.getElementById("total").textContent = `€${totCartUpdate}`;
+                
+                if(counter.value == 0){
+                    window.location.reload();
+                }
             }else if(result.status == 404){
                 window.location.reload();
             }
@@ -265,8 +270,9 @@
 
             if(result.status == 200){
                 document.getElementById(`price-${id}`).textContent = `€${result.data.totaleparziale}`;
-                let totalText = document.getElementById("total");
-                totalText.textContent = `€${result.data.totaleCarrello}`;
+                let idUser = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
+                let totCartUpdate = (await fetchData(`/api/cart/${idUser}`, "GET")).data.totaleCarrello;
+                document.getElementById("total").textContent = `€${totCartUpdate}`;
             }else if(result.status == 404){
                 window.location.reload();
             }

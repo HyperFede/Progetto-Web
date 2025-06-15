@@ -82,6 +82,13 @@
             }else{
                 errorText.classList.remove("invisible");
             }
+        });
+
+        document.addEventListener('keypress', (event) => {
+            if(event.keyCode === 13){
+                event.preventDefault();
+                document.getElementById("loginButton").click();
+            }
         })
 
     </script>
