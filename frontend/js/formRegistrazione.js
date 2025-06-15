@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', function(){
         descText.required = isChecked;
         descText.disabled = !isChecked;
     });
+    
+    
+    function validateEmail(email) {
+        var re = /\S+@\S+\.\S+/;
+        return re.test(email);
+    }
 
 
     //quando viene submittato
@@ -27,12 +33,18 @@ document.addEventListener('DOMContentLoaded', function(){
                 const usernameError = document.getElementById("username-error");
                 const emailError = document.getElementById("email-error");
                 usernameError.classList.add("invisible");
-                emailError.classList.add("invisible")
+                emailError.classList.add("invisible");
+                document.getElementById("email-invalid").classList.add("invisible");
     
                 //prende tutti i dati e li converti in un oggetto facile per inviare all'endpoint
                 const formData = new FormData(this);
     
                 const formObj = Object.fromEntries(formData.entries());
+
+                if(!validateEmail(formObj.email)){
+                    document.getElementById("email-invalid").classList.remove("invisible");
+                    return;
+                }
     
                 // console.log(formObj);
     

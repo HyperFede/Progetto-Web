@@ -1,18 +1,19 @@
 document.addEventListener('DOMContentLoaded', async function(){
             let result = await fetchData("/api/auth/session-info", "GET");
+            console.log(result);
                         setTimeout(() => {
                             if(result.status == 200){
                                 //loggato
-                                console.log(result);
                                 const usernameSpans = document.querySelectorAll('#nav-username');
                                 usernameSpans.forEach(span => {
                                     span.textContent = result.data.username;
                                 })
                                 const selectorInvisible = document.querySelectorAll('.invisible');
                                 selectorInvisible.forEach(section => {
-                                    if(result.data.tipologia != "Admin")
-                                    section.classList.remove("invisible")
-                                    section.classList.add("logged")
+                                    if(result.data.tipologia != "Admin"){
+                                        section.classList.remove("invisible")
+                                        section.classList.add("logged")
+                                    }
                                 });
                                 const selectorUnlogged = document.querySelectorAll('.unlogged');
                                 selectorUnlogged.forEach(section => {
@@ -28,5 +29,5 @@ document.addEventListener('DOMContentLoaded', async function(){
                             }else{
                                 //non loggato
                             }
-                        }, 500)
+                        }, 250)
         })

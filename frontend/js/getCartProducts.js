@@ -13,7 +13,7 @@ function showProducts(result){
                                 <button class="btn btn-sm quantity-btn quantity-minus ms-2" onclick="dimCartProductQta(${product.idprodotto})" title="Diminuisci quantità">
                                     <i class="bi bi-dash-lg"></i>
                                 </button>
-                                <input type="number" id="num-${product.idprodotto}" class="form-control form-control-sm quantity-input mx-1 text-center" value="${product.quantita}" min="1" aria-label="Quantità">
+                                <input type="number" id="num-${product.idprodotto}" class="form-control form-control-sm quantity-input mx-1 text-center" value="${product.quantita}" min="1" aria-label="Quantità" disabled>
                                 <button class="btn btn-sm quantity-btn quantity-plus" onclick="addCartProductQta(${product.idprodotto})" title="Aumenta quantità">
                                     <i class="bi bi-plus-lg"></i>
                                 </button>
