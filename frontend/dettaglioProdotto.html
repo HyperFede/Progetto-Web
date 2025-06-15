@@ -157,7 +157,7 @@
             <div class="col-md-6 product-details-column">
                 <p id="categoriaProdotto" class="product-category-detail">CATEGORIA_PRODOTTO</p>
                 <h1 id="nomeProdotto" class="product-name-detail">Nome Prodotto Dettaglio</h1>
-                <div class="product-rating-detail mb-2">
+                <div class="product-rating-detail mb-2" id = "averageRating">
                     <i class="bi bi-star-fill"></i>
                     <i class="bi bi-star-fill"></i>
                     <i class="bi bi-star-fill"></i>
@@ -195,57 +195,7 @@
             <div id="review" class="col-12">
                 <h3 class="customer-reviews-title mb-4">Recensioni dei clienti</h3>
 
-                <div class="customer-review-box mb-3">
-                    <div class="review-header d-flex justify-content-between align-items-center mb-1">
-                        <span class="review-customer-name">Mario Rossi</span>
-                        <span class="review-date">20/05/2025 10:30</span>
-                    </div>
-                    <div class="review-rating-title d-flex align-items-center mb-2">
-                        <span class="review-stars me-2">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                        </span>
-                        <strong class="review-object">Prodotto eccellente!</strong>
-                    </div>
-                    <div class="review-body d-flex align-items-start">
-                        <div class="review-image-container me-3">
-                            <img src="https://via.placeholder.com/120x120?text=IMG+Utente" alt="Foto recensione cliente" class="review-customer-photo">
-                        </div>
-                        <div class="review-text-content flex-grow-1">
-                            <p class="review-text">
-                                Questa è una prova di recensione! Questo è il primo formato!
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="customer-review-box mb-3">
-                    <div class="review-header d-flex justify-content-between align-items-center mb-1">
-                        <span class="review-customer-name">Laura Bianchi</span>
-                        <span class="review-date">18/05/2025 15:45</span>
-                    </div>
-                    <div class="review-rating-title d-flex align-items-center mb-2">
-                        <span class="review-stars me-2">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                        </span>
-                        <strong class="review-object">Ottimo acquisto</strong>
-                    </div>
-                    <div class="review-body">
-                        <div class="review-text-content">
-                            <p class="review-text">
-                                Anche senza allegare foto, posso confermare che il prodotto è esattamente come descritto.
-                                Funziona benissimo e risponde a tutte le mie esigenze. Lo ricomprerei sicuramente. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                </div>
+            </div>
         </div>
 
         <div class="d-grid p-3 add-to-cart-section align-items-center three-columns">
@@ -279,6 +229,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/fetcher.js"></script>
     <script src="js/headerShower.js"></script>
+    <script src = "js/ratingUtils.js"></script>
     <script src="js/addCartProduct.js"></script>
     <script src="js/dettaglioProdotto.js"></script>
 </body>
