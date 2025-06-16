@@ -19,17 +19,18 @@ function showOrdini(result){
                             <div class="order-items-list p-3">`)
                             const products = order.dettagli.map((product) => {
                                 let reviewButtonClass = "btn btn-sm write-review-btn ms-auto";
-                                let reviewButtonHref = `href="recensioneProdotto.html?idordine=${order.idordine}&idprodotto=${product.idprodotto}"`;
+                                // Modify onclick to check aria-disabled before navigating
+                                let reviewButtonOnClick = `onclick="if (this.getAttribute('aria-disabled') !== 'true') { window.location.href='recensioneProdotto.html?idordine=${order.idordine}&idprodotto=${product.idprodotto}'; }"`;
                                 let reviewButtonAriaDisabled = "false";
                                 let reviewButtonTitle = "Scrivi recensione";
                                 let reviewButtonText = "Scrivi recensione";
-
                                 if (!isConsegnato) {
                                     reviewButtonClass += " is-disabled"; // Add the disabled class
-                                    reviewButtonHref = `href="#"`; // Prevent navigation, or remove href
+                                    // For buttons, the 'disabled' attribute handles click prevention.
+                                    // The onclick can remain, or be cleared, but 'disabled' is primary.
                                     reviewButtonAriaDisabled = "true";
                                     reviewButtonTitle = "Puoi scrivere una recensione solo per ordini consegnati.";
-                                    // Optionally, you could change reviewButtonText here too if desired
+                                    reviewButtonDisabledAttribute = "disabled"; // Add the HTML disabled attribute
                                 }
 
                                 ordersRes += `<div class="order-item d-flex align-items-center py-3">
@@ -38,7 +39,7 @@ function showOrdini(result){
                                         <h6 class="item-name mb-1">${product.nomeprodotto}</h6>
                                         <p class="item-quantity mb-0">Q.tà: ${product.quantita}</p>
                                     </div>
-                                    <a ${reviewButtonHref} class="${reviewButtonClass}" aria-disabled="${reviewButtonAriaDisabled}" title="${reviewButtonTitle}">${reviewButtonText}</a>
+                                    <button ${reviewButtonOnClick} class="${reviewButtonClass}" aria-disabled="${reviewButtonAriaDisabled}" title="${reviewButtonTitle}">${reviewButtonText}</button>
                                 </div>`
                             });
 
@@ -46,7 +47,7 @@ function showOrdini(result){
 
                             <div class="order-header-footer d-flex flex-wrap justify-content-between align-items-center p-3">
                                 <span class="order-total    ">Importo Ordine: <strong>€${order.importototale}</strong></span>
-                                <a href="nuovaSegnalazione.html?idordine=${order.idordine}" class="btn btn-sm report-problem-btn">Segnala problema</a>
+                                <button onclick="window.location.href='nuovaSegnalazione.html?idordine=${order.idordine}'" class="btn btn-sm report-problem-btn">Segnala problema</button>
                             </div>
                         </div>`
             }
