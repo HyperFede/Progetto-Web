@@ -175,10 +175,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     if (successMessageDiv && reviewResponse.data) {
-                        successMessageDiv.textContent = (reviewResponse.data.message || 'Grazie per la tua recensione! Sarà pubblicata dopo la revisione.') + imageUploadMessage;
+                        successMessageDiv.textContent = (reviewResponse.data.message || 'Grazie per la tua recensione!');
                         successMessageDiv.style.display = 'block';
                     } else {
-                        alert(((reviewResponse.data && reviewResponse.data.message) || 'Grazie per la tua recensione! Sarà pubblicata dopo la revisione.') + imageUploadMessage);
+                        alert(((reviewResponse.data && reviewResponse.data.message) || 'Grazie per la tua recensione!'));
                     }
 
                     productReviewForm.reset();
