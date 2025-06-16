@@ -153,7 +153,6 @@
                                 <!-- Prodotti caricati dal js -->
                                 <tr>
                                     <td colspan="4" class="text-center text-muted">Caricamento prodotti...</td>
-
                                 </tr>
                             </tbody>
                         </table>
@@ -173,7 +172,6 @@
                 productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nessun prodotto inserito.</td></tr>`;
                 return;
             }
-
             let productsRes = ``;
             const products = result.data.map((product) => {
                 productsRes += (
@@ -200,7 +198,6 @@
         }
 
         document.addEventListener("DOMContentLoaded", async function () {
-
 
             const productsTableBody = document.getElementById("products");
             productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Caricamento informazioni account...</td></tr>`;

@@ -9,6 +9,7 @@ border: 1px solid var(--border-color);
 min-height: 400px;
 }
 
+
 .dashboard-sidebar-offcanvas .nav-link {
     color: var(--text-dark);
     padding: 0.75rem 1rem;
