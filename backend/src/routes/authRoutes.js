@@ -333,6 +333,18 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
             responsePayload.artigianodescrizione = req.user.artigianodescrizione;
                     responsePayload.piva = req.user.piva;
                     responsePayload.artigianodescrizione = req.user.artigianodescrizione;
+
+                    queryResult = await pool.query(
+                        'SELECT Esito from Storicoapprovazioni where idartigiano = $1',
+                        [req.user.idutente]
+                    );
+
+                    if (queryResult.rows.length > 0) {
+                        responsePayload.esitoapprovazione = queryResult.rows[0].esito;
+                    }
+                    else{
+                        responsePayload.esitoapprovazione = null;
+                    }
         }
 
         res.status(200).json(responsePayload);

@@ -25,6 +25,10 @@ function transformProductForResponse(product, req) {
     if (transformedProduct.prezzounitario !== null && transformedProduct.prezzounitario !== undefined) {
         transformedProduct.prezzounitario = parseFloat(transformedProduct.prezzounitario); //in Json restituirebbe una String, (non so il motivo)
     }
+    // Ensure average_rating is a float or null (COALESCE should handle this, but good for safety)
+    if (transformedProduct.average_rating !== null && transformedProduct.average_rating !== undefined && typeof transformedProduct.average_rating === 'string') {
+        transformedProduct.average_rating = parseFloat(transformedProduct.average_rating);
+    }
     // If nomeartigiano is already joined and selected, it will be part of transformedProduct.
     // No specific action needed here for nomeartigiano if it's selected in the query.
     // If it's fetched separately (e.g., in POST/PUT), it should be added to the product object before calling this.
@@ -125,11 +129,11 @@ const productQueryConfig = {
         { queryParam: 'quantitadisponibile_lte', dbColumn: 'quantitadisponibile', type: 'lte', dataType: 'integer' },
         { queryParam: 'quantitadisponibile_gte', dbColumn: 'quantitadisponibile', type: 'gte', dataType: 'integer' }
     ],
-    allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto', 'quantitadisponibile', 'nomeartigiano'], // Changed alias
+    allowedSortFields: ['nome', 'prezzounitario', 'categoria', 'idprodotto', 'quantitadisponibile', 'nomeartigiano', 'average_rating'],
     defaultLimit: 20, // Default number of products to return
     maxLimit: 100,    // Maximum number of products per request
-    defaultSortField: 'idprodotto',
-    defaultSortOrder: 'ASC'
+    defaultSortField: 'average_rating', 
+    defaultSortOrder: 'DESC' 
 };
 
 
@@ -154,7 +158,7 @@ const adminProductQueryConfig = {
         ...productQueryConfig.allowedFilters,
         { queryParam: 'deleted', dbColumn: 'deleted', type: 'boolean', dataType: 'boolean' } // Admins can filter by deleted status
     ], // nomeartigiano filter could be added here if needed: { queryParam: 'nomeartigiano_like', dbColumn: 'u_art.nome', type: 'like', dataType: 'string'}
-    allowedSortFields: [...productQueryConfig.allowedSortFields, 'deleted'], // Admins can sort by deleted status
+    allowedSortFields: [...productQueryConfig.allowedSortFields, 'deleted'], // Admins can sort by deleted status and average_rating
     defaultLimit: productQueryConfig.defaultLimit, // Inherit from base config
     maxLimit: productQueryConfig.maxLimit,       // Inherit from base config
     // No baseWhereClause for admins, they see all by default unless they filter
@@ -167,10 +171,15 @@ router.get('/',
     async (req, res) => {
     try {
         const queryText = ` 
-            SELECT p.idprodotto, p.nome, p.descrizione, p.categoria, p.prezzounitario, p.quantitadisponibile, p.immagine, p.idartigiano, p.deleted, u_art.nome AS nomeartigiano
+            SELECT p.idprodotto, p.nome, p.descrizione, p.categoria, p.prezzounitario, p.quantitadisponibile, p.immagine, p.idartigiano, p.deleted, u_art.nome AS nomeartigiano,
+                   COALESCE(avg_r.media, 0) AS average_rating
             FROM Prodotto p
             LEFT JOIN Utente u_art ON p.idartigiano = u_art.idutente
-            ${req.sqlWhereClause} ${req.sqlOrderByClause} ${req.sqlLimitClause} ${req.sqlOffsetClause}
+            LEFT JOIN (
+                SELECT r.idprodotto, AVG(r.valutazione) AS media
+                FROM recensione r GROUP BY r.idprodotto
+            ) avg_r ON p.idprodotto = avg_r.idprodotto
+            ${req.sqlWhereClause} ${req.sqlOrderByClause} ${req.sqlLimitClause} ${req.sqlOffsetClause} -- Middleware clauses
         `;
         const allProductsIncludingDeleted = await pool.query(queryText, req.sqlQueryValues);
         const productsWithUrls = allProductsIncludingDeleted.rows.map(product => transformProductForResponse(product, req));
@@ -212,11 +221,17 @@ router.get(
         // or "WHERE (deleted = FALSE)" if no other filters are applied by the user.
         // req.sqlQueryValues will contain the corresponding values
         // req.sqlOrderByClause will be like "ORDER BY nome ASC"
+        // If defaultSortField is 'average_rating' and defaultSortOrder is 'DESC', req.sqlOrderByClause will be "ORDER BY average_rating DESC" (handled by middleware)
         const queryText = ` 
-            SELECT p.idprodotto, p.nome, p.descrizione, p.categoria, p.prezzounitario, p.quantitadisponibile, p.immagine, p.idartigiano, u_art.username AS nomeartigiano
+            SELECT p.idprodotto, p.nome, p.descrizione, p.categoria, p.prezzounitario, p.quantitadisponibile, p.immagine, p.idartigiano, u_art.username AS nomeartigiano,
+                   COALESCE(avg_r.media, 0) AS average_rating
             FROM Prodotto p
             LEFT JOIN Utente u_art ON p.idartigiano = u_art.idutente
-            ${req.sqlWhereClause} ${req.sqlOrderByClause} ${req.sqlLimitClause} ${req.sqlOffsetClause}
+            LEFT JOIN (
+                SELECT r.idprodotto, AVG(r.valutazione) AS media
+                FROM recensione r GROUP BY r.idprodotto
+            ) avg_r ON p.idprodotto = avg_r.idprodotto
+            ${req.sqlWhereClause} ${req.sqlOrderByClause} ${req.sqlLimitClause} ${req.sqlOffsetClause} -- Middleware clauses
         `;
         
         const allProducts = await pool.query(queryText, req.sqlQueryValues);
