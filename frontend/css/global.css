@@ -194,8 +194,27 @@ min-height: 400px;
     font-weight: 500;
     padding: 0.5rem 1rem;
 }
+
 .add-product-btn:hover {
     background-color: var(--tigers-eye);
     border-color: var(--tigers-eye);
     color: var(--text-light);
 }
+
+
+/* artigiano non approvato o rifiutato*/
+.add-product-btn.is-disabled {
+    background-color: var(--divider-color);
+    color: var(--text-light);
+    border-color: var(--divider-color);
+    cursor: not-allowed;
+}
+
+/* Hover effect for the functionally "disabled" button */
+/* THIS IS WHERE YOU CHOOSE THE COLOR ETC. FOR THE HOVER STATE */
+.add-product-btn.is-disabled:hover {
+    background-color: red; /* Example: Red background on hover */
+    border-color: darkred;    /* Example: Darker red border on hover */
+    color: white;          /* Example: White text on hover */
+}
+

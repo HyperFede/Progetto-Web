@@ -191,18 +191,23 @@ min-height: 400px;
 }
 
 #aggiungiSegnalazioneBtn {
-    background-color: var(--primary-color);
-    color: white;
-    border: 1px solid var(--primary-color);
-    position: sticky;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1030;
+  /* cancel the sticky-centering */
+  position: static !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+  background-color: var(--primary-color);
+  color: var(--pakistan-green);
+  border: 1px solid var(--primary-color);
+  padding: 0.6rem 1.8rem;
+  font-weight: 600;
+
 }
+
 
 #aggiungiSegnalazioneBtn:hover{
     background-color: var(--dark-moss-green);
     color: white;
 
 }
+

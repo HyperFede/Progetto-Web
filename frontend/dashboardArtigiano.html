@@ -27,10 +27,11 @@
                         <li><a class="dropdown-item" href="logout.html"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
                     </ul>
                 </li>
+                <!-- da mettere in TUTTE LE PAGINE Dell'artigiano: id="addProductBtn"-->
                 <li class="nav-item">
-                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
-                        <i class="bi bi-plus-circle-fill me-1"></i> Inserisci Prodotto
-                    </a>
+                    <button class="btn add-product-btn" id="addProductBtn" onclick="goToAddProducts(this)">
+                        <i class="bi bi-plus-circle-fill me-1"></i> <span class = "txt-new-product">Inserisci Prodotto </span>
+                    </button>
                 </li>
             </ul>
         </div>
@@ -80,9 +81,11 @@
             </div>
            <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
                 <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
-                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
-                        <i class="bi bi-plus-circle-fill"></i>
-                    </a>
+                    <!-- Removed duplicate id="addProductBtn". Using class 'add-product-btn' for JS targeting. -->
+                    <button class="btn add-product-btn" onclick="goToAddProducts(this)">
+                        <i class="bi bi-plus-circle-fill me-1"></i>
+                    </button>
+            
                 </li>
             </ul>
         </div>
