@@ -202,7 +202,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     alert(errorMsg);
                 }
-            }
+            };
+
+            setTimeout(() => {
+                window.location.href = "/dashboardStoricoOrdini.html";
+            }, 2000);
         });
     }
     // Load product details when the page is ready
