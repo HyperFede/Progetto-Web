@@ -120,10 +120,6 @@
         <div class="row justify-content-center">
             <div class="col-md-10 col-lg-8">
                 <div class="add-product-form-box p-4">
-                    <!-- Placeholder for success/error messages -->
-                    <div id="messagePlaceholder" class="mb-3" style="display: none;">
-                        <!-- Messages will be injected here by JavaScript -->
-                    </div>
                     <form id="addProductForm">
                         <div class="mb-3">
                             <label for="productCategory" class="form-label">Categoria</label>
@@ -173,6 +169,11 @@
                                 <input type="number" class="form-control dashboard-input" id="productPrice" name="price"
                                     min="0" step="0.01" required placeholder="">
                             </div>
+                        </div>
+
+                        <!-- Placeholder for success/error messages -->
+                        <div id="messagePlaceholder" class="mb-3" style="display: none;">
+                            <!-- Messages will be injected here by JavaScript -->
                         </div>
 
                         <div class="text-center mt-4">

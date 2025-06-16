@@ -73,7 +73,7 @@
                                 );
 
                                 if (putResponse.status === 200) {
-                                    successMsg += ' Immagine caricata con successo.';
+                                    //successMsg += ' Immagine caricata con successo.';
                                 } else {
                                     const imageErrorMessage = putResponse.message || (putResponse.body && (putResponse.body.message || putResponse.body.error)) || "Dettagli non disponibili.";
                                     successMsg += ` Errore nel caricamento dell'immagine: ${imageErrorMessage}`;
