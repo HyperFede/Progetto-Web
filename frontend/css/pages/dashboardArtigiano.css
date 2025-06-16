@@ -27,11 +27,15 @@ body {
     font-weight: 500;
     padding: 0.5rem 1rem;
 }
-.add-product-btn:hover {
+/* Hover style for ENABLED button */
+.add-product-btn:not([aria-disabled="true"]):hover {
     background-color: var(--tigers-eye);
     border-color: var(--tigers-eye);
     color: var(--text-light);
+    
 }
+/* Hover style for "DISABLED" (aria-disabled="true") button */
+
 
 .dashboard-sidebar {
     background-color: var(--border-color);

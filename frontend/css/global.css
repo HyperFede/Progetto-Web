@@ -201,17 +201,18 @@ min-height: 400px;
     color: var(--text-light);
 }
 
+
 /* Add this to your global.css or a relevant stylesheet */
 .is-disabled {
     opacity: 0.65;         /* Makes it look faded */
     cursor: not-allowed;   /* Changes mouse cursor to indicate it's not clickable */
-   /* Crucially prevents click events */
-    /* You can add other styles here, like changing background or text color if needed */
-    /* For example, to make it grey like Bootstrap's default disabled buttons: */
-    /* background-color: #e9ecef; */
-    /* border-color: #ced4da; */
-    /* color: #6c757d; */
 }
 
+.add-product-btn[aria-disabled="true"]:hover {
+    background-color: var(--primary-color); /* Keep base background */
+    color: var(--pakistan-green);       /* Keep base text color */
+    border-color: var(--primary-color); /* Keep base border color */
+    /* Opacity and cursor are handled by .is-disabled from global.css */
+        cursor: not-allowed;
 
-
+}

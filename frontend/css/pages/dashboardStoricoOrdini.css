@@ -181,9 +181,20 @@ min-height: 400px;
     font-size: 0.85rem;
 }
 .write-review-btn:hover {
-    background-color: var(--tigers-eye); /* Usa secondary per hover */
+    background-color: var(--primary-color); /* Usa secondary per hover */
     border-color: var(--tigers-eye);
     color: var(--text-light); /* Testo chiaro su tigers-eye */
+}
+
+
+
+
+.write-review-btn[aria-disabled]:hover {
+    background-color: var(--primary-color) !important; /* Revert to its normal background */
+    border-color: var(--primary-color) !important;     /* Revert to its normal border color */
+    color: var(--pakistan-green) !important;       /* Revert to its normal text color */
+    cursor: not-allowed;
+
 }
 
 .report-problem-btn {
