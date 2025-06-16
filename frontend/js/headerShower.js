@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function(){
             let result = await fetchData("/api/auth/session-info", "GET");
-            console.log(result);
+            // console.log(result);
                         setTimeout(() => {
                             if(result.status == 200){
                                 //loggato

@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         // Display as partial success with image error
                         displayMessage(mainSuccessMessage, 'warning'); // Or 'error' if image is critical
                     } else {
-                        mainSuccessMessage += ` Immagine caricata con successo.`;
+                        //mainSuccessMessage += ` Immagine caricata con successo.`;
                         displayMessage(mainSuccessMessage, 'success');
                         // Redirect to leMieSegnalazioni.html after 2 seconds
                         setTimeout(() => {
