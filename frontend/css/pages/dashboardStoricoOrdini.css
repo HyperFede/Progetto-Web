@@ -189,11 +189,20 @@ min-height: 400px;
 
 
 
-.write-review-btn[aria-disabled]:hover {
+.write-review-btn[aria-disabled="true"]:hover {
     background-color: var(--primary-color) !important; /* Revert to its normal background */
     border-color: var(--primary-color) !important;     /* Revert to its normal border color */
     color: var(--pakistan-green) !important;       /* Revert to its normal text color */
     cursor: not-allowed;
+
+}
+
+
+.write-review-btn[aria-disabled="false"]:hover {
+    background-color: var(--primary-color) !important; /* Revert to its normal background */
+    border-color: var(--primary-color) !important;     /* Revert to its normal border color */
+    color: var(--pakistan-green) !important;       /* Revert to its normal text color */
+    cursor: pointer;
 
 }
 

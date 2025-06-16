@@ -101,7 +101,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     // No image to upload, or idproblema missing from first response
                     displayMessage(mainSuccessMessage, 'success');
+                    setTimeout(() => {
+                            window.location.href = 'leMieSegnalazioni.html';
+                        }, 2000);
                     segnalazioneForm.reset();
+                    
 
                 }
             } catch (error) {
