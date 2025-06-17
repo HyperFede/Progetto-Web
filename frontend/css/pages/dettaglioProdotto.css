@@ -209,6 +209,10 @@ hr.my-4 {
     }
 }
 
+main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
+    padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
+}
+
 /* Review */
 .customer-reviews-title {
     color: var(--text-dark);
