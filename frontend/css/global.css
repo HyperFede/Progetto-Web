@@ -50,6 +50,11 @@ body {
     font-weight: 700;
 }
 
+.page-main-title {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
 .input-group {
     margin-bottom: 1.5rem;
 }
