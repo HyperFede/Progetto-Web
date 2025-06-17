@@ -103,6 +103,10 @@ min-height: 400px;
     }
 }
 
+main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
+    padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
+}
+
 .logout-btn {
     background-color: var(--secondary-color);
     color: var(--text-light);
@@ -117,4 +121,29 @@ min-height: 400px;
   background-color: var(--tigers-eye) !important; /* Colore al passaggio del mouse */
     opacity: 0.85;
     color: var(--text-light) !important; /* Colore del testo al passaggio del mouse */
+}
+
+/* Animazione per il badge del carrello */
+.cart-badge-animate {
+  animation: badgeFlash 0.5s ease-in-out;
+}
+
+/* Classe per il posizionamento base del badge del carrello */
+.cart-item-badge-position {
+  transform: translate(-50%, -50%); /* Simula translate-middle senza !important */
+}
+
+@keyframes badgeFlash {
+  0%, 100% {
+    /* Combina la traslazione di base con lo scale */
+    transform: translate(-50%, -50%) scale(1);
+    background-color: #dc3545; /* Colore standard di .bg-danger */
+    opacity: 1;
+  }
+  50% {
+    /* Combina la traslazione di base con lo scale */
+    transform: translate(-50%, -50%) scale(1.35);
+    background-color: #ff3333; /* Un rosso più brillante per il flash */
+    opacity: 0.9;
+  }
 }
