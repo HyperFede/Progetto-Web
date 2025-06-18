@@ -93,16 +93,7 @@ min-height: 400px;
 
 /* In segnalazioniAdmin.css */
 
-/* Stile aggiuntivo per rendere il pulsante "Visualizza" ancora più piccolo */
-.view-problem-image-btn {
-  padding: 0.1rem 0.4rem; /* Riduci il padding verticale e orizzontale */
-  font-size: 0.75rem;   /* Riduci la dimensione del font */
-  /* Puoi anche regolare line-height se necessario */
-  /* line-height: 1.2; */
-  background-color: var(--primary-color);
-  color: white;
-  border:none;
-}
+
 
 
 .dashboard-sidebar .nav-link {

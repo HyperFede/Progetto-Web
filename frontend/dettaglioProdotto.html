@@ -153,43 +153,47 @@
             </div>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-md-6 mb-3 mb-md-0">
-                <div class="product-detail-image-placeholder d-flex align-items-center justify-content-center">
-                    <img id="immagineProdotto" />
-                </div>
+        <div id="product-loading-placeholder" class="text-center p-5 my-5">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Caricamento...</span>
             </div>
-
-            <div class="col-md-6 product-details-column">
-                <p id="categoriaProdotto" class="product-category-detail">CATEGORIA_PRODOTTO</p>
-                <h1 id="nomeProdotto" class="product-name-detail">Nome Prodotto Dettaglio</h1>
-                <div class="product-rating-detail mb-2" id = "averageRating">
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-half"></i>
-                    <i class="bi bi-star"></i>
-                </div>
-                <p id="statoProdotto" class="product-status-detail status-available mb-2">Disponibile</p>
-                <p id="prezzoProdotto" class="product-price-detail mb-3">Prezzo: €XX.XX</p>
-
-                <a id="hrefArtigiano" href="dettaglioArtigiano.html" class="artisan-link">
-                    <div class="product-artisan-detail d-flex align-items-center">
-                        <div class="artisan-icon-placeholder me-2">A</div>
-                        <span id="artigianoProdotto">Nome Artigiano</span>
-                    </div>
-                </a>
-            </div>
+            <h2 class="mt-3" style="color: var(--primary-color);">Caricamento prodotto...</h2>
+            <p class="text-muted">Stiamo recuperando i dettagli per te.</p>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="product-description-box">
-                    <h5 class="mb-2">Descrizione Prodotto</h5>
-                    <div id="descProdotto" class="description-content">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+        <div id="product-details-content" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="product-detail-image-placeholder d-flex align-items-center justify-content-center">
+                        <img id="immagineProdotto" src="" alt="Immagine prodotto" style="max-width: 100%; max-height: 500px; object-fit: contain;"/>
+                    </div>
+                </div>
+
+                <div class="col-md-6 product-details-column">
+                    <p id="categoriaProdotto" class="product-category-detail"></p>
+                    <h1 id="nomeProdotto" class="product-name-detail"></h1>
+                    <div class="product-rating-detail mb-2" id = "averageRating">
+                        <!-- Rating stars will be loaded by ratingUtils.js -->
+                    </div>
+                    <p id="statoProdotto" class="product-status-detail mb-2"></p>
+                    <p id="prezzoProdotto" class="product-price-detail mb-3"></p>
+
+                    <a id="hrefArtigiano" href="dettaglioArtigiano.html" class="artisan-link">
+                        <div class="product-artisan-detail d-flex align-items-center">
+                            <div class="artisan-icon-placeholder me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 50%; font-weight: bold;">
+                                <span id="artigianoIconInitial"></span>
+                            </div>
+                            <span id="artigianoProdotto"></span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="product-description-box">
+                        <h5 class="mb-2">Descrizione Prodotto</h5>
+                        <div id="descProdotto" class="description-content"></div>
                     </div>
                 </div>
             </div>
@@ -200,14 +204,15 @@
         <div class="row mb-5">
             <div id="review" class="col-12">
                 <h3 class="customer-reviews-title mb-4">Recensioni dei clienti</h3>
-
+                <p class="text-muted" id="loading-reviews">Caricamento recensioni...</p>
+                <!-- Reviews will be loaded here by dettaglioProdotto.js -->
             </div>
         </div>
 
-        <div class="d-grid p-3 add-to-cart-section align-items-center three-columns">
+        <div id="product-action-bar" class="d-grid p-3 add-to-cart-section align-items-center three-columns" style="display: none;">
             <div class="text-center mb-3 mb-md-0">
-                <h6 id="nomeProdotto" class="add-to-cart-product-name">Nome Prodotto Dettaglio</h6>
-                <p id="prezzoProdotto" class="add-to-cart-product-price mb-0">Prezzo: €XX.XX</p>
+                <h6 id="nomeProdottoAddToCart" class="add-to-cart-product-name" style="min-height: 1.5em;"></h6>
+                <p id="prezzoProdottoAddToCart" class="add-to-cart-product-price mb-0" style="min-height: 1.2em;"></p>
             </div>
             <div class="mb-3 mb-md-0">
                 <label for="quantityInput" class="form-label quantity-label text-center">Quantità:</label>
@@ -215,8 +220,7 @@
             </div>
 
             <!-- UNLOGGED -->
-             
-             <div class="text-end unlogged"> 
+             <div class="text-end unlogged">
                 <a href="login.html" class="btn w-100 add-to-cart-button-detail d-flex justify-content-center align-items-center">
                     <i class="bi bi-cart-plus fs-3"></i>
                 </a>
@@ -229,6 +233,7 @@
                 </button>
             </div>
         </div>
+
 
     </main>
 

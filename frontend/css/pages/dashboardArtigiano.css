@@ -154,4 +154,17 @@ body {
     main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
         padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
     }
+    
+    .dashboard-sidebar,
+    .dashboard-sidebar .nav-link {
+        display: none !important;
+    }
+    
+    .col-md-3{
+        width: 0 !important;
+    }
+
+    .col-md-9{
+        width: 100% !important;
+    }
 }
