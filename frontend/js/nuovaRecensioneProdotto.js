@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const reviewTextInput = document.getElementById('reviewTextInput');
     const reviewTitleInput = document.getElementById('reviewTitleInput'); // Title is in the form
     const stars = document.querySelectorAll('.star-rating .bi-star, .star-rating .bi-star-fill');
-    const photoUploadInput = document.getElementById('photoUploadInput');
+    const photoUploadInput = document.getElementById('productImageInput'); // Corrected ID
     
     const successMessageDiv = document.getElementById('successMessage'); // Assuming you have this div
     const errorMessageDiv = document.getElementById('formErrorMessage'); // Assuming you add a div for general form errors
@@ -184,8 +184,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     productReviewForm.reset();
                     ratingValueInput.value = '';
                     resetStarsVisual();
-                    const photoPreviewContainer = document.getElementById('photoPreview');
-                    if (photoPreviewContainer) photoPreviewContainer.innerHTML = '';
                 } else {
                     const errorMsg = reviewResponse.body.error;
                     if (errorMessageDiv) {
@@ -194,6 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         alert(errorMsg);
                     }
                 }
+
             } catch (reviewError) {
                 console.error('Errore invio recensione (testo/valutazione):', reviewError);
                 const errorMsg = reviewError.message || (reviewError.body && reviewError.body.message) || 'Errore di comunicazione con il server. Riprova più tardi.';

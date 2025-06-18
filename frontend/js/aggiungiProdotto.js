@@ -2,14 +2,17 @@
         let addProductForm = document.getElementById("addProductForm");
         let productCategory = document.getElementById("productCategory");
 
+        function goToProdottiArtigiano(){
+            window.location.href = "/prodottiArtigiano.html";
+        }
 
-        let photoUploadInput = document.getElementById("photoUploadInput");
+        // let photoUploadInput = document.getElementById("photoUploadInput"); // Old ID, no longer used
         let productName = document.getElementById("productName");
         let productDescription = document.getElementById("productDescription");
         let productPrice = document.getElementById("productPrice");
         let productQuantity = document.getElementById("productQuantity");
 
-        let image = document.getElementById("photoUploadInput");
+        let imageInput = document.getElementById("productImageInput"); // Corrected ID
         let messagePlaceholder = document.getElementById("messagePlaceholder");
 
         function clearMessages() {
@@ -58,7 +61,7 @@
                             let messageType = 'success'; // Default message type
 
                             const productId = response.data.idprodotto;
-                            const imageFile = image.files[0]; // Get the first selected file
+                            const imageFile = imageInput.files[0]; // Get the first selected file from the corrected input
 
                             if (imageFile) { // Only attempt to upload if an image file is present
                                 //console.log("Tentativo di caricamento immagine per prodotto ID:", productId);
@@ -87,8 +90,11 @@
 
                                 showMessage(successMsg, messageType);
                                 addProductForm.reset(); // Reset the form
-                                const photoPreviewContainer = document.getElementById('photoPreview');
-                                if (photoPreviewContainer) photoPreviewContainer.innerHTML = ''; // Clear image preview
+                                setTimeout(goToProdottiArtigiano, 2000);
+                                // The imagePreview.js script should handle clearing its own preview
+                                // If you need to manually trigger it from here, ensure imagePreview.js exposes a function.
+                                // For now, resetting the form should also clear the file input, and imagePreview.js
+                                // should react to the input change (or lack of file).
 
                             } else { // Product creation itself failed
                                 // No imageFile was provided, but product creation was successful.

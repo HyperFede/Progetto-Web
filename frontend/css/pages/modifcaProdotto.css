@@ -12,18 +12,12 @@
 .back-to-search-link i {
     vertical-align: middle;
 }
-
-/* stretch the file-input over the whole container, invisible but clickable */
+/* The file input will be visually-hidden via HTML class, so direct styling for it as an overlay is not needed */
 #productImageInput {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    z-index: 10;
+    /* If not using a global .visually-hidden class, add: 
+    border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; */
 }
+
 
 /* camera-overlay styling */
 .add-image-trigger {
@@ -32,35 +26,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
-    opacity: 0;
-    transition: opacity .2s;
     z-index: 5;
+        cursor: pointer;
+    color: #6c757d; /* Default text/icon color, consistent with other pages */
+    transition: background-color 0.2s ease-in-out;
 }
-
-/* cover entire image container with the invisible file-picker */
-#productImageInput {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    z-index: 10;
-}
-
-/* show a semi-opaque camera overlay on hover */
-.add-image-trigger {
-    background: rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    transition: opacity .2s;
-    z-index: 5;
-}
-
-.product-detail-image-container:hover .add-image-trigger {
-    opacity: 1;
+/* Hover effect for add-image-trigger when no image is present */
+.product-detail-image-container.state-add-image:hover .add-image-trigger {
+    background-color: rgba(0, 0, 0, 0.03); /* Slight hover effect */
 }
 
 /* ensure the image container has a border and fixed height */
@@ -68,17 +41,19 @@
     border: 1px solid #ced4da;
     border-radius: .25rem;
     overflow: hidden;
-}
 
+    min-height: 150px; /* Consistent with other pages, allows dynamic height */
+    background: #f0f2f5; /* Consistent background for the placeholder state */
+    /* The fixed height: 300px; from HTML inline style will override min-height if not removed from HTML */
 
-.product-detail-image-container:hover .add-image-trigger {
-    opacity: 1;
 }
 
 /* keep your delete-button overlay hidden until you want it */
 .image-action-overlay {
     /* you already have inline display:none; you can also toggle via JS */
     z-index: 6;
+        /* opacity is handled by imagePreview.js and inline style initially */
+
 }
 
 
@@ -367,16 +342,15 @@ hr.my-4 {
     font-weight: bold;
 }
 
-.current-image-display img {
+/* This should be the primary rule for the image inside the preview display area */
+.product-detail-image-container .current-image-display img {
     max-width: 100%;
-    max-height: 100%;
-    /* Adatta all'altezza del contenitore */
-    width: 100%;
-    /* Occupa tutta la larghezza disponibile */
-    height: 100%;
-    /* Occupa tutta l'altezza disponibile */
-    object-fit: cover;
-    /* 'cover' riempie, 'contain' mostra tutto. Scegli in base alle tue preferenze. */
+    max-height: 500px; /* Consistent with other pages, avoid !important if possible */
+    width: auto; /* For dynamic height based on image aspect ratio */
+    height: auto;  /* For dynamic height based on image aspect ratio */
+    object-fit: contain; /* Shows whole image, 'cover' would fill and crop */
+    display: block;
+    margin: auto;
 }
 
 /* Overlay per l'azione di rimozione */
@@ -388,28 +362,31 @@ hr.my-4 {
 
 /* Mostra l'overlay con il cestino quando c'è un'immagine e si fa hover */
 .product-detail-image-container:hover .image-action-overlay.can-delete {
-    opacity: 1;
-    display: flex !important;
-    /* Sovrascrive display:none inline */
+    opacity: 1; /* This class 'can-delete' is from old JS, imagePreview.js uses its own logic */
+    /* display: flex !important; /* imagePreview.js sets display:flex when image is present */
+
 }
 
 /* Trigger per aggiungere immagine */
 .add-image-trigger {
     /* display: none; è gestito da JS/inline style inizialmente */
-    border: 2px dashed var(--secondary-color);
     /* Bordo per indicare area cliccabile */
     border-radius: 0.25rem;
     /* Consistente con gli altri bordi */
 }
 
-.add-image-trigger:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    /* Leggero feedback su hover */
-}
+
 
 /* Stato: quando si deve aggiungere un'immagine (nessuna immagine presente) */
 .product-detail-image-container.state-add-image .current-image-display {
+    /*display: none !important;*/
+}
+#addImageTxt{
     display: none !important;
+}
+#addImageIcon{
+    display: none !important;
+
 }
 
 .product-detail-image-container.state-add-image .add-image-trigger {
@@ -420,4 +397,3 @@ hr.my-4 {
     display: none !important;
     opacity: 0 !important;
 }
-

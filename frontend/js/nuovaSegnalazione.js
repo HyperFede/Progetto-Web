@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const segnalazioneForm = document.getElementById('problemForm');
     const idOrdineInput = document.getElementById('orderIdInput'); // Assuming you have an input for Order ID
     const descrizioneInput = document.getElementById('problemDescriptionInput'); // Assuming a textarea for description
-    const immagineInput = document.getElementById('photoUploadInput'); // Assuming a file input for an image
+    const immagineInput = document.getElementById('productImageInput'); // Corrected ID for the file input
     const submitButton = document.getElementById('btnSubmit'); // Assuming a submit button
 
     const successMessage = document.getElementById('successMessage'); // For displaying success/error messages
@@ -85,7 +85,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         mainSuccessMessage += ` Errore nel caricamento dell'immagine: ${imageErrorMessage}`;
                         // Display as partial success with image error
                         displayMessage(mainSuccessMessage, 'warning'); // Or 'error' if image is critical
-                    } else {
+                    }
+                     else {
                         //mainSuccessMessage += ` Immagine caricata con successo.`;
                         displayMessage(mainSuccessMessage, 'success');
                         // Redirect to leMieSegnalazioni.html after 2 seconds
@@ -94,9 +95,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         }, 2000);
                         segnalazioneForm.reset(); // Reset form only on full success
 
-                        // Clear image preview if you have one
-                        const photoPreviewContainer = document.getElementById('photoPreview'); // Assuming this ID for preview
-                        if (photoPreviewContainer) photoPreviewContainer.innerHTML = '';
+                        // imagePreview.js will handle clearing the preview when the form is reset
+                        // because the file input value will be cleared.
                     }
                 } else {
                     // No image to upload, or idproblema missing from first response

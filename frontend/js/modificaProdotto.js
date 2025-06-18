@@ -1,20 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const productImageInput = document.getElementById("productImageInput"); // Already in the previous version, seems like a merge artifact
+    // Form field elements
     const productCategory = document.getElementById("productCategory");
     const productName = document.getElementById("productName");
     const productDescription = document.getElementById("productDescription");
     const productPrice = document.getElementById("productPrice");
-    const btnRemoveImageWithId= document.getElementById('removeImageBtn');
 
     const editProductForm = document.getElementById('editProductForm'); // Assume this ID exists in your HTML
     const formMessagePlaceholder = document.getElementById('formMessagePlaceholder'); // Assume this ID exists for messages
 
     let initialProductImageExists = false; // To track if an image was loaded initially
-
-    // Moved image container and related elements query higher
-    const imageContainer = document.querySelector('.product-detail-image-container');
-    let currentImageDisplay, imageActionOverlay, btnRemoveImage, addImageTrigger;
-
 
 
     /**
@@ -27,51 +21,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return urlParams.get('id');
     }
 
-    // Define updateImageUI here so it's available for populateProductData and event listeners
-    function updateImageUI(hasImage) {
-        if (!imageContainer) return; // Guard if imageContainer itself is not found
-
-        // Query these dynamically within the function or ensure they are set before calling
-        const displayElement = imageContainer.querySelector('.current-image-display');
-        const triggerElement = imageContainer.querySelector('.add-image-trigger');
-        const overlayElement = imageContainer.querySelector('.image-action-overlay');
-        if (hasImage) {
-            if (displayElement) displayElement.style.display = 'flex';
-            if (triggerElement) triggerElement.style.display = 'none';
-            imageContainer.classList.remove('state-add-image');
-            if (overlayElement) {
-                overlayElement.classList.add('can-delete');
-                overlayElement.style.display = 'flex';
-                overlayElement.style.opacity = '1';
-            }
-        } else {
-            if (displayElement) displayElement.style.display = 'none';
-            if (triggerElement) triggerElement.style.display = 'flex';
-            imageContainer.classList.add('state-add-image');
-            if (overlayElement) {
-                overlayElement.classList.remove('can-delete');
-                overlayElement.style.display = 'none';
-                overlayElement.style.opacity = '0';
-            }
-        }
-    }
+    // The updateImageUI function and its direct calls will be removed.
+    // imagePreview.js will handle UI updates.
 
     async function populateProductData() {
         const productId = getProductIdFromURL();
-        // Get a reference to currentImageDisplay, which might be used by updateImageUI
-        currentImageDisplay = imageContainer ? imageContainer.querySelector('.current-image-display') : null;
+        const currentImageDisplay = document.querySelector('.product-detail-image-container .current-image-display');
 
         if (!productId) {
-            alert("prodotto non trovato, invalid format")
-            if (currentImageDisplay) currentImageDisplay.innerHTML = '<span>IMG</span>';
-            updateImageUI(false); // Set to default no-image state
-            // Future: Handle cases where ID is missing (e.g., redirect or show error message to user)
+            showFormMessage("ID Prodotto non trovato nella URL.", "error");
+            if (currentImageDisplay) currentImageDisplay.innerHTML = '<span class="text-muted">IMG</span>'; // Let imagePreview.js pick this up
             return;
         }
 
         try {
             let response = await fetchData("api/products/" + productId, "GET");
-
             if (response.status === 200 && response.data) {
                 const product = response.data;
 
@@ -80,42 +44,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (productDescription) productDescription.value = product.descrizione;
                 if (productPrice) productPrice.value = product.prezzounitario;
 
-                // Now, correctly display the image using imageLink (product.immagine_url)
                 if (product.immagine_url) {
                     initialProductImageExists = true;
+                    if (currentImageDisplay) {
+                        currentImageDisplay.innerHTML = `<img src="${product.immagine_url}" alt="${product.nome || 'Anteprima Prodotto'}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+                        // imagePreview.js will detect this image and update its UI state
+                    }
                 } else {
                     initialProductImageExists = false;
-                }
-                // The rest of the image display logic using currentImageDisplay and updateImageUI
-                // will handle showing the image or placeholder based on product.immagine_url
-
-
-                if (currentImageDisplay) {
-                    if (product.immagine_url) {
-                        currentImageDisplay.innerHTML = `<img src="${product.immagine_url}" alt="${product.nome || 'Anteprima Prodotto'}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
-                        updateImageUI(true);
-                    } else {
-                        currentImageDisplay.innerHTML = '<span>IMG</span>'; // Placeholder if no image
-                        updateImageUI(false);
+                    if (currentImageDisplay) {
+                        currentImageDisplay.innerHTML = '<span class="text-muted">IMG</span>'; // Let imagePreview.js show placeholder
                     }
-                } else if (imageContainer) { // currentImageDisplay not found but container exists
-                    console.warn("'.current-image-display' element not found inside '.product-detail-image-container'. Cannot display image.");
-                    updateImageUI(false); // Default to no image state for the container
                 }
-
-
-
             } else {
                 console.error("Failed to fetch product data:", response.message || response.statusText || `Status: ${response.status}`);
-                if (currentImageDisplay) currentImageDisplay.innerHTML = '<span>IMG</span>'; // Fallback UI
-                updateImageUI(false);
-                // Future: Display an error message to the user
+                if (currentImageDisplay) currentImageDisplay.innerHTML = '<span class="text-muted">IMG</span>';
+                showFormMessage("Impossibile caricare i dati del prodotto.", "error");
             }
         } catch (error) {
             console.error("Exception during populateProductData:", error);
-            if (currentImageDisplay) currentImageDisplay.innerHTML = '<span>IMG</span>'; // Fallback UI
-            updateImageUI(false);
-            // Future: Display an error message to the user
+            if (currentImageDisplay) currentImageDisplay.innerHTML = '<span class="text-muted">IMG</span>';
+            showFormMessage(`Errore durante il caricamento dei dati: ${error.message}`, "error");
         }
     }
 
@@ -265,11 +214,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 let overallMessage = "Prodotto aggiornato con successo.";
                 let messageType = 'success';
 
+                const productImageInput = document.getElementById("productImageInput");
+                const currentImageDisplay = document.querySelector('.product-detail-image-container .current-image-display');
+
                 const imageFile = productImageInput.files[0];
-                const uiShowsImagePlaceholder = currentImageDisplay && currentImageDisplay.querySelector('span') && currentImageDisplay.querySelector('span').textContent === 'IMG';
+                const uiShowsImagePlaceholder = currentImageDisplay && currentImageDisplay.querySelector('span.text-muted') && currentImageDisplay.querySelector('span.text-muted').textContent === 'IMG';
                 const imageInputIsEmpty = productImageInput.value === '';
                 const imageWasExplicitlyRemovedByUI = !imageFile && uiShowsImagePlaceholder && imageInputIsEmpty && initialProductImageExists;
-                
                 if (imageFile) { // New image selected for upload
                     const imageUploadResponse = await fetchData(
                         `/api/products/${productId}/image`,
@@ -280,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log(imageUploadResponse);
                     if (imageUploadResponse.status === 200) {
                         overallMessage += " Immagine aggiornata.";
-                        //productImageInput.value = ''; // Clear file input after successful upload
+                        // productImageInput.value = ''; // imagePreview.js handles input state, but populateProductData will refresh.
                     } else {
                         overallMessage += ` Errore aggiornamento immagine: ${imageUploadResponse.message || 'Dettaglio non disponibile.'}`;
                         messageType = 'warning';
@@ -291,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (responseDeltete.status === 200 || responseDeltete.status === 204) {
                         overallMessage += " Immagine rimossa.";
                     }
-                    // The UI for "no image" is already set by the "Rimuovi Immagine" button logic.
+                    // imagePreview.js handles the UI for "no image".
                 }
 
                 showFormMessage(overallMessage, messageType);
@@ -312,65 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
     populateProductData();
     populateReviews();
     populateProductAverageRating();
-
-
-
-    // Setup event listeners for image interactions if the container exists
-    if (imageContainer) {
-        // Ensure these are fresh or correctly scoped if used by listeners
-        // currentImageDisplay was already assigned if imageContainer exists
-        imageActionOverlay = imageContainer.querySelector('.image-action-overlay');
-        btnRemoveImage = imageContainer.querySelector('removeImageBtn');
-        addImageTrigger = imageContainer.querySelector('.add-image-trigger');
-        
-
-
-
-        if (currentImageDisplay && addImageTrigger && imageActionOverlay) { // Ensure elements exist
-            let initialImageElement = currentImageDisplay.querySelector('img');
-            let hasInitialImage = initialImageElement && initialImageElement.getAttribute('src') && initialImageElement.getAttribute('src') !== '' && initialImageElement.getAttribute('src') !== '#';
-
-            if (!initialImageElement && currentImageDisplay.querySelector('span').textContent === 'IMG') {
-                hasInitialImage = false;
-            }
-            // populateProductData should have already set the correct UI state via updateImageUI.
-            // Calling it again here might be redundant.
-            // updateImageUI(hasInitialImage); 
-        }
-
-        if (btnRemoveImageWithId){
-            btnRemoveImageWithId.addEventListener('click', () => {
-                if (currentImageDisplay) currentImageDisplay.innerHTML = '<span>IMG</span>';
-                if (productImageInput) productImageInput.value = '';
-                updateImageUI(false); //no image
-            });
-        }
-
-        if (addImageTrigger) {
-            addImageTrigger.addEventListener('click', () => {
-                if (productImageInput) productImageInput.click();
-            });
-        }
-
-        if (productImageInput) {
-            productImageInput.addEventListener('change', function (event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        if (currentImageDisplay) currentImageDisplay.innerHTML = `<img src="${e.target.result}" alt="Anteprima Prodotto">`;
-                        updateImageUI(true);
-                    }
-                    reader.readAsDataURL(file);
-                } else {
-                    if (currentImageDisplay && !currentImageDisplay.querySelector('img[src], img[data-existing-src]')) {
-                        currentImageDisplay.innerHTML = '<span>IMG</span>';
-                        updateImageUI(false);
-                    }
-                }
-            });
-        }
-    }
     // Attach form submission handler
     if (editProductForm) {
         editProductForm.addEventListener('submit', handleProductUpdate);
@@ -487,4 +379,3 @@ function generateReviewHtml(review) {
         </div>
     `;
 }
-

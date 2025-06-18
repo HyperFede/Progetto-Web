@@ -8,8 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/pages/recensioneProdotto.css">
-    <script src = "js/imagePreview.js"> </script>
-
 </head>
 <body>
     <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
@@ -124,13 +122,39 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label d-block photo-upload-label">Mostrare l'aspetto dell'articolo? (Opzionale)</label>
-                    <div class="photo-upload-box text-center" onclick="document.getElementById('photoUploadInput').click();">
-                        <i class="bi bi-camera fs-1 mb-2"></i>
-                        <p>AGGIUNGI FOTO</p>
+                    <label class="form-label d-block">Immagine (Opzionale)</label>
+                    <div class="product-detail-image-container position-relative border rounded"
+                         style="background: #f0f2f5; overflow: hidden; min-height: 150px;">
+                        <!-- current image or placeholder -->
+                        <div class="current-image-display
+                                    d-flex align-items-center justify-content-center
+                                    w-100 h-100">
+                            <!-- JS will fill this, e.g., with <span>IMG</span> or an <img> tag -->
+                        </div>
+
+                        <!-- camera-overlay -->
+                        <div class="add-image-trigger
+                                    position-absolute top-0 start-0
+                                    d-flex flex-column align-items-center justify-content-center
+                                    w-100 h-100">
+                            <i class="bi bi-camera-fill fs-1" id="addImageIcon"></i>
+                            <span class="mt-2 small" id="addImageAggiungiTxt">Aggiungi Foto</span>
+                        </div>
+
+                        <!-- visually-hidden file-input -->
+                        <input type="file" id="productImageInput" name="image" accept="image/*"
+                            class="visually-hidden" />
+
+                        <!-- delete-overlay (JS will control display) -->
+                        <div class="image-action-overlay
+                                    position-absolute top-0 start-0
+                                    w-100 h-100 d-flex align-items-center justify-content-center"
+                            style="display: none; opacity: 0;">
+                            <button type="button" class="btn btn-danger" id="removeImageBtn">
+                                <i class="bi bi-trash me-1"></i>Rimuovi
+                            </button>
+                        </div>
                     </div>
-                    <input type="file" id="photoUploadInput" class="d-none" accept="image/*" multiple>
-                    <div id="photoPreview" class="mt-2 d-flex flex-wrap"></div>
                 </div>
 
                 <div class="mb-3">
@@ -159,8 +183,7 @@
 
     <script src="js/fetcher.js"></script> <!-- Assicurati che sia prima del tuo script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- <script src="js/product-review.js"></script> --> <!-- Se questo file esiste e fa altro, altrimenti rimuovilo -->
     <script src="js/nuovaRecensioneProdotto.js"></script>
-    <!-- imagePreview.js è già incluso nell'head, va bene lì -->
+    <script src="js/imagePreview.js"></script> <!-- Moved to the end -->
 </body>
 </html>

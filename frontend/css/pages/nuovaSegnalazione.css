@@ -60,34 +60,12 @@ body {
     margin-bottom: 0.5rem;
 }
 
+/* Remove or comment out old photo upload styles */
 .photo-upload-box {
-    border: 2px dashed var(--divider-color);
-    padding: 2rem 1rem;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    background-color: #e9ecef;
-    border-radius: 0.25rem;
+    /* display: none; */ /* Or simply remove these rules */
 }
-.photo-upload-box:hover {
-    border-color: var(--primary-color);
-}
-.photo-upload-box i {
-    color: var(--secondary-color);
-    display: block;
-}
-.photo-upload-box p {
-    margin-bottom: 0;
-    color: var(--secondary-color);
-    font-weight: 500;
-}
-
 #photoPreview img {
-    width: 70px;
-    height: 70px;
-    object-fit: cover;
-    margin: 5px;
-    border: 1px solid var(--border-color);
-    border-radius: 0.25rem;
+    /* display: none; */ /* Or simply remove these rules */
 }
 
 .dashboard-input, /* Classe usata per l'input ID Ordine */
@@ -127,4 +105,40 @@ body {
 
 .footer-text{ /* Mantenuto se usato altrove o se c'è un footer */
     color: var(--text-dark);
+}
+
+/* Styles for the new image preview container (adapted from aggiungiProdotto.css) */
+.product-detail-image-container {
+    position: relative;
+    min-height: 150px; /* A smaller initial height for the placeholder */
+    background: #f0f2f5;
+    overflow: hidden;
+    border-radius: 0.25rem; /* Match other form elements */
+    border: 1px solid var(--border-color); /* Match other form elements */
+}
+
+.product-detail-image-container .current-image-display img {
+  max-width: 100%;
+  max-height: 400px; /* Adjust as needed for segnalazioni */
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin: auto;
+}
+
+.add-image-trigger {
+    z-index: 1; /* Ensure it's above the current-image-display if they overlap */
+    cursor: pointer;
+    color: #6c757d; /* Default text/icon color, can be overridden by IDs if needed */
+    transition: background-color 0.2s ease-in-out;
+}
+
+.product-detail-image-container.state-add-image:hover .add-image-trigger {
+    background-color: rgba(0, 0, 0, 0.03); /* Slight hover effect */
+}
+
+/* Ensure the label and container have some space */
+.form-label.d-block { /* This rule already exists, ensure it's appropriate */
+    margin-bottom: 0.5rem;
 }
