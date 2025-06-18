@@ -90,7 +90,7 @@
 
                                 showMessage(successMsg, messageType);
                                 addProductForm.reset(); // Reset the form
-                                setTimeout(goToProdottiArtigiano, 2000);
+                                setTimeout(goToProdottiArtigiano, 1500);
                                 // The imagePreview.js script should handle clearing its own preview
                                 // If you need to manually trigger it from here, ensure imagePreview.js exposes a function.
                                 // For now, resetting the form should also clear the file input, and imagePreview.js
