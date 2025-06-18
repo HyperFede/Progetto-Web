@@ -20,7 +20,7 @@ function showReviews(result) { // Renamed from showProducts for clarity
     const infos = result.data.map((rec) => {
         const reviewStarsHtml = getStarsHtml(rec.valutazione); // Use getStarsHtml for individual review ratings
 
-        productsRes += rec.immagine != undefined ? (
+        productsRes += rec.immagine_url != undefined ? (
             `<div class="customer-review-box mb-3">
                     <div class="review-header d-flex justify-content-between align-items-center mb-1">
                         <span class="review-customer-name">${rec.username}</span>
@@ -62,7 +62,7 @@ function showReviews(result) { // Renamed from showProducts for clarity
                 </div>`
         )
     });
-
+    console.log(productsRes);
 
     document.getElementById("review").innerHTML = productsRes;
 }
