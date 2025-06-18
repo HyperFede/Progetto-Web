@@ -48,6 +48,28 @@ min-height: 400px;
     }
 }
 
+@media (max-width: 479.98px) {
+    .write-review-btn {
+        /* Nasconde il testo originale */
+        font-size: 0;
+        text-indent: -9999px; /* Sposta il testo fuori schermo */
+        overflow: hidden;    /* Evita barre di scorrimento dovute a text-indent */
+        line-height: 1;      /* Resetta line-height */
+
+        /* Dimensioni e padding per il pulsante icona */
+        padding: 0;
+        width: 36px; /* Larghezza desiderata */
+        height: 36px; /* Altezza desiderata */
+
+        /* Imposta l'icona come sfondo */
+        background-image: url('../../assets/star-plus.svg'); /* AGGIORNA QUESTO PERCORSO */
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 50px 50px; /* Dimensione dell'icona all'interno del pulsante */
+        /* Il colore di sfondo e il bordo esistenti verranno mantenuti */
+    }
+}
+
 .dashboard-sidebar {
     background-color: var(--border-color);
     padding: 1.5rem 1rem;
