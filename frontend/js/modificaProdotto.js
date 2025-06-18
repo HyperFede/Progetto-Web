@@ -246,7 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 showFormMessage(overallMessage, messageType);
-                await populateProductData(); // Refresh all product data from server, including image
+                window.location.href = "prodottiArtigiano.html";
+                //await populateProductData(); // Refresh all product data from server, including image
 
             } else {
                 showFormMessage(`Errore durante l'aggiornamento del prodotto: ${productUpdateResponse.message || 'Dettaglio non disponibile.'}`, "error");
