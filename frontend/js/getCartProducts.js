@@ -2,8 +2,8 @@ function showProducts(result){
     let productsRes = ``;
         const products = result.data.items.map((product) => {
             productsRes += (
-                `<div id="item-${product.idprodotto}" class="cart-item d-flex align-items-start py-3">
-                        <img src="/api/products/${product.idprodotto}/image_content" alt="${product.nomeprodotto}" class="cart-item-image me-3">
+                `<div id="item-${product.idprodotto}" class="cart-item d-flex flex-column flex-sm-row align-items-center align-items-sm-start py-3">
+                        <img src="/api/products/${product.idprodotto}/image_content" alt="${product.nomeprodotto}" class="cart-item-image mb-2 mb-sm-0 me-sm-3">
                         <div class="cart-item-info flex-grow-1">
                             <h5 class="item-name mb-1">${product.nomeprodotto}</h5>
                             <div class="quantity-controls d-flex align-items-center mt-2">
@@ -13,13 +13,13 @@ function showProducts(result){
                                 <button class="btn btn-sm quantity-btn quantity-minus ms-2" onclick="dimCartProductQta(${product.idprodotto})" title="Diminuisci quantità">
                                     <i class="bi bi-dash-lg"></i>
                                 </button>
-                                <input type="number" id="num-${product.idprodotto}" class="form-control form-control-sm quantity-input mx-1 text-center" value="${product.quantita}" min="1" aria-label="Quantità" disabled>
+                                <input type="number" id="num-${product.idprodotto}" class="form-control form-control-sm quantity-input mx-1 text-center" value="${product.quantita}" min="1" aria-label="Quantità" readonly style="max-width: 60px;">
                                 <button class="btn btn-sm quantity-btn quantity-plus" onclick="addCartProductQta(${product.idprodotto})" title="Aumenta quantità">
                                     <i class="bi bi-plus-lg"></i>
                                 </button>
                             </div>
                         </div>
-                        <div class="cart-item-price text-end ms-3">
+                        <div class="cart-item-price text-center text-sm-end mt-2 mt-sm-0 ms-sm-3">
                             <span id="price-${product.idprodotto}" class="item-price-value fw-bold">€${product.totaleparziale}</span>
                             <small id="unit-${product.idprodotto}" class="d-block text-muted">€${product.prezzounitario} cad.</small>
                         </div>
@@ -27,6 +27,12 @@ function showProducts(result){
             )
         });
         document.getElementById("cart-products").innerHTML = productsRes;
+        // Assicura che gli input per la quantità siano readonly.
+        // Nota: l'attributo 'readonly' è già stato aggiunto direttamente nella stringa HTML dell'input.
+        // Questo blocco JS è una doppia sicurezza.
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.setAttribute('readonly', true);
+        });
 }
 
 
