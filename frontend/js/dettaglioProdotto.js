@@ -3,18 +3,6 @@ function getOrderIdFromURL() {
     return urlParams.get('id');
 }
 
-function dateFormatter(datestr) {
-    const date = new Date(datestr);
-
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-}
-
 function showReviews(result) { // Renamed from showProducts for clarity
     let productsRes = `<h3 class="customer-reviews-title mb-4">Recensioni dei clienti</h3>`;
     const infos = result.data.map((rec) => {
@@ -24,7 +12,7 @@ function showReviews(result) { // Renamed from showProducts for clarity
             `<div class="customer-review-box mb-3">
                     <div class="review-header d-flex justify-content-between align-items-center mb-1">
                         <span class="review-customer-name">${rec.username}</span>
-                        <span class="review-date">${dateFormatter(rec.data)}</span>
+                        <span class="review-date">${combineDateTime(rec.data, rec.ora)}</span>
                     </div>
                     <div class="review-rating-title d-flex align-items-center mb-2">
                         <span class="review-stars me-2">${reviewStarsHtml}</span>
@@ -46,7 +34,7 @@ function showReviews(result) { // Renamed from showProducts for clarity
             `<div class="customer-review-box mb-3">
                     <div class="review-header d-flex justify-content-between align-items-center mb-1">
                         <span class="review-customer-name">${rec.username}</span>
-                        <span class="review-date">${dateFormatter(rec.data)}</span>
+                        <span class="review-date">${combineDateTime(rec.data, rec.ora)}</span>
                     </div>
                     <div class="review-rating-title d-flex align-items-center mb-2">
                         <span class="review-stars me-2">${reviewStarsHtml}</span>
@@ -62,7 +50,7 @@ function showReviews(result) { // Renamed from showProducts for clarity
                 </div>`
         )
     });
-    console.log(productsRes);
+    // console.log(productsRes);
 
     document.getElementById("review").innerHTML = productsRes;
 }
@@ -136,6 +124,7 @@ async function loadAndDisplayAverageRating(productId) {
 
         //CARICO RECENSIONI
         let recensioni = await fetchData(`/api/reviews/product/${id}`, "GET");
+        console.log(recensioni);
         if (recensioni.status == 200) { // Check recensioni.status, not result.status
             showReviews(recensioni); // Use the renamed function
         } else {
