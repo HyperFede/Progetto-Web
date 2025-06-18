@@ -105,7 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const valutazione = parseInt(ratingValueInput.value, 10);
             const testo = reviewTextInput.value.trim();
-            const titolo = reviewTitleInput.value.trim(); // Get title value
 
             // Client-side validation
             let isValid = true;
@@ -120,10 +119,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else if (errorMessageDiv) {
                     errorMessageDiv.innerHTML += '<br><span class="error-text">Per favore, seleziona una valutazione.</span>';
                 }
-                isValid = false;
-            }
-            if (!titolo) { // Title is required in the form
-                if (errorMessageDiv) errorMessageDiv.innerHTML += '<br><span class="error-text">Il titolo della recensione è obbligatorio.</span>';
                 isValid = false;
             }
             if (!testo) {

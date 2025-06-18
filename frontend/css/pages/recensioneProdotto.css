@@ -50,9 +50,9 @@ body {
 
 .product-review-img {
    width: 100%;
-   max-width: 1800px; /* or whatever max you want */
+   max-height: 350px; /* or whatever max you want */
    height: auto;
-   object-fit: cover;
+   object-fit: contain;
    border: 1px solid var(--border-color);
    border-radius: 0.25rem;
    display: block; /* removes inline gaps if inside flex/grid */
