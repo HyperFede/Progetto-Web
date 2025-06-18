@@ -50,6 +50,11 @@ body {
     font-weight: 700;
 }
 
+.page-main-title {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
 .input-group {
     margin-bottom: 1.5rem;
 }
@@ -217,4 +222,68 @@ min-height: 400px;
 
 }
 
+/* Animazione per il badge del carrello */
+.cart-badge-animate {
+  animation: badgeFlash 0.5s ease-in-out;
+}
 
+/* Classe per il posizionamento base del badge del carrello */
+.cart-item-badge-position {
+  transform: translate(-50%, -50%); /* Simula translate-middle senza !important */
+}
+
+@keyframes badgeFlash {
+  0%, 100% {
+    /* Combina la traslazione di base con lo scale */
+    transform: translate(-50%, -50%) scale(1);
+    background-color: #dc3545; /* Colore standard di .bg-danger */
+    opacity: 1;
+  }
+  50% {
+    /* Combina la traslazione di base con lo scale */
+    transform: translate(-50%, -50%) scale(1.35);
+    background-color: #ff3333; /* Un rosso più brillante per il flash */
+    opacity: 0.9;
+  }
+}
+
+/* Stili per il pulsante "Aggiungi al carrello" durante l'animazione */
+.add-to-cart-button {
+    position: relative; /* Necessario per posizionare l'icona del check */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Transizioni esistenti */
+    overflow: hidden; /* Per nascondere il testo che esce */
+}
+
+.add-to-cart-button .button-text {
+    display: inline-block;
+    transition: opacity 0.2s ease-out, transform 0.3s ease-out;
+}
+
+.add-to-cart-button.loading {
+    /* Mantiene il colore di sfondo desiderato (es. primario) durante il caricamento. */
+    /* Questo previene che diventi bianco se il bottone è anche .primary-btn e l'icona è bianca. */
+    background-color: var(--primary-color);
+}
+
+
+.add-to-cart-button.loading .button-text {
+    opacity: 0;
+    transform: translateY(-20px); /* Fa scorrere il testo verso l'alto e fuori */
+}
+
+.add-to-cart-button .cart-feedback-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0); /* Inizia invisibile e piccolo */
+    font-size: 1.6em; /* Dimensione dell'icona, es. per bi-check-lg */
+    color: white; /* Colore del check */
+    opacity: 0;
+    line-height: 1; /* Assicura che l'icona sia centrata verticalmente */
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s, opacity 0.3s ease-out 0.1s; /* Ritardo per l'apparizione */
+}
+
+.add-to-cart-button.loading .cart-feedback-icon.show {
+    transform: translate(-50%, -50%) scale(1); /* Appare e si ingrandisce */
+    opacity: 1;
+}

@@ -17,9 +17,9 @@ function showProducts(result){
                                 <li><strong style="color: var(--primary-color);">Prezzo: €${product.prezzounitario}</strong></li>
                             </ul>
                             <!-- LOGGED (aggiunge il prodotto al carrello)-->
-                            <button class="btn mt-auto invisible" onclick="aggiungiAlCarrello(${product.idprodotto})" style="background-color: var(--primary-color); color: white;">Aggiungi al carrello</button>
+                            <button class="btn mt-auto invisible add-to-cart-button" onclick="aggiungiAlCarrello(${product.idprodotto}, 1, this)" style="background-color: var(--primary-color); color: white;"><span class="button-text">Aggiungi al carrello</span></button>
                             <!-- UNLOGGED -->
-                            <button class="btn mt-auto unlogged" onclick="window.location.replace('/login.html')" style="background-color: var(--primary-color); color: white;">Aggiungi al carrello</button>
+                            <button class="btn mt-auto unlogged" onclick="window.location.replace('/login.html')" style="background-color: var(--primary-color); color: white;"><span class="button-text">Aggiungi al carrello</span></button>
 
                         </div>
                     </div>
