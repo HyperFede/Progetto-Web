@@ -333,6 +333,7 @@
                 successMessage.textContent = "Modifiche salvate con successo!";
                 successMessage.style.display = "block";
                 [nomeInput, cognomeInput, usernameInput, emailInput, indirizzoInput].forEach(input => input.classList.add("is-valid"));
+                setTimeout(() => { successMessage.style.display = "none"; }, 3000); // Hide after 3 seconds
 
             } else {
                 let errorMessageText = "Si è verificato un errore durante l'aggiornamento.";

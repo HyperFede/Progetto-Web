@@ -1,14 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Form field elements
-    const productCategory = document.getElementById("productCategory");
-    const productName = document.getElementById("productName");
-    const productDescription = document.getElementById("productDescription");
-    const productPrice = document.getElementById("productPrice");
+    const productCategoryInput = document.getElementById("productCategory");
+    const productNameInput = document.getElementById("productName");
+    const productDescriptionInput = document.getElementById("productDescription");
+    const productPriceInput = document.getElementById("productPrice");
+    const productImageInput = document.getElementById("productImageInput"); // Added for consistency
+    const submitMessagePlaceholder = document.getElementById('submitMessagePlaceholder'); // Define the placeholder
 
     const editProductForm = document.getElementById('editProductForm'); // Assume this ID exists in your HTML
-    const formMessagePlaceholder = document.getElementById('formMessagePlaceholder'); // Assume this ID exists for messages
-
+    
     let initialProductImageExists = false; // To track if an image was loaded initially
+
+
+    /**
+     * Displays a message in the submitMessagePlaceholder.
+     * @param {string} message - The message to display.
+     * @param {string} type - 'success' or 'danger'.
+     */
+    function displaySubmitMessage(message, type = 'success') {
+        if (submitMessagePlaceholder) {
+            submitMessagePlaceholder.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : 'danger'}" role="alert">${message}</div>`;
+            submitMessagePlaceholder.style.display = 'block';
+        }
+    }
+
+    /**
+     * Clears any message from the submitMessagePlaceholder.
+     */
+    function clearSubmitMessage() {
+        if (submitMessagePlaceholder) {
+            submitMessagePlaceholder.innerHTML = '';
+            submitMessagePlaceholder.style.display = 'none';
+        }
+    }
 
 
     /**
@@ -24,12 +48,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // The updateImageUI function and its direct calls will be removed.
     // imagePreview.js will handle UI updates.
 
+    function clearFormValidationStyles() {
+        const inputs = [
+            productCategoryInput,
+            productNameInput,
+            productDescriptionInput,
+            productPriceInput
+        ];
+        inputs.forEach(input => {
+            if (input) {
+                input.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+        // Note: productImageInput (file input) is not typically styled with is-valid/is-invalid
+    }
+
     async function populateProductData() {
         const productId = getProductIdFromURL();
         const currentImageDisplay = document.querySelector('.product-detail-image-container .current-image-display');
-
         if (!productId) {
-            showFormMessage("ID Prodotto non trovato nella URL.", "error");
             if (currentImageDisplay) currentImageDisplay.innerHTML = '<span class="text-muted">IMG</span>'; // Let imagePreview.js pick this up
             return;
         }
@@ -39,12 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 200 && response.data) {
                 const product = response.data;
 
-                if (productCategory) productCategory.value = product.categoria;
-                if (productName) productName.value = product.nome;
-                if (productDescription) productDescription.value = product.descrizione;
-                if (productPrice) productPrice.value = product.prezzounitario;
+                if (productCategoryInput) productCategoryInput.value = product.categoria || '';
+                if (productNameInput) productNameInput.value = product.nome || '';
+                if (productDescriptionInput) productDescriptionInput.value = product.descrizione || '';
+                if (productPriceInput) productPriceInput.value = product.prezzounitario || '';
 
-                if (product.immagine_url) {
+                if (product.idprodotto) { // Check if product has an ID, implying an image might exist
                     initialProductImageExists = true;
                     if (currentImageDisplay) {
                         currentImageDisplay.innerHTML = `<img src="${product.immagine_url}" alt="${product.nome || 'Anteprima Prodotto'}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
@@ -59,12 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("Failed to fetch product data:", response.message || response.statusText || `Status: ${response.status}`);
                 if (currentImageDisplay) currentImageDisplay.innerHTML = '<span class="text-muted">IMG</span>';
-                showFormMessage("Impossibile caricare i dati del prodotto.", "error");
             }
         } catch (error) {
             console.error("Exception during populateProductData:", error);
             if (currentImageDisplay) currentImageDisplay.innerHTML = '<span class="text-muted">IMG</span>';
-            showFormMessage(`Errore durante il caricamento dei dati: ${error.message}`, "error");
         }
     }
 
@@ -164,55 +199,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function clearFormMessages() {
-        if (formMessagePlaceholder) {
-            formMessagePlaceholder.innerHTML = '';
-            formMessagePlaceholder.style.display = 'none';
-            formMessagePlaceholder.className = 'my-3'; // Reset classes
-        }
-    }
+    // Functions clearFormMessages and showFormMessage are removed as per rollback request.
 
-    function showFormMessage(message, type = 'success') {
-        if (formMessagePlaceholder) {
-            formMessagePlaceholder.innerHTML = `<div class="alert alert-${type === 'success' ? 'success' : (type === 'warning' ? 'warning' : 'danger')}" role="alert">${message}</div>`;
-            formMessagePlaceholder.style.display = 'block';
-        } else {
-            alert(message); // Fallback
-        }
-    }
-
-    async function handleProductUpdate(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
-        clearFormMessages();
+        clearFormValidationStyles();
+        clearSubmitMessage(); // Clear previous submit messages
 
         const productId = getProductIdFromURL();
         if (!productId) {
-            showFormMessage("ID Prodotto non trovato. Impossibile salvare le modifiche.", "error");
+            console.error("ID Prodotto non trovato. Impossibile salvare le modifiche.");
             return;
         }
 
         // Basic client-side validation
-        if (!productCategory || !productCategory.value) { showFormMessage('Seleziona una categoria.', 'error'); return; }
-        if (!productName || !productName.value.trim()) { showFormMessage('Il nome del prodotto è obbligatorio.', 'error'); return; }
-        if (!productDescription || !productDescription.value.trim()) { showFormMessage('La descrizione è obbligatoria.', 'error'); return; }
-        if (!productPrice || productPrice.value === '' || parseFloat(productPrice.value) < 0) { showFormMessage('Prezzo non valido.', 'error'); return; }
+        let isValid = true;
+        if (!productCategoryInput || !productCategoryInput.value) { productCategoryInput.classList.add('is-invalid'); isValid = false; }
+        if (!productNameInput || !productNameInput.value.trim()) { productNameInput.classList.add('is-invalid'); isValid = false; }
+        if (!productDescriptionInput || !productDescriptionInput.value.trim()) { productDescriptionInput.classList.add('is-invalid'); isValid = false; }
+        if (!productPriceInput || productPriceInput.value === '' || parseFloat(productPriceInput.value) < 0) { productPriceInput.classList.add('is-invalid'); isValid = false; }
+        
+        if (!isValid) {
+                        displaySubmitMessage("Errore nell'aggiornamento del prodotto. Controlla i campi evidenziati.", 'danger');
+
+            console.warn("Validazione fallita lato client.");
+            return;
+        }
 
         const updatePayload = {
-            nome: productName.value.trim(),
-            descrizione: productDescription.value.trim(),
-            prezzounitario: parseFloat(productPrice.value),
-            categoria: productCategory.value,
+            nome: productNameInput.value.trim(),
+            descrizione: productDescriptionInput.value.trim(),
+            prezzounitario: parseFloat(productPriceInput.value),
+            categoria: productCategoryInput.value,
             // Nota: 'quantitadisponibile' non è gestito qui perché non è tra gli elementi del form definiti all'inizio del file.
             // Se necessario, aggiungere l'input HTML e includerlo qui.
         };
 
         try {
-            showFormMessage("Salvataggio modifiche prodotto...", "info");
+            // No "Saving..." message for simplified version
             const productUpdateResponse = await fetchData(`api/products/${productId}`, "PUT", updatePayload);
 
             if (productUpdateResponse.status === 200) {
-                let overallMessage = "Prodotto aggiornato con successo.";
-                let messageType = 'success';
+                // Product text data updated successfully
+                [productCategoryInput, productNameInput, productDescriptionInput, productPriceInput].forEach(input => {
+                    if (input) input.classList.add('is-valid');
+                });
 
                 const productImageInput = document.getElementById("productImageInput");
                 const currentImageDisplay = document.querySelector('.product-detail-image-container .current-image-display');
@@ -221,7 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const uiShowsImagePlaceholder = currentImageDisplay && currentImageDisplay.querySelector('span.text-muted') && currentImageDisplay.querySelector('span.text-muted').textContent === 'IMG';
                 const imageInputIsEmpty = productImageInput.value === '';
                 const imageWasExplicitlyRemovedByUI = !imageFile && uiShowsImagePlaceholder && imageInputIsEmpty && initialProductImageExists;
-                if (imageFile) { // New image selected for upload
+                
+                if (imageFile) { 
                     const imageUploadResponse = await fetchData(
                         `/api/products/${productId}/image`,
                         "PUT",
@@ -229,32 +261,62 @@ document.addEventListener('DOMContentLoaded', () => {
                         { isRawBody: true, customContentType: imageFile.type }
                     );
                     console.log(imageUploadResponse);
-                    if (imageUploadResponse.status === 200) {
-                        overallMessage += " Immagine aggiornata.";
-                        // productImageInput.value = ''; // imagePreview.js handles input state, but populateProductData will refresh.
-                    } else {
-                        overallMessage += ` Errore aggiornamento immagine: ${imageUploadResponse.message || 'Dettaglio non disponibile.'}`;
-                        messageType = 'warning';
+                    if (imageUploadResponse.status !== 200) {
+                        console.warn(`Errore aggiornamento immagine: ${imageUploadResponse.message || 'Dettaglio non disponibile.'}`);
+                        // Optionally mark image input as invalid, though it's tricky for file inputs
                     }
                 } else if (imageWasExplicitlyRemovedByUI) {
                     let responseDeltete = await fetchData(`/api/products/${productId}/image`, "DELETE");
-
-                    if (responseDeltete.status === 200 || responseDeltete.status === 204) {
-                        overallMessage += " Immagine rimossa.";
+                    if (responseDeltete.status !== 200 && responseDeltete.status !== 204) {
+                        console.warn(`Errore rimozione immagine: ${responseDeltete.message || 'Dettaglio non disponibile.'}`);
                     }
-                    // imagePreview.js handles the UI for "no image".
                 }
 
-                showFormMessage(overallMessage, messageType);
-                window.location.href = "prodottiArtigiano.html";
-                //await populateProductData(); // Refresh all product data from server, including image
+                // Success: clear 'is-valid' after a delay and reload data
+                                displaySubmitMessage("Prodotto aggiornato con successo, ti stiamo portando ai tuoi prodotti.", 'success');
+                // Redirect after a delay
 
-            } else {
-                showFormMessage(`Errore durante l'aggiornamento del prodotto: ${productUpdateResponse.message || 'Dettaglio non disponibile.'}`, "error");
+                setTimeout(() => {
+                window.location.href = "prodottiArtigiano.html"; // Redirect after success
+
+                    clearFormValidationStyles();
+                    populateProductData(); // Refresh all product data from server
+                }, 2000); // User sees the ticks for 2 seconds
+
+                // No automatic redirect to "prodottiArtigiano.html" in this version
+
+            } else { // Error updating product text data
+                                const backendErrorMessage = productUpdateResponse.message || (productUpdateResponse.body && productUpdateResponse.body.message);
+                const displayErrorMessage = backendErrorMessage || "Errore nell'aggiornamento del prodotto.";
+                displaySubmitMessage(displayErrorMessage, 'danger');
+                console.error(`Errore durante l'aggiornamento del prodotto: ${displayErrorMessage}`);
+
+                if (productUpdateResponse.body && productUpdateResponse.body.field) { // Highlight specific field if backend indicates
+
+                    const field = productUpdateResponse.body.field;
+                    if (field === 'nome' && productNameInput) productNameInput.classList.add('is-invalid');
+                    else if (field === 'categoria' && productCategoryInput) productCategoryInput.classList.add('is-invalid');
+                    else if (field === 'prezzounitario' && productPriceInput) productPriceInput.classList.add('is-invalid');
+                    else if (field === 'descrizione' && productDescriptionInput) productDescriptionInput.classList.add('is-invalid');
+                    else { // General error, mark all as invalid
+                        [productCategoryInput, productNameInput, productDescriptionInput, productPriceInput].forEach(input => {
+                            if (input) input.classList.add('is-invalid');
+                        });
+                    }
+                } else { // No specific field from backend, mark all as invalid
+                    [productCategoryInput, productNameInput, productDescriptionInput, productPriceInput].forEach(input => {
+                        if (input) input.classList.add('is-invalid');
+                    });
+                }
             }
         } catch (error) {
+                        const exceptionMessage = error.message || (error.body && (error.body.message || error.body.error)) || "Errore nell'aggiornamento del prodotto.";
+            displaySubmitMessage(exceptionMessage, 'danger');
+
             console.error("Eccezione durante l'aggiornamento del prodotto:", error);
-            showFormMessage(`Errore: ${error.message || "Si è verificato un errore imprevisto."}`, "error");
+            [productCategoryInput, productNameInput, productDescriptionInput, productPriceInput].forEach(input => {
+                if (input) input.classList.add('is-invalid');
+            });
         }
     }
 
@@ -266,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     populateProductAverageRating();
     // Attach form submission handler
     if (editProductForm) {
-        editProductForm.addEventListener('submit', handleProductUpdate);
+        editProductForm.addEventListener('submit', handleSubmit);
     } else {
         console.warn("Elemento form con ID 'editProductForm' non trovato. La funzionalità di salvataggio non sarà attiva.");
 
