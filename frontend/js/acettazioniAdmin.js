@@ -2,6 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const pendingApprovalsContainer = document.getElementById('pendingApprovalsContainer');
     const adminMessagesContainer = document.getElementById('adminMessages');
 
+    const confirmationModalElement = document.getElementById('confirmationModal');
+    const confirmationModalMessage = document.getElementById('confirmationModalMessage');
+    const confirmActionBtn = document.getElementById('confirmActionBtn');
+    let confirmationModalInstance;
+
     if (!pendingApprovalsContainer) {
         console.error('Element with ID "pendingApprovalsContainer" not found.');
         if (adminMessagesContainer) {
@@ -9,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
     }
+        if (confirmationModalElement) {
+        confirmationModalInstance = new bootstrap.Modal(confirmationModalElement);
+    }
+
 
     function displayAdminMessage(message, type = 'info') {
         if (adminMessagesContainer) {
@@ -116,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetchData(`api/approvals/${idstorico}/decide`, 'PUT', { esito: decision });
 
             if (response.status === 200 && response.data) {
-                displayAdminMessage(`Richiesta #${idstorico} ${decision.toLowerCase()} con successo.`, 'success');
+                //displayAdminMessage(`Richiesta #${idstorico} ${decision.toLowerCase()} con successo.`, 'success');
                 if (cardElement) {
                     cardElement.remove(); // Remove the card from the UI
                     // Check if container is empty after removal
@@ -142,23 +151,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+        let currentAction = null; // To store { idstorico, decision } for the modal
+
+
     // Event delegation for approve/reject buttons
     pendingApprovalsContainer.addEventListener('click', function (event) {
         const target = event.target;
-        const idstorico = target.dataset.idstorico;
+                // Check if the clicked element itself is a button or if its parent is (for icons inside buttons)
+        const button = target.closest('.approve-btn, .reject-btn');
+        if (button && button.dataset.idstorico) {
+            const idstorico = button.dataset.idstorico;
+            let decision;
+            let actionText;
 
-        if (idstorico) { // Check if the clicked element or its parent has data-idstorico
-            if (target.classList.contains('approve-btn')) {
-                if (confirm(`Sei sicuro di voler APPROVARE la richiesta #${idstorico}?`)) {
-                    handleApprovalDecision(idstorico, 'Approvato');
-                }
-            } else if (target.classList.contains('reject-btn')) {
-                if (confirm(`Sei sicuro di voler RIFIUTARE la richiesta #${idstorico}?`)) {
-                    handleApprovalDecision(idstorico, 'Rifiutato');
-                }
+            if (button.classList.contains('approve-btn')) {
+                decision = 'Approvato';
+                actionText = 'APPROVARE';
+            } else if (button.classList.contains('reject-btn')) {
+                decision = 'Rifiutato';
+                actionText = 'RIFIUTARE';
+            }
+            
+                        if (decision && confirmationModalInstance && confirmationModalMessage) {
+                currentAction = { idstorico, decision };
+                confirmationModalMessage.textContent = `Sei sicuro di voler ${actionText} la richiesta #${idstorico}`;
+                confirmationModalInstance.show();
             }
         }
     });
+
+        if (confirmActionBtn && confirmationModalInstance) {
+        confirmActionBtn.addEventListener('click', () => {
+            if (currentAction) {
+                handleApprovalDecision(currentAction.idstorico, currentAction.decision);
+                currentAction = null; // Reset after action
+            }
+            confirmationModalInstance.hide();
+        });
+    }
 
     // Initial load
     fetchAndDisplayPendingApprovals();

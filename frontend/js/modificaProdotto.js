@@ -6,12 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const productPriceInput = document.getElementById("productPrice");
     const productImageInput = document.getElementById("productImageInput"); // Added for consistency
     const submitMessagePlaceholder = document.getElementById('submitMessagePlaceholder'); // Define the placeholder
-
     const editProductForm = document.getElementById('editProductForm'); // Assume this ID exists in your HTML
     
     let initialProductImageExists = false; // To track if an image was loaded initially
-
-
     /**
      * Displays a message in the submitMessagePlaceholder.
      * @param {string} message - The message to display.
