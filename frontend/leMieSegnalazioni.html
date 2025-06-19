@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/pages/leMieSegnalazioni.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 </head>
 
 <body>
@@ -174,7 +175,7 @@
                     </div>
                 </div>
                 <div id="artisan-title" style="display: none;" class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Dashboard Artigiano</h5>
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Pannello Artigiano</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div id="artisan-menu" style="display: none;" class="offcanvas-body">
@@ -226,7 +227,7 @@
     </nav>
 
     <main class="container my-4 pt-5 pt-lg-0">
-        <h2 class="page-main-title mb-4">Il Mio Account</h2>
+        <h2 class="page-main-title mb-4" id="mainPageTitle">Il Mio Account</h2>
         <div class="row">
             <div class="col-md-3">
                 <div class="dashboard-sidebar d-flex flex-column">
@@ -310,6 +311,12 @@
                 document.getElementById("inserisciProdotto").style.display = 'block';
                 document.getElementById("inserisciProdottoSM").style.display = 'block';
                 document.getElementById("artisan-title").style.display = 'flex';
+                                // Change main page title for Artisan
+                const mainPageTitle = document.getElementById("mainPageTitle");
+                if (mainPageTitle) {
+                    mainPageTitle.textContent = "Pannello Artigiano";
+                }
+
                 document.getElementById("artisan-menu").style.display = 'block';
 
                 const arts = document.querySelectorAll('#artisan-list');

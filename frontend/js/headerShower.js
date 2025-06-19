@@ -92,6 +92,24 @@ document.addEventListener('DOMContentLoaded', async function(){
                             section.classList.remove("invisible-admin");
                         });
                     }
+                                        // Disable logo link to index.html for Artigiano
+                    if (result.data.tipologia === "Artigiano") {
+                        const logoImages = document.querySelectorAll('img[src="assets/Logo.svg"]');
+                        logoImages.forEach(img => {
+                            // Check if the parent is an <a> tag linking to the homepage
+                            if (img.parentElement && img.parentElement.tagName === 'A') {
+                                const logoLink = img.parentElement;
+                                // Only disable if it links to "/" (index.html)
+                                if (logoLink.getAttribute('href') === '/') {
+                                    logoLink.href = "javascript:void(0);"; // Prevents navigation
+                                    logoLink.style.cursor = "default";
+                                    logoLink.title = "Navigazione alla home page disabilitata"; // Tooltip
+                                    logoLink.classList.add('logo-link-disabled-artisan'); // Optional class
+                                }
+                            }
+                        });
+                    }
+
                     // Chiamata per aggiornare il contatore del carrello
                     await fetchAndUpdateCartCounter();
                 }else{
