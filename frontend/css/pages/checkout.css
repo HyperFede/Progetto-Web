@@ -133,9 +133,9 @@ body {
 }
 
 .delete-order-btn {
-    background-color: var(--primary-color);
-    color: var(--pakistan-green);
-    border: 1px solid var(--primary-color);
+    background-color: transparent;
+    color: var(--danger-color, #dc3545); /* Colore testo danger, con fallback */
+    border: 1px solid var(--danger-color, #dc3545); /* Bordo danger, con fallback */
     padding: 0.85rem 1.5rem;
     font-weight: 600;
     font-size: 1.15rem;
@@ -143,7 +143,7 @@ body {
 .delete-order-btn:hover {
     background-color: var(--danger-color);
     border-color: var(--danger-color);
-    color: var(--text-light);
+    color: var(--text-light, #fff); /* Testo chiaro su sfondo danger */
 }
 
 /* Sovrascrive il padding superiore per schermi più piccoli di 'lg' */
