@@ -171,16 +171,46 @@
             </div>
         </div>
     </main>
+    <!-- Message Placeholder -->
+<div id="actionMessage" class="alert" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1050; display: none; transition: opacity 0.5s ease-out; min-width: 300px; text-align: center;" role="alert">
+<!-- Message will be injected here -->
+</div>
 
     <a href="#" id="scrollToTopBtn" class="scroll-to-top" title="Torna su">
         <i class="bi bi-arrow-up"></i>
     </a>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/fetcher.js"></script>
     <script src="js/headerShower.js"></script>
     <script src="js/getCartProducts.js"></script>
     <script>
+
+                const actionMessageEl = document.getElementById('actionMessage');
+        let messageTimeout;
+
+        function displayActionMessage(message, type = 'success') {
+            if (!actionMessageEl) return;
+
+            clearTimeout(messageTimeout); // Clear any existing timeout
+
+            actionMessageEl.textContent = message;
+            actionMessageEl.className = 'alert'; // Reset classes
+            actionMessageEl.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
+            
+            actionMessageEl.style.display = 'block';
+            actionMessageEl.style.opacity = '1';
+
+            messageTimeout = setTimeout(() => {
+                actionMessageEl.style.opacity = '0';
+                // Wait for fade out transition to complete before hiding
+                setTimeout(() => {
+                    actionMessageEl.style.display = 'none';
+                }, 500); // Matches the CSS transition duration
+            }, 3000); // Message visible for 3 seconds
+        }
+
         // This function should be called by getCartProducts.js after cart data is loaded
         // and also after any operation that modifies the cart and reloads/updates its state.
         function updateCartView(isCartEmpty) {
@@ -240,19 +270,40 @@
         }
 
         async function addCartProductQta(id){
-            let result = await fetchData(`api/cart/items/${id}/add`, "PUT", {"quantita": 1});
-            let counter = document.getElementById(`num-${id}`);
-            counter.value = parseInt(counter.value) + 1;
+                        let result = await fetchData(`api/cart/items/${id}/add`, "PUT", {"quantita": 1});
+
+            const counter = document.getElementById(`num-${id}`);
+            const itemMessageEl = document.getElementById(`item-message-${id}`); // Assuming this exists per item for specific errors
+
+            if (itemMessageEl) {
+                itemMessageEl.textContent = ''; // Clear previous item-specific messages
+            }
+
+            
 
             if(result.status == 200){
+                counter.value = parseInt(counter.value) + 1;
+                                // Successfully added to cart
+
                 document.getElementById(`price-${id}`).textContent = `€${result.data.totaleparziale}`;
                 let idUser = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
                 let totCartUpdate = (await fetchData(`/api/cart/${idUser}`, "GET")).data.totaleCarrello;
                 document.getElementById("total").textContent = `€${totCartUpdate}`;
-            }else if(result.status == 404){
-                window.location.reload();
-            }
+                // Optionally, trigger cart counter animation if you have one
+                if (typeof fetchAndUpdateCartCounter === 'function') {
+                    fetchAndUpdateCartCounter(true); // true to trigger animation
+                }
+            } else {
+                //TODO: txt messagio piu bello
+                // Error handling (e.g., stock issue, 404, 500)
+                const errorMessage = "Attenzione, stai cercando di ordinare una quantità maggiore di quella disponibile";
+                displayActionMessage(errorMessage, 'danger'); // Use the global fading message
+                console.warn(`Errore ${result.status} nell'aggiornare la quantità per il prodotto ${id}:`, errorMessage, result.body);
+                // Do not increment counter.value if there was an error.
+                // The counter.value was incremented optimistically before, now it's only on success.
+
         }
+    }
     </script>
 </body>
 </html>

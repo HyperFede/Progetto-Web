@@ -1,3 +1,29 @@
+const actionMessageEl = document.getElementById('actionMessage'); // Needs to exist in HTML on pages using this script
+let messageTimeout;
+
+function displayActionMessage(message, type = 'success') {
+    if (!actionMessageEl) return;
+
+    clearTimeout(messageTimeout); // Clear any existing timeout
+
+    actionMessageEl.textContent = message;
+    actionMessageEl.className = 'alert'; // Reset classes
+    actionMessageEl.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
+    
+    actionMessageEl.style.display = 'block';
+    actionMessageEl.style.opacity = '1';
+
+    messageTimeout = setTimeout(() => {
+        actionMessageEl.style.opacity = '0';
+        // Wait for fade out transition to complete before hiding
+        setTimeout(() => {
+            actionMessageEl.style.display = 'none';
+        }, 500); // Matches the CSS transition duration
+    }, 3000); // Message visible for 3 seconds
+}
+
+
+
 async function aggiungiAlCarrello(id = null, quantita = 1, buttonElement = null){
     let originalButtonContent = '';
     let feedbackIconElement;
@@ -66,9 +92,25 @@ async function aggiungiAlCarrello(id = null, quantita = 1, buttonElement = null)
         } else {
             // console.log("Errore nella aggiunta (POST)!", postResult)
             // Qui si potrebbe mostrare un messaggio di errore all'utente
+                        let userMessage = "Si è verificato un errore durante l'aggiunta del prodotto.";
+
             if (postResult.message) {
                 // alert(`Errore: ${postResult.message}`);
+                                userMessage = postResult.message;
+
                 console.warn("Messaggio dal backend (POST):", postResult.message);
+                                // Check for stock-related keywords or specific status codes
+                const stockErrorKeywords = ["disponibile", "disponibilità", "stock", "esaurito", "quantità", "insufficiente"];
+                const isStockError = stockErrorKeywords.some(keyword => 
+                    postResult.message.toLowerCase().includes(keyword.toLowerCase())
+                );
+                if (isStockError || postResult.status === 409 || postResult.status === 400 || postResult.status === 422) {
+                    displayActionMessage(`Attenzione: ${postResult.message}`, 'danger'); // Use fading message for stock issues
+                } else {
+                    // For other errors, you might choose a less intrusive notification or just log it
+                    // displayActionMessage(`Errore: ${postResult.message}`, 'danger'); 
+                }
+
             }
             // Ripristina il pulsante in caso di errore POST
             if (buttonElement) {
@@ -84,9 +126,24 @@ async function aggiungiAlCarrello(id = null, quantita = 1, buttonElement = null)
     } else {
         // console.log("Errore nell'aggiunta (PUT) o stock terminato!", result)
         // Qui si potrebbe mostrare un messaggio di errore all'utente (es. stock non disponibile)
+                let userMessage = "Si è verificato un errore durante l'aggiornamento del carrello.";
+
         if (result.message) {
             // alert(`Errore: ${result.message}`);
+                        userMessage = result.message;
+
             console.warn("Messaggio dal backend (PUT):", result.message);
+                        // Check for stock-related keywords or specific status codes
+            const stockErrorKeywords = ["disponibile", "disponibilità", "stock", "esaurito", "quantità", "insufficiente"];
+            const isStockError = stockErrorKeywords.some(keyword => 
+                result.message.toLowerCase().includes(keyword.toLowerCase())
+            );
+            if (isStockError) {
+                displayActionMessage(`Attenzione: stai tentando di aggiungere al carrello più prodotti di quelli disponibili.`, 'danger'); // Use fading message for stock issues
+            } else {
+                // displayActionMessage(`Errore: ${result.message}`, 'danger');
+            }
+
         }
         // Ripristina il pulsante in caso di errore PUT
         if (buttonElement) {
@@ -114,4 +171,4 @@ async function aggiungiAlCarrello(id = null, quantita = 1, buttonElement = null)
             }, transitionIconOutDuration); // Attende la fine della transizione dell'icona
         }, checkVisibleDuration); // Tempo in cui il check rimane visibile
     }
-    }
+}
