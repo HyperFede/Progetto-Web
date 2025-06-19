@@ -29,7 +29,7 @@ function showReviews(result) { // Renamed from showProducts for clarity
             `<div class="customer-review-box mb-3">
                     <div class="review-header d-flex justify-content-between align-items-center mb-1">
                         <span class="review-customer-name">${rec.username}</span>
-                        <span class="review-date">${dateFormatter(rec.data)}</span>
+                        <span class="review-date">${combineDateTime(rec.data, rec.ora)}</span>
                     </div>
                     <div class="review-rating-title d-flex align-items-center mb-2">
                         <span class="review-stars me-2">${reviewStarsHtml}</span>
@@ -51,7 +51,7 @@ function showReviews(result) { // Renamed from showProducts for clarity
             `<div class="customer-review-box mb-3">
                     <div class="review-header d-flex justify-content-between align-items-center mb-1">
                         <span class="review-customer-name">${rec.username}</span>
-                        <span class="review-date">${dateFormatter(rec.data)}</span>
+                        <span class="review-date">${combineDateTime(rec.data, rec.ora)}</span>
                     </div>
                     <div class="review-rating-title d-flex align-items-center mb-2">
                         <span class="review-stars me-2">${reviewStarsHtml}</span>
