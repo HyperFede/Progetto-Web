@@ -71,6 +71,7 @@ body {
     margin-bottom: 0.3rem;
 }
 
+
 .dashboard-input { /* Stile per il select, se non già globale */
     background-color: #e9ecef;
     color: var(--text-dark);

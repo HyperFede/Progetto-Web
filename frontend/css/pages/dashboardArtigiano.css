@@ -36,7 +36,19 @@ body {
 }
 /* Hover style for "DISABLED" (aria-disabled="true") button */
 
+.error-text {
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: inline-block;
+}
 
+.success-text {
+    color: green;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: inline-block;
+}
 .dashboard-sidebar {
     background-color: var(--border-color);
     padding: 1.5rem 1rem;
