@@ -27,7 +27,6 @@
     padding: 1.5rem;
     border: 1px solid var(--secondary-color);
     border-radius: 0.375rem;
-    height: 52%;
 }
 
 .artisan-info-box .artisan-name {

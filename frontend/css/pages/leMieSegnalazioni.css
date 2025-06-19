@@ -211,3 +211,8 @@ min-height: 400px;
 
 }
 
+#table-horizontal{
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
