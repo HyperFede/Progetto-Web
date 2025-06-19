@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     populateOrderDetails();
-        // Setup event listener for the status save button
+    // Setup event listener for the status save button
     const saveStatusButton = document.getElementById('saveStatusBtn');
     if (saveStatusButton) {
         saveStatusButton.addEventListener('click', handleStatusUpdate);
@@ -72,77 +72,42 @@ function populateOrderedProducts(data) {
 }
 
 function populateSubOrderStatus(data) {
+
     const selectEl = document.getElementById('orderStatus');
-    const badgeEl = document.getElementById('orderStatusBadge');
 
-    if (!selectEl || !badgeEl) return;
-
+    console.log(data);
     // 1) Set the dropdown to the incoming status (so the form control matches)
-    selectEl.value = data.subOrdineStatus || 'In attesa';
+    selectEl.value = data.subOrdineStatus || data.subordinestatus || 'In attesa';
 
-    // 2) Reset badge and text
-    badgeEl.textContent = data.subOrdineStatus || '—';
-    badgeEl.className = 'badge'; // clear any old classes
 
-    // 3) Add the proper Bootstrap color
-    switch (data.subOrdineStatus) {
-        case 'In attesa':
-            badgeEl.classList.add('bg-warning', 'text-dark');
-            break;
-        case 'Da spedire':
-            badgeEl.classList.add('bg-info', 'text-dark');
-            break;
-        case 'Spedito':
-            badgeEl.classList.add('bg-primary');
-            break;
-        case 'Consegnato':
-            badgeEl.classList.add('bg-success');
-            break;
-        case 'Scaduto':
-            badgeEl.classList.add('bg-danger');
-            break;
-        default:
-            badgeEl.classList.add('bg-secondary');
-    }
 }
-
-    // Disable select and button if status is 'Consegnato' or 'Scaduto'
-    if (data.subOrdineStatus === 'Consegnato' || data.subOrdineStatus === 'Scaduto') {
-        selectEl.disabled = true;
-        const saveBtn = document.getElementById('saveStatusButton');
-        if (saveBtn) saveBtn.disabled = true;
-    } else {
-        selectEl.disabled = false;
-        const saveBtn = document.getElementById('saveStatusButton');
-        if (saveBtn) saveBtn.disabled = false;
-    }
-
-
 
 async function populateOrderDetails() {
 
     try {
         let idordine = getOrderIdFromURL();
         const orderNumberValue = document.getElementById('orderNumberValue');
-        if(orderNumberValue) orderNumberValue.textContent = `#${idordine || 'N/D'}`;
+        if (orderNumberValue) orderNumberValue.textContent = `#${idordine || 'N/D'}`;
 
         if (!idordine) {
-    console.error("ID Ordine non trovato nella URL.");
-    document.body.innerHTML = '<p class="text-center text-danger">ID Ordine mancante. Impossibile caricare i dettagli.</p>';
-    return;
-}
+            console.error("ID Ordine non trovato nella URL.");
+            document.body.innerHTML = '<p class="text-center text-danger">ID Ordine mancante. Impossibile caricare i dettagli.</p>';
+            return;
+        }
 
         let infosession = await fetchData("api/auth/session-info", "GET");
 
         let idartigiano = infosession.data ? infosession.data.idutente : null;
         if (!idartigiano) {
             console.error("ID Artigiano non trovato nella sessione.");
-            document.body.innerHTML = '<p class="text-center text-danger">Errore di sessione utente. Impossibile caricare i dettagli.</p>'; return; }
+            document.body.innerHTML = '<p class="text-center text-danger">Errore di sessione utente. Impossibile caricare i dettagli.</p>'; return;
+        }
 
 
 
         let response = await fetchData(`api/suborders/order/${idordine}/artisan/${idartigiano}`, "GET",)
         orderData = response.data;
+
 
         populateCustomerInfo(orderData);
         populateOrderedProducts(orderData);
@@ -190,6 +155,11 @@ async function handleStatusUpdate() {
         if (response.status === 200 && response.data && response.data.subOrder) {
             if (statusUpdateMessageEl) statusUpdateMessageEl.innerHTML = `<div class="alert alert-success"> 'Stato aggiornato con successo!'</div>`;
             populateSubOrderStatus(response.data.subOrder); // Update the displayed status badge and select element
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = 'ordiniRicevuti.html';
+            }, 1500); // 1 second delay
+
         } else {
             if (statusUpdateMessageEl) statusUpdateMessageEl.innerHTML = `<div class="alert alert-danger">${response.message || (response.data && response.data.message) || 'Errore durante l\'aggiornamento dello stato.'}</div>`;
         }
