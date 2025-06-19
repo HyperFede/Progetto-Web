@@ -254,7 +254,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-hover table-horizontal">
+                        <table id="table-horizontal" class="table table-hover">
                             <thead>
                                 <tr>
                                     <th scope="col">ID Segn.</th>
@@ -300,6 +300,13 @@
     <script src="js/headerShower.js"></script>
     <script src="js/dateExport.js"></script>
     <script src="js/getUsernameArt.js"></script>
+    <script>
+        const table = document.getElementById('table-horizontal')
+        table.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            table.scrollLeft += e.deltaY;
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             let tipologia = (await fetchData("/api/auth/session-info", "GET")).data.tipologia;
