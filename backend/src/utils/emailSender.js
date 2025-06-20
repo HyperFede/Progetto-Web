@@ -29,7 +29,7 @@ function sendEmail(dest, sub, text, attach = false){
             attachments: [
                 {
                     filename: "Logo.svg",
-                    path: "../assets/Logo.svg",
+                    path: "../frontend/assets/Logo.svg",
                     cid: "logo@example.com"
                 }
             ]

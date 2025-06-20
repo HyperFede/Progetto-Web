@@ -20,7 +20,7 @@ if (!jwtSecret) {
 // ma con una scadenza molto più breve e un payload specifico.
 const PASSWORD_RESET_TOKEN_EXPIRES_IN = '10m'; // Token per il reset password valido per 10 minuti
 const PASSWORD_RESET_VERIFY_TOKEN_EXPIRES_IN = '10m'; // Token per il reset password (dopo verifica identità) valido per 10 minuti
-const PASSWORD_RECOVERY_LINK_TOKEN_EXPIRES_IN = '15m'; // Token per il link di recupero password inviato via email
+const PASSWORD_RECOVERY_LINK_TOKEN_EXPIRES_IN = '10m'; // Token per il link di recupero password inviato via email
 
 
 
