@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../config/db-connect.js');
 const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare.js');
 const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js');
+const {sendEmail} = require("../utils/emailSender.js");
 
 const db = pool;
 
@@ -220,6 +221,35 @@ router.put('/:idstorico/decide', isAuthenticated, hasPermission(['Admin']), asyn
         client.release();
     }
 });
+
+
+router.post("/send-email", isAuthenticated,hasPermission(['Admin']), async (req, res) => {
+    
+    try{
+        const {
+            destinatario: emailDestinatario,
+            oggetto : emailSubject,
+            testo: emailText
+        } = req.body;
+        
+        if (!emailDestinatario || !emailSubject || !emailText) {
+            return res.status(400).json({ message: 'I campi destinatario, oggetto e testo sono obbligatori.' });
+        }
+
+        sendEmail(emailDestinatario, emailSubject, emailText);
+    
+    
+        res.status(200).json({ message: 'Email inviata con successo.' });
+        
+    }
+    catch(error){
+        console.error('Errore durante invio mail', error);
+        res.status(500).json({ message: 'Errore del server durante la procedura di invio mail.' });
+    }
+
+
+})
+
 
 // Note: A DELETE route for ArtigianoApprovazione might not be common.
 // Usually, these records are kept for auditing. If an artisan re-applies,

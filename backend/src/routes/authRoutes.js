@@ -4,7 +4,9 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db-connect'); // Assicurati che il percorso sia corretto
-const { isAuthenticated } = require('../middleware/authMiddleWare'); // Importa isAuthenticated
+const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare'); // Importa isAuthenticated"
+
+const{ sendEmail} = require ("../utils/emailSender");
 
 // Assicurati che JWT_SECRET sia definito nelle variabili d'ambiente
 const jwtSecret = process.env.JWT_SECRET;
@@ -17,6 +19,9 @@ if (!jwtSecret) {
 // per distinguerli dai token di sessione. Per semplicità, useremo la stessa chiave
 // ma con una scadenza molto più breve e un payload specifico.
 const PASSWORD_RESET_TOKEN_EXPIRES_IN = '10m'; // Token per il reset password valido per 10 minuti
+const PASSWORD_RESET_VERIFY_TOKEN_EXPIRES_IN = '10m'; // Token per il reset password (dopo verifica identità) valido per 10 minuti
+const PASSWORD_RECOVERY_LINK_TOKEN_EXPIRES_IN = '15m'; // Token per il link di recupero password inviato via email
+
 
 
 
@@ -157,96 +162,6 @@ router.post('/logout', (req, res) => {
 });
 
 /**
- * @route POST /api/auth/recover-password/verify-identity
- * @description Verifica l'identità dell'utente tramite username ed email per il recupero password.
- *              Se l'identità è verificata, restituisce un token a breve scadenza per il reset.
- * @access Public
- *
- * Interazione Black-Box:
- *  Input: Oggetto JSON nel corpo della richiesta (req.body) con:
- *      {
- *          "username": "String (obbligatorio)",
- *          "email": "String (obbligatorio se l'utente è 'Cliente')",
- *          "piva": "String (obbligatorio se l'utente è 'Artigiano')"
- *      }
- *  Output:
- *      - Successo (200 OK): Oggetto JSON con messaggio e token di reset.
- *        { "message": "Identità verificata. Usa questo token per resettare la password.", "resetToken": "jwt_reset_token" }
- *      - Errore (400 Bad Request): Se username manca, o se manca email/piva a seconda della tipologia utente.
- *        { "message": "Stringa di errore specifica" }
- *      - Errore (403 Forbidden): Se si tenta di recuperare la password per un utente 'Admin'.
- *        { "message": "Il recupero password non è abilitato per gli account Admin." }
- *      - Errore (404 Not Found): Se nessuna corrispondenza utente viene trovata o l'utente è disattivato.
- *        { "message": "Nessun utente trovato con queste credenziali o utente non attivo." }
- *      - Errore (500 Internal Server Error): In caso di errore del server.
- *        { "message": "Errore del server durante la verifica dell'identità." }
- */
-router.post('/recover-password/verify-identity', async (req, res) => {
-    const { username, email, piva } = req.body;
-
-    if (!username) {
-        return res.status(400).json({ message: 'Username è obbligatorio.' });
-    }
-
-    try {
-        // Prima, trova l'utente e la sua tipologia basandosi sull'username
-        const userQuery = await pool.query(
-            'SELECT idutente, email AS db_email, piva AS db_piva, tipologia FROM utente WHERE username = $1 AND deleted = false',
-            [username]
-        );
-
-        if (userQuery.rows.length === 0) {
-            return res.status(404).json({ message: 'Nessun utente trovato con queste credenziali o utente non attivo.' });
-        }
-
-        const foundUser = userQuery.rows[0];
-
-        // Impedisci il recupero password per gli Admin
-        if (foundUser.tipologia === 'Admin') {
-            return res.status(403).json({ message: 'Il recupero password non è abilitato per gli account Admin.' });
-        }
-
-        // Ora verifica il secondo identificatore basato sulla tipologia
-        if (foundUser.tipologia === 'Artigiano') {
-            if (!piva) {
-                return res.status(400).json({ message: 'PIVA è obbligatoria per la verifica di un utente Artigiano.' });
-            }
-            if (piva !== foundUser.db_piva) {
-                return res.status(404).json({ message: 'Nessun utente trovato con queste credenziali o utente non attivo.' });
-            }
-        } else if (foundUser.tipologia === 'Cliente') {
-            if (!email) {
-                return res.status(400).json({ message: 'Email è obbligatoria per la verifica di un utente Cliente.' });
-            }
-            if (email !== foundUser.db_email) {
-                return res.status(404).json({ message: 'Nessun utente trovato con queste credenziali o utente non attivo.' });
-            }
-        } else {
-            // Caso imprevisto di tipologia utente, per sicurezza neghiamo
-            return res.status(403).json({ message: 'Tipologia utente non supportata per il recupero password.' });
-        }
-
-        // Genera un token specifico per il reset della password
-        const payload = {
-            user: {
-                id: foundUser.idutente,
-                purpose: 'password-reset' // Aggiungi uno scopo per distinguere questo token
-            }
-        };
-        const resetToken = jwt.sign(payload, jwtSecret, { expiresIn: PASSWORD_RESET_TOKEN_EXPIRES_IN });
-
-        res.status(200).json({
-            message: 'Identità verificata. Usa questo token per resettare la password.',
-            resetToken: resetToken
-        });
-
-    } catch (error) {
-        console.error('Errore durante la verifica dell\'identità per recupero password:', error);
-        res.status(500).json({ message: 'Errore del server durante la verifica dell\'identità.' });
-    }
-});
-
-/**
  * @route POST /api/auth/recover-password/reset
  * @description Resetta la password dell'utente usando un token di reset valido e una nuova password.
  * @access Public (ma richiede un token di reset valido)
@@ -352,6 +267,43 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
         // Questo caso non dovrebbe verificarsi se isAuthenticated funziona correttamente
         // e popola sempre req.user con tipologia per utenti validi.
         res.status(500).json({ message: "Errore: tipologia utente non trovata dopo l'autenticazione." });
+    }
+});
+
+
+router.get ("/send-recovery-email", async (req, res) => {
+    const {email : emailInput} = req.body;
+
+    queryResult = await pool.query("SELECT username FROM UTENTE WHERE email = $1" ,[emailInput]);
+
+    let usernameDb = queryResult.rows[0].username;
+
+    emailDestinatario = emailInput;
+
+    try{
+        // Genera il JWT per il link di recupero
+        const payload = {
+            username: usernameDb,
+            purpose: 'password-recovery-via-email-link' // Scopo specifico per questo token
+        };
+        const recoveryLinkToken = jwt.sign(payload, jwtSecret, { expiresIn: PASSWORD_RECOVERY_LINK_TOKEN_EXPIRES_IN });
+
+        const messaggio = `Ciao ${usernameDb},\n\nHai richiesto di resettare la tua password. Clicca sul seguente link per procedere:\n\n`;
+        // Assicurati che il frontend (recuperoPassword.html) possa gestire un parametro 'token' nell'URL.
+        const link = `${process.env.FRONTEND_URL}/recuperoPassword.html?token=${recoveryLinkToken}`;
+        const emailText = messaggio + link + "\n\nSe non hai richiesto tu il reset, ignora questa email.\nIl link scadrà tra 15 minuti.";
+        const emailSubject = 'Recupero Password BazArt';
+
+
+
+        sendEmail(emailDestinatario, emailSubject, emailText);
+
+        res.status(200).json({ message: "Se l'utente esiste, un'email di recupero è stata inviata con le istruzioni." });
+    } catch (error) {
+
+        console.error('Errore durante la procedura di invio email di recupero:', error);
+        res.status(500).json({ message: 'Errore del server durante la procedura di recupero password.' });
+    
     }
 });
 
