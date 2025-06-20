@@ -1,132 +1,86 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Elements for Step 1: Identity Verification
-    const usernameInput = document.getElementById('username');
-    const emailOrPivaInput = document.getElementById('emailOrPiva'); // Updated ID
-    const verifyIdentityButton = document.getElementById('verifyIdentityButton');
-    const verifyMessageDiv = document.getElementById('verifyMessage');
+    const token = getTokenFromURL();
 
-    // Elements for Step 2: New Password
-    const recuperoForm = document.getElementById('recuperoForm'); // Form element
-    const newPasswordSection = document.getElementById('newPasswordSection');
-    const newPasswordInput = document.getElementById('password');
-    const resetPasswordButton = document.getElementById('resetPasswordButton');
-    const resetMessageDiv = document.getElementById('resetMessage');
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confermapassword");
+    const resetPasswordButton = document.getElementById("resetPasswordButton");
+    const resetMessageDiv = document.getElementById("resetMessage"); // Assumes a div with this ID exists for messages
 
-    // To store the token from the verification step
-    let recoveryToken = null;
+    if (!token) {
+        displayMessage('Token di recupero non valido o mancante. Richiedi un nuovo link.', 'danger');
+        if (resetPasswordButton) resetPasswordButton.disabled = true;
+        if (passwordInput) passwordInput.disabled = true;
+        if (confirmPasswordInput) confirmPasswordInput.disabled = true;
 
-    // Step 1: Verify Identity
-    if (verifyIdentityButton && usernameInput && emailOrPivaInput && verifyMessageDiv) {
-        verifyIdentityButton.addEventListener('click', async function (event) {
-            event.preventDefault(); // Prevent default button action
-            verifyMessageDiv.innerHTML = ''; // Clear previous messages
-            if (resetMessageDiv) resetMessageDiv.innerHTML = ''; // Clear reset messages too
+    };
 
-            const username = usernameInput.value.trim();
-            const emailOrPivaValue = emailOrPivaInput.value.trim();
-
-            if (!username || !emailOrPivaValue) {
-                verifyMessageDiv.innerHTML = '<span class="error-text">Username e Email/PIVA sono obbligatori.</span>';
-                return;
-            }
-
-            // Prepare data for the backend.
-            const requestBody = {
-                "username": username,
-            };
-
-            if (emailOrPivaValue.includes('@')) {
-                requestBody.email = emailOrPivaValue;
-            } else {
-                // Basic PIVA validation: check if it's a number and not empty
-                // You might want more sophisticated PIVA validation (e.g., length, checksum)
-                if (isNaN(parseFloat(emailOrPivaValue)) || !isFinite(emailOrPivaValue) || emailOrPivaValue.length === 0) {
-                    verifyMessageDiv.innerHTML = '<span class="error-text">PIVA non valida. Deve essere un numero.</span>';
-                    return;
-                }
-                requestBody.piva = emailOrPivaValue;
-            }
-
-            const response = await fetchData("/api/auth/recover-password/verify-identity", "POST", requestBody);
-
-            if (response.status === 200 && response.data && response.data.resetToken) {
-                recoveryToken = response.data.resetToken; // Store the token
-
-                verifyMessageDiv.innerHTML = `<span class="success-text">${response.message || 'Verifica completata. Inserisci la nuova password.'}</span>`;
-
-                // Show the new password section and update UI
-                if (newPasswordSection) newPasswordSection.style.display = 'block';
-                verifyIdentityButton.style.display = 'none'; // Hide verify button
-                usernameInput.disabled = true; // Disable username and email fields
-                emailOrPivaInput.disabled = true;
-            }
-            else if (response.status === 404) {
-                // Assuming 404 from backend also comes in response.message if fetchData doesn't throw
-                verifyMessageDiv.innerHTML = `<span class="error-text">${(response.data && response.message) || response.message || 'Utente non trovato o dati non corrispondenti.'}</span>`;
-            }
-            else {
-                // Handle errors from the backend (e.g., user not found, email/piva mismatch)
-                verifyMessageDiv.innerHTML = `<span class="error-text">${(response.data && response.message) || response.message || 'Verifica fallita. Controlla i dati inseriti.'}</span>`;
-                console.error('Verification failed:', response);
-            }
-        });
+    function clearMessages() {
+        if (resetMessageDiv) {
+            resetMessageDiv.innerHTML = '';
+            resetMessageDiv.style.display = 'none';
+        }
     }
 
-    // Step 2: Reset Password (Form submission)
-    if (recuperoForm && resetPasswordButton && newPasswordInput && resetMessageDiv) {
-        recuperoForm.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent default form submission
-            resetMessageDiv.innerHTML = ''; // Clear previous messages
 
-            const nuovapassword = newPasswordInput.value.trim(); // Backend expects 'nuovapassword'
+    function displayMessage(message, type = 'danger') {
+        if (resetMessageDiv) {
+            let alertClass = '';
+            let style = '';
+            // Set class and inline styles to ensure correct, light colors
+            if (type === 'success') {
+                alertClass = 'alert-success';
+                style = 'background-color: #d1e7dd; color: #0f5132; border-color: #badbcc;';
+            } else { // 'danger' or default
+                alertClass = 'alert-danger';
+                style = 'background-color: #f8d7da; color: #842029; border-color: #f5c2c7;';
+            }
+            resetMessageDiv.innerHTML = `<div class="alert ${alertClass}" style="${style}" role="alert">${message}</div>`;
+            resetMessageDiv.style.display = 'block';
 
-            if (!nuovapassword) {
-                resetMessageDiv.innerHTML = '<span class="error-text">La nuova password è obbligatoria.</span>';
+        } else {
+            alert(message); // Fallback
+        }
+    }
+
+    if (resetPasswordButton) {
+        resetPasswordButton.addEventListener('click', async function (event) {
+            event.preventDefault();
+            clearMessages();
+
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (!password || !confirmPassword) {
+                displayMessage("Per favore, inserisci e conferma la nuova password.");
+                return;
+            }
+            if (password !== confirmPassword) {
+                displayMessage("Le password non corrispondono.");
                 return;
             }
 
-            if (!recoveryToken) {
-                resetMessageDiv.innerHTML = '<span class="error-text">Token di recupero mancante o sessione scaduta. Esegui prima la verifica.</span>';
-                // Optionally reset UI to verification step
-                if (newPasswordSection) newPasswordSection.style.display = 'none';
-                if (verifyIdentityButton) verifyIdentityButton.style.display = 'block';
-                if (usernameInput) usernameInput.disabled = false;
-                if (emailOrPivaInput) emailOrPivaInput.disabled = false;
-                if (verifyMessageDiv) verifyMessageDiv.innerHTML = '<span class="error-text">Sessione di recupero scaduta o token non valido. Riprova la verifica.</span>';
-                return;
-            }
-
-            const requestBody = {
-                token: recoveryToken,
-                nuovapassword: nuovapassword // Match backend expectation
+            const objToSend = {
+                token: token,
+                nuovapassword: password
             };
+            const response = await fetchData("api/auth/recover-password/reset", "POST", objToSend);
 
-            try {
-                const response = await fetchData("/api/auth/recover-password/reset", "POST", requestBody);
 
-                if (response.status === 200) {
-                    recuperoForm.reset(); // Clear the form (username, email, newPassword)
-                    if (newPasswordSection) newPasswordSection.style.display = 'none'; // Hide password section
-                    if (verifyIdentityButton) verifyIdentityButton.style.display = 'block'; // Show verify button again
-                    if (usernameInput) usernameInput.disabled = false; // Re-enable username and email
-                    if (emailOrPivaInput) emailOrPivaInput.disabled = false;
-                    recoveryToken = null; // Clear the token
-                    if (verifyMessageDiv) verifyMessageDiv.innerHTML = ''; // Clear verification message
-                    // Redirect to login after a short delay
-                    resetMessageDiv.innerHTML = `<span class="success-text">${response.message || 'Password aggiornata con successo!'}</span>`;
+            if (response.status === 200) {
+                displayMessage("Password resettata con successo! Sarai reindirizzato alla pagina di login.", 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2500); // Redirect after 2.5 seconds
+            } else {
+                const errorMessage = response.message || (response.body && response.body.message) || "Si è verificato un errore. Il token potrebbe essere scaduto.";
+                displayMessage(errorMessage);
 
-                    setTimeout(() => { window.location.href = 'login.html'; }, 2500); // 2.5 seconds delay
-
-                } else {
-                    // This case might be less likely if fetchData throws for non-200, error handled in catch.
-                    // But if fetchData could return non-200 without throwing:
-                    resetMessageDiv.innerHTML = `<span class="error-text">${(response.data && response.message) || response.message || 'Reset della password fallito. Riprova.'}</span>`;
-                }
-            } catch (error) {
-                console.error('Errore durante il reset della password:', error);
-                const backendMessage = error.body && error.body.message ? error.body.message : 'Errore di comunicazione con il server durante il reset. Riprova più tardi.';
-                resetMessageDiv.innerHTML = `<span class="error-text">${backendMessage}</span>`;
             }
         });
     }
 });
+
+function getTokenFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('token');
+}

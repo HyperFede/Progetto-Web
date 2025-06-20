@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/db-connect'); // Assicurati che il percorso sia corretto
 const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare'); // Importa isAuthenticated"
 
-const{ sendEmail} = require ("../utils/emailSender");
+const { sendEmail } = require("../utils/emailSender");
 
 // Assicurati che JWT_SECRET sia definito nelle variabili d'ambiente
 const jwtSecret = process.env.JWT_SECRET;
@@ -192,7 +192,8 @@ router.post('/recover-password/reset', async (req, res) => {
 
         const decoded = jwt.verify(resetToken, jwtSecret);
         // Verifica che il token sia effettivamente per il reset password e non un token di sessione
-        if (!decoded.user || !decoded.user.id || decoded.user.purpose !== 'password-reset') {
+        console.log (decoded);
+        if (!decoded.user || !decoded.user.id || decoded.purpose !== 'password-reset') {
             return res.status(401).json({ message: 'Token di reset non valido o malformato.' });
         }
         const userId = decoded.user.id;
@@ -246,20 +247,20 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
         if (req.user.tipologia && req.user.tipologia.toLowerCase() === 'artigiano') {
             responsePayload.piva = req.user.piva;
             responsePayload.artigianodescrizione = req.user.artigianodescrizione;
-                    responsePayload.piva = req.user.piva;
-                    responsePayload.artigianodescrizione = req.user.artigianodescrizione;
+            responsePayload.piva = req.user.piva;
+            responsePayload.artigianodescrizione = req.user.artigianodescrizione;
 
-                    queryResult = await pool.query(
-                        'SELECT Esito from Storicoapprovazioni where idartigiano = $1',
-                        [req.user.idutente]
-                    );
+            queryResult = await pool.query(
+                'SELECT Esito from Storicoapprovazioni where idartigiano = $1',
+                [req.user.idutente]
+            );
 
-                    if (queryResult.rows.length > 0) {
-                        responsePayload.esitoapprovazione = queryResult.rows[0].esito;
-                    }
-                    else{
-                        responsePayload.esitoapprovazione = null;
-                    }
+            if (queryResult.rows.length > 0) {
+                responsePayload.esitoapprovazione = queryResult.rows[0].esito;
+            }
+            else {
+                responsePayload.esitoapprovazione = null;
+            }
         }
 
         res.status(200).json(responsePayload);
@@ -270,25 +271,36 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
     }
 });
 
-
-router.post ("/send-recovery-email", async (req, res) => {
-    const {email : emailInput} = req.body;
-
-    queryResult = await pool.query("SELECT username FROM UTENTE WHERE email = $1" ,[emailInput]);
-
+router.post("/send-recovery-email", async (req, res) => {
+    const { email: emailInput } = req.body;
+    let userIdDb; // To store the user ID
     let usernameDb;
-    if (queryResult.rows.length > 0){
 
-        usernameDb = queryResult.rows[0].username;
-    }
+    try {
+        const userQuery = await pool.query(
+            'SELECT idutente, username FROM utente WHERE email = $1 AND deleted = false', // Fetch idutente and ensure user is not deleted
+            [emailInput]
+        );
 
-    emailDestinatario = emailInput;
+        if (userQuery.rows.length === 0) {
+            // For security, do not reveal if the email exists. Send a generic success message.
+            console.log(`Recovery email requested for non-existent or deleted email: ${emailInput}`);
+            return res.status(200).json({ message: "Se l'email è associata ad un account, ti abbiamo inviato un link per il recupero della password." });
+        }
 
-    try{
+        const user = userQuery.rows[0];
+        userIdDb = user.idutente;
+        usernameDb = user.username;
+
+        // emailDestinatario = emailInput; // Not needed, use emailInput directly in sendEmail
         // Genera il JWT per il link di recupero
         const payload = {
-            username: usernameDb,
-            purpose: 'password-recovery-via-email-link' // Scopo specifico per questo token
+            user: { // Nest user details under 'user' object
+                id: userIdDb,
+                username: usernameDb // Include username for email personalization
+            },
+            purpose: 'password-reset' // Consistent with the reset route's verification
+
         };
         const recoveryLinkToken = jwt.sign(payload, jwtSecret, { expiresIn: PASSWORD_RECOVERY_LINK_TOKEN_EXPIRES_IN });
 
@@ -296,7 +308,7 @@ router.post ("/send-recovery-email", async (req, res) => {
         const link = `${process.env.FRONTEND_URL}/recuperoPassword.html?token=${recoveryLinkToken}`;
         const emailSubject = 'Recupero Password BazArt';
 
-                // HTML content for the email
+        // HTML content for the email
         const emailText = `
         <html>
           <head>
@@ -322,7 +334,7 @@ router.post ("/send-recovery-email", async (req, res) => {
                 <p>Ciao ${usernameDb},</p>
                 <p>Hai richiesto di resettare la tua password. Clicca sul seguente pulsante per procedere:</p>
                 <div class="button-container">
-                  <a href="${link}" class="button">Resetta Password</a>
+                  <a href="${link}" style="color: #ffffff !important;" class="button">Resetta Password</a>
                 </div>
                 <div class="link-fallback">
                   <p>Se il pulsante non funziona, copia e incolla il seguente link nel tuo browser:</p>
@@ -342,14 +354,14 @@ router.post ("/send-recovery-email", async (req, res) => {
 
 
 
-        sendEmail(emailDestinatario, emailSubject, emailText);
+        await sendEmail(emailInput, emailSubject, emailText);
 
         res.status(200).json({ message: "Se l'utente esiste, un'email di recupero è stata inviata con le istruzioni." });
     } catch (error) {
 
         console.error('Errore durante la procedura di invio email di recupero:', error);
         res.status(500).json({ message: 'Errore del server durante la procedura di recupero password.' });
-    
+
     }
 });
 

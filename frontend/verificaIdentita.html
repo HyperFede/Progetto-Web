@@ -20,14 +20,14 @@
 
         <!-- Singolo Form per Recupero Password -->
         <form id="recuperoForm">
-            <p class="form-step-info mb-3">Inserisci il tuo username e l'email associata al tuo account per verificare la tua identità.</p>
+            <p class="form-step-info mb-3">Inserisci l'email associata al tuo account per verificare la tua identità.</p>
             <!-- <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" placeholder="Il tuo username" name="username" id="username" required>
             </div> -->
             <div class="input-group">
-                <label for="emailOrPiva">Email</label>
-                <input type="email" placeholder="La tua email" name="emailOrPiva" id="emailOrPiva" required>
+                <label for="email">Email</label>
+                <input type="email" placeholder="La tua email" name="emailOrPiva" id="email" required>
             </div>
             <!-- Placeholder per messaggi di errore/successo Step 1 -->
             <div id="verifyMessage" class="message-placeholder my-3">
@@ -45,8 +45,7 @@
     <!-- Assicurati che fetcher.js sia caricato prima se fetchData è globale, altrimenti definiscilo in recuperoPassword.js -->
     
     <script src="js/fetcher.js"></script>
-    <script src="js/passwordFieldShower.js"></script>
-    <script src="js/recuperoPassword.js"></script>
+    <script src="js/verificaIdentita.js"></script>
 </body>
 
 </html>
