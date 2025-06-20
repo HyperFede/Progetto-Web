@@ -257,9 +257,9 @@
                         </button>`;
                 } else { // Unlogged or Admin (admins don't shop from artisan details page this way)
                     buttonHtml = `
-                        <a href="login.html" class="btn btn-sm mt-3 add-to-cart-button-artisan">
-                            <i class="bi bi-cart"></i> Accedi per acquistare
-                        </a>`;
+                        <button onclick="window.location.href='login.html'" class="btn btn-sm mt-3 add-to-cart-button-artisan add-to-cart-button">
+                            <span class="button-text"><i class="bi bi-cart-plus"></i> Aggiungi al Carrello</span>
+                        </button>`;
                 }
 
                 return `
