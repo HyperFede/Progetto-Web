@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/pages/recuperoPassword.css"> <!-- CSS specifico per questa pagina -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> <!-- Incluso per coerenza, rimuovere se non usato -->
+    <title>Verifica Identità</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+</head>
+<body>
+    <div class="container-rel">
+        <a href="/" class="d-flex align-items-center mb-4 text-dark text-decoration-none">
+            <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 100px;">
+        </a>
+        <h1 class="title-center" id="title-recupero">Recupero Password</h1>
+
+        <!-- Singolo Form per Recupero Password -->
+        <form id="recuperoForm">
+            <p class="form-step-info mb-3">Inserisci il tuo username e l'email associata al tuo account per verificare la tua identità.</p>
+            <!-- <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" placeholder="Il tuo username" name="username" id="username" required>
+            </div> -->
+            <div class="input-group">
+                <label for="emailOrPiva">Email</label>
+                <input type="email" placeholder="La tua email" name="emailOrPiva" id="emailOrPiva" required>
+            </div>
+            <!-- Placeholder per messaggi di errore/successo Step 1 -->
+            <div id="verifyMessage" class="message-placeholder my-3">
+                <!-- Esempio errore: <span class="error-text">Username o Email non validi.</span> -->
+                <!-- Esempio successo: <span class="success-text">Verifica completata. Inserisci la nuova password.</span> -->
+            </div>
+            <button id="verifyIdentityButton" type="button" class="submit-btn">
+                Verifica Identità
+            </button>
+        </form>
+
+        <span class="signup-text mt-4 d-block text-center">Ricordi la password? <a href="login.html">Accedi</a></span>
+    </div>
+
+    <!-- Assicurati che fetcher.js sia caricato prima se fetchData è globale, altrimenti definiscilo in recuperoPassword.js -->
+    
+    <script src="js/fetcher.js"></script>
+    <script src="js/passwordFieldShower.js"></script>
+    <script src="js/recuperoPassword.js"></script>
+</body>
+
+</html>
