@@ -354,7 +354,7 @@ router.post("/send-recovery-email", async (req, res) => {
 
 
 
-        await sendEmail(emailInput, emailSubject, emailText);
+        await sendEmail(emailInput, emailSubject, emailText,true);
 
         res.status(200).json({ message: "Se l'utente esiste, un'email di recupero è stata inviata con le istruzioni." });
     } catch (error) {
