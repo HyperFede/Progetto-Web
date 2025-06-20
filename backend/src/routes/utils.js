@@ -18,10 +18,13 @@ router.post ('/send-email', async (req, res) => {
         if (!destinatario || !oggetto || !testo){
             res.status(400).json({ message: "destinatario,oggetto,testo sono obbligatori" });
         }
-        
-        sendEmail(destinatario, oggetto, testo);
-
+        else{
+            sendEmail(destinatario, oggetto, testo);
         res.status(200).json({ message: "Email inviata con successo" });
+        }
+        
+
+
     }
     catch(error){
         console.error(error);
