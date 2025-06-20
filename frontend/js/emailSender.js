@@ -13,7 +13,7 @@ export default function sendEmail(dest, sub, text){
         from: 'bazartcommerce@gmail.com',
         to: dest,
         subject: sub,
-        text: text
+        html: text
     };
 
     transport.sendMail(mailOpt, (error, info) => {
