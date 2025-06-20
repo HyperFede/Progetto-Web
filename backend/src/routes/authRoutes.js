@@ -271,7 +271,7 @@ router.get('/session-info', isAuthenticated, async (req, res) => { // Added asyn
 });
 
 
-router.get ("/send-recovery-email", async (req, res) => {
+router.post ("/send-recovery-email", async (req, res) => {
     const {email : emailInput} = req.body;
 
     queryResult = await pool.query("SELECT username FROM UTENTE WHERE email = $1" ,[emailInput]);
