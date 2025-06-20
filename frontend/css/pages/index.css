@@ -6,6 +6,8 @@
 body {
     background-color: var(--background-color);
     color: var(--text-color);
+    background-image: url("../../assets/trama-del-libro-bianco.png");
+    background-size: cover;
 }
 
 .filter-bar {
