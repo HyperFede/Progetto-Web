@@ -26,6 +26,11 @@ document.addEventListener('DOMContentLoaded', function(){
         return re.test(email);
     }
 
+    function validatePiva(piva) {
+        var re = /^\d{11}$/;
+        return re.test(piva);
+    }
+
 
     //quando viene submittato
     document.getElementById('formRegistrazione').addEventListener('submit', async function(event) {
@@ -52,8 +57,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 if(!validateEmail(formObj.email)){
                     document.getElementById("email-invalid").classList.remove("invisible");
+                    formObj.email.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to the error message
+
                     return;
                 }
+
+
     
                 // console.log(formObj);
     
@@ -61,19 +70,36 @@ document.addEventListener('DOMContentLoaded', function(){
                     formObj.tipologia = "Artigiano";
                     formObj.piva = pivaText.value;
                     formObj.artigianodescrizione = descText.value;
-                }else{
+                    if (!validatePiva(formObj.piva)) {
+                        document.getElementById("piva-invalid").classList.remove("invisible");
+                        formObj.piva.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to the error message
+                        return;
+                    }
+                    else{
+                        document.getElementById("piva-invalid").classList.add("invisible");
+                    }
+                }
+                else{
                     formObj.tipologia = "Cliente";
                 }
     
                 let result = await fetchData("/api/users", "POST", formObj);
                 if(result.status === 201 || result.status === 200){
 
+                    
+                    usernameError.classList.add("invisible");
+                    inputEmail.classList.remove("is-invalid");
+                    emailError.classList.add("invisible");
+                    inputUsername.classList.remove("is-invalid");
+                    document.getElementById("piva-invalid").classList.add("invisible");
+
+
+
                     [inputNome, inputCognome, inputUsername, inputPassword, inputEmail, inputIndirzzo, inputPiva, inputDesc].forEach(input => {
                         input.classList.add("is-valid");
                     })
-                    console.log("OK=");
-                    console.log(result);
-                    let signAsLogin = await fetchData ("api/auth/login", "POST", {username: formObj.username, password: formObj.password});
+
+                    await fetchData ("api/auth/login", "POST", {username: formObj.username, password: formObj.password});
                     
                     setTimeout(() => {
                         if(formObj.tipologia == "Cliente"){
@@ -83,14 +109,17 @@ document.addEventListener('DOMContentLoaded', function(){
                         }
                     }, 2000); // 2000 milliseconds = 2 seconds delay
                 }else{
-                    
                     if(result.message == "Username già esistente."){
                         //TODO: mettere qualcosa in caso di failure della registrazione
                         usernameError.classList.remove("invisible");
                         inputUsername.classList.add("is-invalid");
+                        usernameError.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to the error message
+
+                        inputUsername.classList.add("is-invalid");
                     }else if(result.message == "Email già esistente."){
                         emailError.classList.remove("invisible");
                         inputEmail.classList.add("is-invalid");
+                        inputEmail.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to the error message
                     }
                 }
             });
