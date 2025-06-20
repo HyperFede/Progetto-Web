@@ -28,13 +28,15 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Nome</label>
-                        <input type="text" name="nome" placeholder="Nome" class="form-control">
+                        <input type="text" id = "nome"name="nome" placeholder="Nome" class="form-control" required>
+                        <span class="error-text invisible" id="nome-error"></span>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Cognome</label>
-                        <input type="text" name="cognome" placeholder="Cognome" class="form-control">
+                        <input type="text" id = "cognome" name="cognome" placeholder="Cognome" class="form-control" required>
+                        <span class="error-text invisible" id="cognome-error"></span>
                     </div>
                 </div>
             </div>
@@ -44,26 +46,22 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Username</label>
-                        <input type="text" name="username" placeholder="Username" class="form-control" required>
-                        <!-- Quando l'esito di POST api/users/ è username già esistente, cambia display:none -->
-                        
+                        <input type="text" id = "username" name="username" placeholder="Username" class="form-control" required>
                         <span class="error-text invisible" id="username-error">Username già esistente</span>
-                        
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <input type="text" name="password" placeholder="Password" class="form-control" required>
+                        <input type="password" id = "password" name="password" placeholder="Password" class="form-control" required>
+                        <span class="error-text invisible" id="password-error"></span>
                     </div>
                 </div>
             </div>
 
             <div class="form-group mb-4">
                 <label class="form-label">Email</label>
-                <input type="email" name="email" placeholder="email@example.com" class="form-control" required>
-                <!-- Quando l'esito di POST api/users/ è email già esistente -->
-                
+                <input type="email" name="email" id = "email" placeholder="email@example.com" class="form-control" required>
                 <span class="error-text invisible" id="email-error">Email già esistente</span>
                 <span class="error-text invisible" id="email-invalid">Email non valida</span>
                
@@ -72,7 +70,8 @@
             <!-- Terza Riga -->
             <div class="form-group mb-4">
                 <label class="form-label">Indirizzo</label>
-                <input type="text" name="indirizzo" placeholder="via, numero, città" class="form-control" required>
+                <input type="text" name="indirizzo" id = "indirizzo"  placeholder="via, numero, città" class="form-control" required>
+                <span class="error-text invisible" id="indirizzo-error"></span>
             </div>
 
             <!-- Quarta Riga - Switch -->
@@ -90,17 +89,23 @@
             <!-- Quinta Riga (Se artigiano) -->
             <div class="form-group mb-4 conditional-section" style="display: none;">
                 <label class="form-label">Partita IVA</label>
-                <input type="text" id="piva" name="piva" placeholder="Partita IVA" class="form-control">
+                <input type="text" id="piva" name="piva" id = "piva"  placeholder="Partita IVA" class="form-control">
+                <span class="error-text invisible" id="piva-error"></span>
             </div>
 
             <!-- Sesta Riga (Se artigiano) -->
             <div class="form-group mb-5 conditional-section" style="display: none;">
                 <label class="form-label">Descrizione - Attività</label>
                 <textarea class="form-control" id="descrizione" name="descrizione" placeholder="Descrizione" style="min-height: 150px;"></textarea>
+                <span class="error-text invisible" id="descrizione-error"></span>
             </div>
 
+            <div id="form-messages" class="mb-3 text-center" style="min-height: 1.5em;">
+                <!-- Success/Error messages will appear here -->
+            </div>
             <!-- Bottone Submit -->
             <button type="submit" class="btn primary-btn w-100">Registrati</button>
+
         </form>
     </div>
 
