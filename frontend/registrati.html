@@ -63,7 +63,7 @@
                 <label class="form-label">Email</label>
                 <input type="email" name="email" id = "email" placeholder="email@example.com" class="form-control" required>
                 <span class="error-text invisible" id="email-error">Email già esistente</span>
-                <span class="error-text invisible" id="email-invalid">Email non valida</span>
+                <span class="error-text invisible" id="email-invalid">Email non valida (formato xx@yy.zz)</span>
                
             </div>
 
@@ -90,6 +90,8 @@
             <div class="form-group mb-4 conditional-section" style="display: none;">
                 <label class="form-label">Partita IVA</label>
                 <input type="text" id="piva" name="piva" id = "piva"  placeholder="Partita IVA" class="form-control">
+                <span class="error-text invisible" id="piva-invalid">Piva non valida (11 numeri)</span>
+
                 <span class="error-text invisible" id="piva-error"></span>
             </div>
 
