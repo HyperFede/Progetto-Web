@@ -84,7 +84,7 @@ main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
     border: 1px solid var(--border-color);
     border-radius: 0.375rem;
     box-shadow: var(--shadow);
-    min-height: 400px;
+    min-height: 450px;
 }
 
 .dashboard-sidebar .nav-link {
