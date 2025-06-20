@@ -35,6 +35,15 @@ document.addEventListener('DOMContentLoaded', function(){
                 usernameError.classList.add("invisible");
                 emailError.classList.add("invisible");
                 document.getElementById("email-invalid").classList.add("invisible");
+
+                const inputNome = document.getElementById("nome");
+                const inputCognome = document.getElementById("cognome");
+                const inputUsername = document.getElementById("username");
+                const inputPassword = document.getElementById("password");
+                const inputEmail = document.getElementById("email");
+                const inputPiva = document.getElementById("piva");
+                const inputDesc = document.getElementById("descrizione");
+                const inputIndirzzo = document.getElementById("indirizzo");
     
                 //prende tutti i dati e li converti in un oggetto facile per inviare all'endpoint
                 const formData = new FormData(this);
@@ -57,18 +66,31 @@ document.addEventListener('DOMContentLoaded', function(){
                 }
     
                 let result = await fetchData("/api/users", "POST", formObj);
-                if(result.status == 200){
-                    if(formObj.tipologia == "Cliente"){
-                        window.location.replace("/")
-                    }else{
-                        window.location.replace("artigianoInAttesa.html")
-                    }
+                if(result.status === 201 || result.status === 200){
+
+                    [inputNome, inputCognome, inputUsername, inputPassword, inputEmail, inputIndirzzo, inputPiva, inputDesc].forEach(input => {
+                        input.classList.add("is-valid");
+                    })
+                    console.log("OK=");
+                    console.log(result);
+                    let signAsLogin = await fetchData ("api/auth/login", "POST", {username: formObj.username, password: formObj.password});
+                    
+                    setTimeout(() => {
+                        if(formObj.tipologia == "Cliente"){
+                            window.location.href = "/"; // No need for parentheses around the URL string
+                        }else{
+                            window.location.href = "dashboardArtigiano.html"; // No need for parentheses
+                        }
+                    }, 2000); // 2000 milliseconds = 2 seconds delay
                 }else{
+                    
                     if(result.message == "Username già esistente."){
                         //TODO: mettere qualcosa in caso di failure della registrazione
                         usernameError.classList.remove("invisible");
+                        inputUsername.classList.add("is-invalid");
                     }else if(result.message == "Email già esistente."){
                         emailError.classList.remove("invisible");
+                        inputEmail.classList.add("is-invalid");
                     }
                 }
             });
