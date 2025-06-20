@@ -150,6 +150,9 @@ document.addEventListener('DOMContentLoaded', function () {
             let responseToCancel = await fetchData(`api/orders/${idordine}/cancel`, "POST");
             let errorMessage = "Ordine con ID: " + idordine + " annullato con successo.";
             displayCheckoutMessage(errorMessage, 'success');
+            setTimeout(() => {
+                window.location.href = 'carrelloUtente.html';
+            }, 1000);
             
         }
         else{
