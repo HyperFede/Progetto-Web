@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+const dotenv = require('dotenv');
 
 function sendEmail(dest, sub, text, attach = false){
     let transport = nodemailer.createTransport({
