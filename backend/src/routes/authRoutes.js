@@ -276,7 +276,11 @@ router.get ("/send-recovery-email", async (req, res) => {
 
     queryResult = await pool.query("SELECT username FROM UTENTE WHERE email = $1" ,[emailInput]);
 
-    let usernameDb = queryResult.rows[0].username;
+    let usernameDb;
+    if (queryResult.rows.length > 0){
+
+        usernameDb = queryResult.rows[0].username;
+    }
 
     emailDestinatario = emailInput;
 
@@ -288,11 +292,53 @@ router.get ("/send-recovery-email", async (req, res) => {
         };
         const recoveryLinkToken = jwt.sign(payload, jwtSecret, { expiresIn: PASSWORD_RECOVERY_LINK_TOKEN_EXPIRES_IN });
 
-        const messaggio = `Ciao ${usernameDb},\n\nHai richiesto di resettare la tua password. Clicca sul seguente link per procedere:\n\n`;
         // Assicurati che il frontend (recuperoPassword.html) possa gestire un parametro 'token' nell'URL.
         const link = `${process.env.FRONTEND_URL}/recuperoPassword.html?token=${recoveryLinkToken}`;
-        const emailText = messaggio + link + "\n\nSe non hai richiesto tu il reset, ignora questa email.\nIl link scadrà tra 15 minuti.";
         const emailSubject = 'Recupero Password BazArt';
+
+                // HTML content for the email
+        const emailText = `
+        <html>
+          <head>
+            <style>
+              body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #f4f4f4; margin: 0; padding: 0; }
+              .email-container { max-width: 600px; margin: 20px auto; padding: 30px; background-color: #ffffff; border: 1px solid #dddddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+              .email-header { text-align: center; margin-bottom: 25px; }
+              .email-header h2 { color: #dda15e; margin-top:0; }
+              .email-body p { margin-bottom: 15px; font-size: 16px; }
+              .button-container { text-align: center; margin: 30px 0; }
+              .button { display: inline-block; padding: 12px 25px; background-color: #dda15e; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; }
+              .link-fallback { margin-top: 15px; font-size: 14px; text-align: center; }
+              .link-fallback a { color: #dda15e; text-decoration: underline; }
+              .footer { margin-top: 30px; font-size: 14px; color: #777777; text-align: center; border-top: 1px solid #eeeeee; padding-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="email-container">
+              <div class="email-header">
+                <h2>Recupero Password BazArt</h2>
+              </div>
+              <div class="email-body">
+                <p>Ciao ${usernameDb},</p>
+                <p>Hai richiesto di resettare la tua password. Clicca sul seguente pulsante per procedere:</p>
+                <div class="button-container">
+                  <a href="${link}" class="button">Resetta Password</a>
+                </div>
+                <div class="link-fallback">
+                  <p>Se il pulsante non funziona, copia e incolla il seguente link nel tuo browser:</p>
+                  <p><a href="${link}">${link}</a></p>
+                </div>
+                <p>Se non hai richiesto tu il reset, per favore ignora questa email.</p>
+                <p>Il link di recupero scadrà tra 15 minuti.</p>
+              </div>
+              <div class="footer">
+                <p>Grazie,<br>Il Team di BazArt</p>
+              </div>
+            </div>
+          </body>
+        </html>
+        `;
+
 
 
 
