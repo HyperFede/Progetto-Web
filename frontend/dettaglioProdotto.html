@@ -31,8 +31,8 @@
                     </ul>
                 </li>
                 <li class="nav-item dropdown invisible-admin">
-                    <a class="nav-link dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--secondary-color);">
-                        <i class="bi bi-person-circle fs-3 me-2"></i> <span id="nav-username">Username</span>
+                    <a class="nav-link dropdown-toggle" href="#" id="userAccountDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--secondary-color);">
+                        <i class="bi bi-person-circle fs-3 me-2"></i> <span id="nav-username-admin">Username</span>
                     </a>
                     <!-- ADMIN -->
                     <ul class="invisible-admin dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
@@ -125,6 +125,32 @@
                                 <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
                             </button>
                         </a>
+                    </div>
+                </div>
+
+                <!-- Offcanvas menu Admin ONLY-->
+                <div class="offcanvas-header invisible-admin">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabelAdmin">Pannello Admin</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body invisible-admin">
+                    <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                        <ul class="nav nav-pills flex-column mb-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="segnalazioniAdmin.html">
+                                    <i class="bi bi-flag-fill me-2"></i>GESTIONE SEGNALAZIONI
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="accettazioniAdmin.html"> <i
+                                        class="bi bi-patch-check-fill me-2"></i>GESTIONE ARTIGIANI
+                                </a>
+                            </li>
+                        </ul>
+                        <hr class="sidebar-divider">
+                        <button onclick="window.location.href='logout.html'" class="btn logout-btn w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                        </button>
                     </div>
                 </div>
             </div>
