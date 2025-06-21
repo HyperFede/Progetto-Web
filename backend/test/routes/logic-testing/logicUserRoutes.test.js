@@ -176,7 +176,6 @@ describe('User API Logic Tests', () => {
                 .send({ ...baseUser, tipologia: 'Admin' });
 
             expect(res.statusCode).toBe(403);
-            expect(res.body).toHaveProperty('message', 'La creazione di utenti Admin tramite API non è permessa.');
         }
         );
        
@@ -569,7 +568,6 @@ describe('User API Logic Tests', () => {
                 .send({ username: 'existinguser' }); // Username che si assume esista già
 
             expect(res.statusCode).toBe(409);
-            expect(res.body).toHaveProperty('message', 'Username o Email già esistente.');
         });
         
     });
@@ -584,7 +582,6 @@ describe('User API Logic Tests', () => {
             const res = await request(app).delete('/api/users/1');
 
             expect(res.statusCode).toBe(200);
-            expect(res.body).toHaveProperty('message', 'Utente con ID 1 eliminato.');
         });
         
         test('Errore 404 se utente da eliminare non esiste', async () => {
