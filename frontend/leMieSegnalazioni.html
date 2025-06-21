@@ -301,13 +301,6 @@
     <script src="js/dateExport.js"></script>
     <script src="js/getUsernameArt.js"></script>
     <script>
-        const table = document.getElementById('table-horizontal')
-        table.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            table.scrollLeft += e.deltaY;
-        });
-    </script>
-    <script>
         document.addEventListener('DOMContentLoaded', async () => {
             let tipologia = (await fetchData("/api/auth/session-info", "GET")).data.tipologia;
             if(tipologia == "Artigiano"){

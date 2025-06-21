@@ -28,9 +28,9 @@ function sendEmail(dest, sub, text, attach = false){
             html: text,
             attachments: [
                 {
-                    filename: "Logo.svg",
-                    path: "../frontend/assets/Logo.svg",
-                    cid: "logo@example.com"
+                    filename: "logo.png",
+                    path: "../frontend/assets/logo.png",
+                    cid: "logo@bazart"
                 }
             ]
         };
@@ -42,6 +42,7 @@ function sendEmail(dest, sub, text, attach = false){
             console.log(error);
         }else{
             console.log('Email sent: ' + info.response);
+            console.log(text);
         }
     });
 }
