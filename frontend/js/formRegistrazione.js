@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         }else{
                             window.location.href = "dashboardArtigiano.html"; // No need for parentheses
                         }
-                    }, 2000); // 2000 milliseconds = 2 seconds delay
+                    }, 1000); // 2000 milliseconds = 2 seconds delay
                 }else{
                     if(result.message == "Username già esistente."){
                         //TODO: mettere qualcosa in caso di failure della registrazione
