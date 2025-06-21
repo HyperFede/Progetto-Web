@@ -843,7 +843,7 @@ router.get('/:id/image_content', async (req, res) => {
         }
 
         const productQuery = await pool.query(
-            "SELECT immagine FROM Prodotto WHERE idprodotto = $1 AND deleted = FALSE",
+            "SELECT immagine FROM Prodotto WHERE idprodotto = $1",
             [productId]
         );
 

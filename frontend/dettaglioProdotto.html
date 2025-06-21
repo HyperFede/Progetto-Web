@@ -238,6 +238,13 @@
 
     </main>
 
+      <!-- Admin Action Bar: Hidden by default, shown via JS for admins -->
+    <div id="admin-action-bar" class="p-3" style = "display: none;">
+            <button id="deleteProductButton" onclick="eliminaProdotto()" class="btn btn-danger w-100 d-flex justify-content-center align-items-center">
+            <i class="bi bi-trash-fill me-2"></i> Elimina Prodotto
+        </button>
+    </div>
+
                 <!-- Message Placeholder -->
     <div id="actionMessage" class="alert" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1050; display: none; transition: opacity 0.5s ease-out; min-width: 300px; text-align: center;" role="alert">
         <!-- Message will be injected here -->
@@ -250,5 +257,6 @@
     <script src="js/addCartProduct.js"></script>
     <script src="js/dateExport.js"></script>
     <script src="js/dettaglioProdotto.js"></script>
+    <script src = "js/dettaglioProdottoAdminHandler.js"></script>
 </body>
 </html>
