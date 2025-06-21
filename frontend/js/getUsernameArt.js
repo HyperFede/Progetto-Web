@@ -2,10 +2,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     let result = await fetchData("/api/auth/session-info", "GET");
     if (result.status == 200) {
         if (result.data.tipologia == "Artigiano") {
-        document.getElementById("usernameProfilo").textContent = result.data.username;
+            let usernameArtigiano = document.getElementById("usernameProfilo");
+
+        if (!usernameArtigiano){
+            usernameArtigiano = document.getElementById("nav-username");
+        }
+        usernameArtigiano.textContent = result.data.username;
 
                        // Select all buttons that should be managed for adding products
             const addProductButtons = document.querySelectorAll(".add-product-btn"); 
+            console.log("getUsernameArt.js", addProductButtons);
             addProductButtons.forEach(button => {
                 if (button) { 
                     if (result.data.esitoapprovazione == "In lavorazione" || result.data.esitoapprovazione == "Rifiutato") {
