@@ -14,7 +14,7 @@ function showProducts(result){
                                     <span id="rating-placeholder-${product.idprodotto}"><small class="text-muted">Caricamento...</small></span>
                                 </small></li>
                                 <li><small class="text-muted">Artigiano: ${product.nomeartigiano}</small></li>
-                                <li><strong style="color: var(--primary-color);">Prezzo: €${product.prezzounitario}</strong></li>
+                                <li><strong style="color: var(--primary-color);">Prezzo: €${parseFloat(product.prezzounitario).toFixed(2)}</strong></li>
                             </ul>
                             <!-- LOGGED (aggiunge il prodotto al carrello)-->
                             <button class="btn mt-auto invisible add-to-cart-button" onclick="aggiungiAlCarrello(${product.idprodotto}, 1, this)" style="background-color: var(--primary-color); color: white;"><span class="button-text">Aggiungi al carrello</span></button>
