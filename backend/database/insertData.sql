@@ -152,7 +152,7 @@ BEGIN
         (5, NULL, 1, 10, 'Difetti di fabbricazione visibili', 'Risolto', NULL, '2025-04-12 09:15:00'),
         (6, NULL, NULL, 2, 'Prodotto non funzionante', 'Aperto', NULL, '2025-01-22 16:45:00'),
         (6, NULL, 1, 5, 'Problemi di assemblaggio - istruzioni mancanti', 'Risolto', NULL, '2025-02-17 10:30:00'),
-        (6, NULL, 1, 9, 'Materiali di qualità inferiore alle aspettative', 'In lavorazione', NULL, '2025-04-03 14:20:00'),
+        (6, NULL, 1, 9, 'Pacco arrivato danneggiato', 'In lavorazione', NULL, '2025-04-03 14:20:00'),
         (7, NULL, NULL, 4, 'Danno estetico sul prodotto', 'Aperto', NULL, '2025-02-07 09:40:00'),
         (7, NULL, 1, 6, 'Prodotto diverso dal campione mostrato', 'Risolto', NULL, '2025-02-27 13:25:00'),
         (7, NULL, NULL, 8, 'Ritardo nella consegna', 'Aperto', NULL, '2025-03-22 17:55:00'),
