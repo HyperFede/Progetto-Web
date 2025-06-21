@@ -41,8 +41,8 @@
                     if (!productCategory.value) { showMessage('Per favore, seleziona una categoria.', 'error'); return; }
                     if (!productName.value.trim()) { showMessage('Il nome del prodotto è obbligatorio.', 'error'); return; }
                     if (!productDescription.value.trim()) { showMessage('La descrizione del prodotto è obbligatoria.', 'error'); return; }
-                    if (productPrice.value === '' || parseFloat(productPrice.value) < 0) { showMessage('Il prezzo del prodotto non è valido.', 'error'); return; }
-                    if (productQuantity.value === '' || parseInt(productQuantity.value) < 0) { showMessage('La quantità disponibile non è valida.', 'error'); return; }
+                    if (productPrice.value === '' || parseFloat(productPrice.value) <= 0) { showMessage('Il prezzo del prodotto non è valido. deve essere >0 ', 'error'); return; }
+                    if (productQuantity.value === '' || parseInt(productQuantity.value) <= 0) { showMessage('La quantità disponibile non è valida. deve essere >0 ', 'error'); return; }
 
                     let bodyreq = {
                         nome: productName.value,
