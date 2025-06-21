@@ -221,17 +221,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             const table = document.getElementById("table-segnalazioni");
             const divTable = document.getElementById("div-segnalazioni");
-            const isScrollable = divTable.scrollWidth > divTable.clientWidth;
-            if(isScrollable){
-                table.addEventListener('wheel', (event) => {
-                    console.log(event.deltaX);
-                    console.log(table.scrollLeft);
-                    if(Math.abs(event.deltaY) > Math.abs(event.deltaX)){
-                        event.preventDefault();
-                    }
-                    divTable.scrollLeft += event.deltaY;
-                })
-            }
+            table.addEventListener('wheel', (event) => {
+                console.log(event.deltaX);
+                console.log(table.scrollLeft);
+                if(Math.abs(event.deltaY) > Math.abs(event.deltaX)){
+                    event.preventDefault();
+                }
+                divTable.scrollLeft += event.deltaY;
+            })
         })
     </script>
 </body>
