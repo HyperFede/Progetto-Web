@@ -1,5 +1,5 @@
-//const path = require('path'); // Importa il modulo 'path'
-//require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Specifica il percorso del file .env
+const path = require('path'); // Importa il modulo 'path'
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Specifica il percorso del file .env
 // __dirname si riferisce alla directory corrente del file (cioè src)
 // '../.env' sale di un livello per trovare il file .env nella cartella backend
 
@@ -22,13 +22,14 @@ const subOrderRoutes = require('./routes/subOrderRoutes'); // Importa le route d
 const reviewRoutes = require('./routes/reviewRoutes'); // Importa le route delle recensioni
 const problemRoutes = require('./routes/problemRoutes'); // Importa le route dei problemi
 const approvalsRoutes = require('./routes/artigianoApproveRoutes'); // Importa le route delle approvazioni
+const utilRoutes = require('./routes/utils.js');
 
 const app = express();
 app.use(cors()); // Abilita CORS per tutte le richieste
 app.use(cookieParser()); // Usa il middleware per il parsing dei cookie
 
 const dbport = process.env.DB_PORT || 5432; // Usa la porta 5432 come default se non specificata
-const serverport = process.env.PORT || 5000; // Usa la porta 3000 come default se non specificata
+const serverport = process.env.PORT || 3000; // Usa la porta 3000 come default se non specificata
 
 if (!dbport) {
     console.log("Variabile d'ambiente PORT non impostata, utilizzo la porta di default 5432");
@@ -48,14 +49,14 @@ app.use('/api/suborders', subOrderRoutes); // Monta le route degli ordini second
 app.use('/api/reviews', reviewRoutes); // Monta le route delle recensioni
 app.use('/api/problems', problemRoutes); // Monta le route dei problemi
 app.use('/api/approvals', approvalsRoutes); // Monta le route delle approvazioni
-
+app.use('/api/utils', utilRoutes);
 
 // Endpoint di root per un semplice check
 app.get('/test', (req, res) => {
     res.send('Server is running. Database initialization attempted.');
 });
 
-//app.use(express.static('../frontend/'))
+app.use(express.static('../frontend/'));
 
 async function startServer() {
     try {
@@ -70,8 +71,8 @@ async function startServer() {
     }
 }
 
-// Start the server only if this script is executed directly (e.g., `node src/index.js`)
-// and not when required by another module (like a test file). (e.g. `node src/server.js`)
+// Start the server only if this script is executed directly (e.g., node src/index.js)
+// and not when required by another module (like a test file). (e.g. node src/server.js)
 if (require.main === module) {
     startServer();
 }
