@@ -224,7 +224,7 @@
                         productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Errore nel caricamento dei prodotti.</td></tr>`;
                     }
                 } else if (sessionInfo.data.esitoapprovazione === "In lavorazione" || sessionInfo.data.esitoapprovazione === "Rifiutato") {
-                    productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-warning">Il tuo account artigiano è '${sessionInfo.data.esitoapprovazione}'. Non puoi gestire i prodotti al momento.</td></tr>`;
+                    productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-warning">Il tuo account artigiano non è ancora stato approvato. Non puoi visualizzare, aggiungere o modificare prodotti al momento.</td></tr>`;
                 } else {
                     productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Stato account artigiano non riconosciuto.</td></tr>`;
                 }
