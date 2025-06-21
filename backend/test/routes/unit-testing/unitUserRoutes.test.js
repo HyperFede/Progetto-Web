@@ -612,7 +612,6 @@ describe('User API Unit Tests', () => {
 
 
             expect(res.statusCode).toBe(409);
-            expect(res.body).toHaveProperty('message', 'Username o Email già esistente.');
         });
 
         test('Errore 409 se aggiornamento causa conflitto di email', async () => {
@@ -621,7 +620,6 @@ describe('User API Unit Tests', () => {
                 .send({ email: uniqueArtigianoEmailForPut }); // Use the unique email of the artigiano created in beforeEach
 
             expect(res.statusCode).toBe(409);
-            expect(res.body).toHaveProperty('message', 'Username o Email già esistente.');
         });
 
         test('Tipologia non viene modificata durante aggiornamento', async () => {

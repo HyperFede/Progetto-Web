@@ -10,15 +10,17 @@ function showProducts(result){
                         <div class="card-body d-flex flex-column p-3">
                             <h5 class="card-title" style="color: var(--primary-color);">${product.nome}</h5>
                             <ul class="list-unstyled mt-2 mb-3 flex-grow-1">
-                                <li><small class="text-muted">Valutazioni: <i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-fill" style="color: var(--primary-color);"></i><i class="bi bi-star-half" style="color: var(--primary-color);"></i><i class="bi bi-star" style="color: var(--primary-color);"></i></small></li>
+                                <li><small class="text-muted">Valutazioni: 
+                                    <span id="rating-placeholder-${product.idprodotto}"><small class="text-muted">Caricamento...</small></span>
+                                </small></li>
                                 <li><small class="text-muted">Artigiano: ${product.nomeartigiano}</small></li>
-                                <li><strong style="color: var(--primary-color);">Prezzo: €${product.prezzounitario}</strong></li>
+                                <li><strong style="color: var(--primary-color);">Prezzo: €${parseFloat(product.prezzounitario).toFixed(2)}</strong></li>
                             </ul>
-                            <!-- UNLOGGED -->
-                            <button class="btn mt-auto unlogged" onclick="window.location.replace('/login.html')" style="background-color: var(--primary-color); color: white;">Aggiungi al carrello</button>
-
                             <!-- LOGGED (aggiunge il prodotto al carrello)-->
-                            <button class="btn mt-auto invisible" onclick="aggiungiAlCarrello(${product.idprodotto})" style="background-color: var(--primary-color); color: white;">Aggiungi al carrello</button>
+                            <button class="btn mt-auto invisible add-to-cart-button" onclick="aggiungiAlCarrello(${product.idprodotto}, 1, this)" style="background-color: var(--primary-color); color: white;"><span class="button-text">Aggiungi al carrello</span></button>
+                            <!-- UNLOGGED -->
+                            <button class="btn mt-auto unlogged" onclick="window.location.replace('/login.html')" style="background-color: var(--primary-color); color: white;"><span class="button-text">Aggiungi al carrello</span></button>
+
                         </div>
                     </div>
                 </div>`
@@ -30,50 +32,35 @@ function showProducts(result){
 }
 
 /**
- * Generates HTML for star rating icons based on a given rating value,
- * rounding up to the nearest half star.
- * E.g., 1.0 -> 1 full; 1.1 -> 1.5 (1 full, 1 half); 1.6 -> 2.0 (2 full)
- * @param {number|string} rating - The rating value (e.g., 3, 3.2, "4.7").
- * @param {number} maxStars - The maximum number of stars to display (default is 5).
- * @returns {string} HTML string representing the star icons.
+ * Fetches and displays the average rating for each product listed.
+ * This should be called after showProducts has rendered the product cards.
+ * @param {Array} productsData - Array of product objects from the API.
  */
-function getStarsHtml(rating, maxStars = 5){
-    let html = '';
-    // Ensure rating is a number, default to 0 if null/undefined or not a number
-    let numericRating = parseFloat(rating);
-    numericRating = isNaN(numericRating) ? 0 : numericRating;
-
-    // Cap rating between 0 and maxStars
-    numericRating = Math.max(0, Math.min(numericRating, maxStars));
-
-    // Round up to the nearest 0.5
-    // Example: 1.0 -> 1.0; 1.1 -> 1.5; 1.5 -> 1.5; 1.6 -> 2.0
-    const displayRating = Math.ceil(numericRating * 2) / 2;
-
-    const fullStars = Math.floor(displayRating);
-    const hasHalfStar = (displayRating - fullStars) === 0.5;
-
-    for (let i = 0; i < fullStars; i++) {
-        html += '<i class="bi bi-star-fill" style="color: var(--primary-color);"></i>';
+async function loadAndDisplayProductRatings(productsData) {
+    if (!productsData || productsData.length === 0) {
+        return;
     }
-    if (hasHalfStar) {
-        html += '<i class="bi bi-star-half" style="color: var(--primary-color);"></i>';
+
+    for (const product of productsData) {
+        const ratingPlaceholder = document.getElementById(`rating-placeholder-${product.idprodotto}`);
+        if (ratingPlaceholder) {
+            // Assuming getHTMLforAverageRating is available globally (e.g., from ratingUtils.js)
+            const ratingHtml = await getHTMLforAverageRating(product.idprodotto);
+            ratingPlaceholder.innerHTML = ratingHtml;
+        }
     }
-    const emptyStars = maxStars - fullStars - (hasHalfStar ? 1 : 0);
-    for (let i = 0; i < emptyStars; i++) {
-        html += '<i class="bi bi-star" style="color: var(--primary-color);"></i>';
-    }
-    return html;
 }
+
 
 document.addEventListener("DOMContentLoaded", async function(){
     let result = await fetchData("/api/products/notdeleted", "GET");
     if(result.status == 200){
-        showProducts(result);
-
+        showProducts(result); // Render product cards first
+        await loadAndDisplayProductRatings(result.data); // Then load and display their ratings
     }else{
         //console.log("Errore caricamento prodotti!")
     }
+
     
     document.getElementById('searchForm').addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -102,5 +89,6 @@ document.addEventListener("DOMContentLoaded", async function(){
 
         let resultSearch = await fetchData("/api/products/notdeleted" + opt, "GET");
         showProducts(resultSearch);
+        await loadAndDisplayProductRatings(resultSearch.data); // Also load ratings for search results
     })
 })

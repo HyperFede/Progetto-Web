@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const reviewTextInput = document.getElementById('reviewTextInput');
     const reviewTitleInput = document.getElementById('reviewTitleInput'); // Title is in the form
     const stars = document.querySelectorAll('.star-rating .bi-star, .star-rating .bi-star-fill');
-    const photoUploadInput = document.getElementById('photoUploadInput');
+    const photoUploadInput = document.getElementById('productImageInput'); // Corrected ID
     
     const successMessageDiv = document.getElementById('successMessage'); // Assuming you have this div
     const errorMessageDiv = document.getElementById('formErrorMessage'); // Assuming you add a div for general form errors
@@ -105,7 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const valutazione = parseInt(ratingValueInput.value, 10);
             const testo = reviewTextInput.value.trim();
-            const titolo = reviewTitleInput.value.trim(); // Get title value
 
             // Client-side validation
             let isValid = true;
@@ -120,10 +119,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else if (errorMessageDiv) {
                     errorMessageDiv.innerHTML += '<br><span class="error-text">Per favore, seleziona una valutazione.</span>';
                 }
-                isValid = false;
-            }
-            if (!titolo) { // Title is required in the form
-                if (errorMessageDiv) errorMessageDiv.innerHTML += '<br><span class="error-text">Il titolo della recensione è obbligatorio.</span>';
                 isValid = false;
             }
             if (!testo) {
@@ -175,17 +170,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     if (successMessageDiv && reviewResponse.data) {
-                        successMessageDiv.textContent = (reviewResponse.data.message || 'Grazie per la tua recensione! Sarà pubblicata dopo la revisione.') + imageUploadMessage;
+                        successMessageDiv.textContent = (reviewResponse.data.message || 'Grazie per la tua recensione!');
                         successMessageDiv.style.display = 'block';
                     } else {
-                        alert(((reviewResponse.data && reviewResponse.data.message) || 'Grazie per la tua recensione! Sarà pubblicata dopo la revisione.') + imageUploadMessage);
+                        alert(((reviewResponse.data && reviewResponse.data.message) || 'Grazie per la tua recensione!'));
                     }
 
                     productReviewForm.reset();
                     ratingValueInput.value = '';
                     resetStarsVisual();
-                    const photoPreviewContainer = document.getElementById('photoPreview');
-                    if (photoPreviewContainer) photoPreviewContainer.innerHTML = '';
                 } else {
                     const errorMsg = reviewResponse.body.error;
                     if (errorMessageDiv) {
@@ -194,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         alert(errorMsg);
                     }
                 }
+
             } catch (reviewError) {
                 console.error('Errore invio recensione (testo/valutazione):', reviewError);
                 const errorMsg = reviewError.message || (reviewError.body && reviewError.body.message) || 'Errore di comunicazione con il server. Riprova più tardi.';
@@ -202,7 +196,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     alert(errorMsg);
                 }
-            }
+            };
+
+            setTimeout(() => {
+                window.location.href = "/dashboardStoricoOrdini.html";
+            }, 2000);
         });
     }
     // Load product details when the page is ready

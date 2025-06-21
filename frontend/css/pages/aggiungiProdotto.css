@@ -2,19 +2,24 @@
     background-color: var(--background-color);
     border-bottom: 1px solid var(--border-color);
 }
+
 .logo-text {
     color: var(--primary-color);
 }
+
 .header-nav .nav-link-custom {
     color: var(--secondary-color);
 }
+
 .header-nav .nav-link-custom:hover,
 .header-nav .nav-link-custom:focus {
     color: var(--primary-color);
 }
+
 .header-nav .nav-link-cart {
     color: var(--primary-color);
 }
+
 .add-product-btn {
     background-color: var(--primary-color);
     color: var(--pakistan-green);
@@ -22,6 +27,16 @@
     font-weight: 500;
     padding: 0.5rem 1rem;
 }
+
+.product-detail-image-container {
+    position: absolute;
+}
+
+.add-image-trigger {
+    z-index: 1;
+    cursor: pointer;
+}
+
 .add-product-btn:hover {
     background-color: var(--tigers-eye);
     border-color: var(--tigers-eye);
@@ -36,10 +51,12 @@
     display: inline-flex;
     align-items: center;
 }
+
 .back-link-add-product:hover {
     text-decoration: none;
     color: var(--primary-color);
 }
+
 .back-link-add-product i {
     font-size: 1.2rem;
 }
@@ -65,13 +82,16 @@
     background-color: #e9ecef;
     border-radius: 0.25rem;
 }
+
 .product-image-upload-box:hover {
     border-color: var(--primary-color);
 }
+
 .product-image-upload-box i {
     color: var(--secondary-color);
     display: block;
 }
+
 .product-image-upload-box p {
     margin-bottom: 0.25rem;
     color: var(--secondary-color);
@@ -85,7 +105,23 @@
     border: 1px solid var(--border-color);
     border-radius: 0.25rem;
 }
+/* in aggiungiProdotto.css */
 
+
+.product-detail-image-container {
+    /* FIX: Changed from 'absolute' to 'relative'. */
+    /* This keeps the container in the normal document flow, fixing the click issue. */
+    position: relative;
+    /* height: 300px; /* REMOVE fixed height or set a max-height */
+    min-height: 150px; /* A smaller initial height for the placeholder */
+    background: #f0f2f5; 
+    overflow: hidden;
+}
+
+/* Ensure the label and container have some space */
+.form-label.d-block {
+    margin-bottom: 0.5rem;
+}
 
 .add-product-form-box .form-label {
     color: var(--text-dark);
@@ -99,6 +135,7 @@
     color: var(--text-dark);
     border: 1px solid var(--border-color);
 }
+
 .add-product-form-box .form-control:focus,
 .add-product-form-box .form-select:focus {
     background-color: var(--background-color);
@@ -117,15 +154,51 @@
     font-weight: 600;
     font-size: 1.05rem;
 }
+
 .confirm-add-product-btn:hover {
     background-color: var(--tigers-eye);
     border-color: var(--tigers-eye);
     color: var(--text-light);
 }
 
+
+/* in css/aggiungiProdotto.css */
+
+/*
+* FIX: Change the color of the "Add Image" icon and text for better contrast.
+*/
+.add-image-trigger {
+    /* This color will be inherited by the icon and the text span inside */
+    color: #6c757d; /* A standard, darker bootstrap gray */
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* * OPTIONAL: Add a hover effect to give the user feedback when they
+* move their mouse over the upload area.
+*/
+.product-detail-image-container.state-add-image:hover .add-image-trigger {
+    background-color: rgba(0, 0, 0, 0.03);
+}
 /* Sovrascrive il padding superiore per schermi più piccoli di 'lg' */
-@media (max-width: 991.98px) { /* Il breakpoint 'lg' di Bootstrap è 992px */
-    main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
-        padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
+@media (max-width: 991.98px) {
+
+    /* Il breakpoint 'lg' di Bootstrap è 992px */
+    main.container.my-4.pt-lg-0 {
+        /* Rimosso .pt-5 dal selettore */
+        padding-top: 7rem !important;
+        /* Aumentato valore e aggiunto !important per test */
     }
 }
+
+/* Fa sì che l'<img> dentro .current-image-display occupi tutto lo spazio */
+.product-detail-image-container .current-image-display img {
+  max-width: 100%;  /* Image will not exceed container width */
+  max-height: 500px; /* Optional: Set a maximum height for very tall images */
+  height: auto;     /* Height will adjust to maintain aspect ratio */
+  width: auto;      /* Width will adjust, or set to 100% if you want it to fill width-wise */
+  object-fit: contain;
+  display: block;
+  margin: auto; /* Center the image if its width is less than container's */
+}
+
+

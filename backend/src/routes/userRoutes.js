@@ -458,8 +458,15 @@ router.put('/:id', isAuthenticated, hasPermission(['Admin', 'Self']), async (req
         res.status(200).json(updatedUser.rows[0]);
     } catch (error) {
         console.error(`Errore nell'aggiornare l'utente con ID ${id}:`, error);
-        if (error.code === '23505') {
-            return res.status(409).json({ message: 'Username o Email già esistente.' });
+                if (error.code === '23505') { // Unique violation
+            if (error.constraint === 'utente_username_key') {
+                return res.status(409).json({ message: 'Username già esistente.', field: 'username' });
+            } else if (error.constraint === 'utente_email_key') {
+                return res.status(409).json({ message: 'Email già esistente.', field: 'email' });
+            }
+            // Fallback for other unique constraints, if any
+            return res.status(409).json({ message: 'Valore duplicato non consentito.' });
+
         }
         res.status(500).json({ message: 'Errore del server durante l aggiornamento dell utente.' });
     }

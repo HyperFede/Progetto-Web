@@ -120,8 +120,8 @@ router.get('/', isAuthenticated, hasPermission(['Admin']), createQueryBuilderMid
             -- Select all problems, with optional filters and sorting applied by middleware
             -- Joins are needed to potentially filter/sort by related user info in the future
             SELECT p.*, 
-                   uc.username AS username_cliente,
-                   ua.username AS username_artigiano,
+                   uc.email AS email_cliente,
+                   ua.email AS email_artigiano,
                    uadmin.username AS username_admin
             FROM Problema p
             LEFT JOIN Utente uc ON p.idcliente = uc.idutente
@@ -238,10 +238,6 @@ router.put('/:id/status', isAuthenticated, hasPermission(['Admin']), async (req,
     const { id } = req.params;
     const { status } = req.body; // Using lowercase to match schema
     const { idutente: idadmin } = req.user; // Admin taking action
-
-    if (!status || !['In lavorazione', 'Risolto'].includes(status)) {
-        return res.status(400).json({ error: "Invalid status. Must be 'In lavorazione' or 'Risolto'." });
-    }
 
     try {
         const updateQuery = `

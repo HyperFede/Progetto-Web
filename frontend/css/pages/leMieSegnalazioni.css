@@ -73,6 +73,10 @@ min-height: 400px;
     }
 }
 
+main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
+    padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
+}
+
 /* Sidebar Dashboard */
 .dashboard-sidebar {
     background-color: var(--border-color);
@@ -80,7 +84,7 @@ min-height: 400px;
     border: 1px solid var(--border-color);
     border-radius: 0.375rem;
     box-shadow: var(--shadow);
-    min-height: 400px;
+    min-height: 450px;
 }
 
 .dashboard-sidebar .nav-link {
@@ -191,18 +195,28 @@ min-height: 400px;
 }
 
 #aggiungiSegnalazioneBtn {
-    background-color: var(--primary-color);
-    color: white;
-    border: 1px solid var(--primary-color);
-    position: sticky;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1030;
+  /* cancel the sticky-centering */
+  position: static !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+  background-color: var(--primary-color);
+  color: var(--pakistan-green);
+  border: 1px solid var(--primary-color);
+  padding: 0.6rem 1.8rem;
+  font-weight: 600;
+
 }
+
 
 #aggiungiSegnalazioneBtn:hover{
     background-color: var(--dark-moss-green);
     color: white;
 
 }
+
+#table-horizontal{
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+

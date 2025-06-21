@@ -6,6 +6,8 @@
 body {
     background-color: var(--background-color);
     color: var(--text-color);
+    background-image: url("../../assets/trama-del-libro-bianco.png");
+    background-size: cover;
 }
 
 .filter-bar {
@@ -101,6 +103,10 @@ min-height: 400px;
     main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
         padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
     }
+}
+
+main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
+    padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
 }
 
 .logout-btn {

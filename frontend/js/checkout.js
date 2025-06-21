@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         else if (response.status===409 && numberOfClicksinBuyButton == 1){
             let remindermessage = response.message;
-            errorMessage = "Hai gia un ordine in attesa di pagamento, ID: " + response.body.orderId + ".Puoi cliccare ancora per redirectarti alla pagina di pagamento oppure annullare ora quell'ordine.";
+            errorMessage = "Hai gia un ordine in attesa di pagamento, ID: " + response.body.orderId + ". Clicca ancora ACQUISTA ORA per andare alla pagina di pagamento oppure clicca ANNULLA ORDINE per annullare l'ordine in sospeso.";
             displayCheckoutMessage(errorMessage, 'error');
 
         }
@@ -148,8 +148,11 @@ document.addEventListener('DOMContentLoaded', function () {
             let idordine = response.data[0].idordine;
 
             let responseToCancel = await fetchData(`api/orders/${idordine}/cancel`, "POST");
-            let errorMessage = "Ordine con ID: " + idordine + " annullato con successo. Il tuo carrello è rimasto intatto e puoi procedere con un nuovo ordine";
+            let errorMessage = "Ordine con ID: " + idordine + " annullato con successo.";
             displayCheckoutMessage(errorMessage, 'success');
+            setTimeout(() => {
+                window.location.href = 'carrelloUtente.html';
+            }, 1000);
             
         }
         else{

@@ -221,6 +221,8 @@ router.put('/:idstorico/decide', isAuthenticated, hasPermission(['Admin']), asyn
     }
 });
 
+
+
 // Note: A DELETE route for ArtigianoApprovazione might not be common.
 // Usually, these records are kept for auditing. If an artisan re-applies,
 // a new record is created. If deletion is needed, it would typically be an Admin-only action.

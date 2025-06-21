@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <title>Login</title>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 </head>
 <body>
     <div class="container-rel">
@@ -37,8 +38,8 @@
                
             </div>
             <!-- Link to password recovery -->
-            <div style="text-align: right; margin-bottom: 1rem; margin-top: 0.5rem;">
-                <a href="recuperoPassword.html">Password dimenticata?</a>
+            <div style="text-align: left; margin-bottom: 1rem; margin-top: 0.5rem;">
+                <a href="verificaIdentita.html">Password dimenticata?</a>
             </div>
             <button id="loginButton" type="button" class="submit-btn">Accedi</button>
         </form>
@@ -64,15 +65,7 @@
                 }
                 else{
                     if (session.data.tipologia == "Artigiano"){
-                        let approval = (await fetchData("/api/approvals/me", "GET")).data[0].esito;
-                        console.log(approval)
-                        if(approval == "In attesa"){
-                            window.location.replace("artigianoInAttesa.html")
-                        }else if(approval == "Rifiutato"){
-                            window.location.replace("artigianoRifiutato.html")
-                        }else{
                             window.location.replace("/dashboardArtigiano.html");
-                        }
                     }
                     else{
                         window.location.replace("/segnalazioniAdmin.html");
@@ -81,6 +74,13 @@
 
             }else{
                 errorText.classList.remove("invisible");
+            }
+        });
+
+        document.addEventListener('keypress', (event) => {
+            if(event.keyCode === 13){
+                event.preventDefault();
+                document.getElementById("loginButton").click();
             }
         })
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/pages/prodottiArtigiano.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 </head>
+
 <body>
     <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">
@@ -16,22 +19,31 @@
 
             <ul class="nav nav-pills align-items-center">
                 <li class="nav-item dropdown">
-                    <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link nav-link-custom dropdown-toggle" href="#" id="userAccountDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle fs-3 me-2"></i> <span id="usernameProfilo">Username</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
-                        <li><a class="dropdown-item" href="dashboardArtigiano.html"><i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO</a></li>
-                        <li><a class="dropdown-item active" href="prodottiArtigiano.html"><i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI</a></li>
-                        <li><a class="dropdown-item" href="ordiniRicevuti.html"><i class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI</a></li>
-                        <li><a class="dropdown-item" href="leMieSegnalazioni.html"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="logout.html"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
+                        <li><a class="dropdown-item" href="dashboardArtigiano.html"><i
+                                    class="bi bi-person-workspace me-2"></i>IL MIO PROFILO</a></li>
+                        <li><a class="dropdown-item active" href="prodottiArtigiano.html"><i
+                                    class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI</a></li>
+                        <li><a class="dropdown-item" href="ordiniRicevuti.html"><i
+                                    class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI</a></li>
+                        <li><a class="dropdown-item" href="leMieSegnalazioni.html"><i
+                                    class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="logout.html"><i
+                                    class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
-                        <i class="bi bi-plus-circle-fill me-1"></i> Inserisci Prodotto
-                    </a>
+                    <button class="btn add-product-btn" onclick="goToAddProducts(this)">
+                        <i class="bi bi-plus-circle-fill me-1"></i> <span class="txt-new-product">Inserisci Prodotto
+                        </span>
+                    </button>
                 </li>
             </ul>
         </div>
@@ -39,57 +51,63 @@
 
     <!-- Navbar per schermi < lg -->
     <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none">
-         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
 
             <div class="ms-auto"></div>
-            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Dashboard Artigiano</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header" id="artisan-title">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Pannello Artigiano</h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
-                <div class="offcanvas-body">
-                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                <div class="offcanvas-body" id="artisan-menu">
+                    <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
                         <ul class="nav nav-pills flex-column mb-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="dashboardArtigiano.html">
-                                <i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                             <a class="nav-link active" aria-current="page" href="prodottiArtigiano.html"> <i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI
-                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="ordiniRicevuti.html"> <i class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="leMieSegnalazioni.html"> <i class="bi bi-flag-fill me-2"></i>SEGNALAZIONI
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="dashboardArtigiano.html">
+                                    <i class="bi bi-person-workspace me-2"></i>IL MIO PROFILO
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="prodottiArtigiano.html"> <i
+                                        class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="ordiniRicevuti.html"> <i
+                                        class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="leMieSegnalazioni.html"> <i
+                                        class="bi bi-flag-fill me-2"></i>SEGNALAZIONI
+                                </a>
+                            </li>
                         </ul>
                         <hr class="sidebar-divider">
-                        <button class="btn logout-btn w-100">
-                            <i class="bi bi-box-arrow-right me-2" href="logout.html"></i>LOGOUT
+                        <button onclick="window.location.href='logout.html'" class="btn logout-btn w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
                         </button>
                     </div>
                 </div>
             </div>
-           <ul class="nav nav-pills align-items-center">
-                <li class="nav-item">
-                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
-                        <i class="bi bi-plus-circle-fill"></i>
-                    </a>
-                </li>
+            <ul class="nav nav-pills align-items-center">
+                <button class="btn add-product-btn" onclick="goToAddProducts(this)">
+                    <i class="bi bi-plus-circle-fill me-1"></i>
+                </button>
             </ul>
         </div>
     </nav>
 
     <main class="container my-4 pt-lg-0">
+                    <h2 class="page-main-title mb-4">Pannello Artigiano</h2>
+
         <div class="row">
             <div class="col-md-3">
                 <div class="dashboard-sidebar d-flex flex-column">
@@ -100,21 +118,24 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="prodottiArtigiano.html"> <i class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI
+                            <a class="nav-link active" aria-current="page" href="prodottiArtigiano.html"> <i
+                                    class="bi bi-box2-heart-fill me-2"></i>I MIEI PRODOTTI
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="ordiniRicevuti.html"> <i class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI
+                            <a class="nav-link" href="ordiniRicevuti.html"> <i
+                                    class="bi bi-receipt-cutoff me-2"></i>ORDINI RICEVUTI
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="leMieSegnalazioni.html"> <i class="bi bi-flag-fill me-2"></i>SEGNALAZIONI
+                            <a class="nav-link" href="leMieSegnalazioni.html"> <i
+                                    class="bi bi-flag-fill me-2"></i>SEGNALAZIONI
                             </a>
                         </li>
                     </ul>
                     <hr class="sidebar-divider">
-                    <button class="btn logout-btn w-100">
-                        <i class="bi bi-box-arrow-right me-2" href="logout.html"></i>LOGOUT
+                    <button onclick="window.location.href='logout.html'" class="btn logout-btn w-100">
+                        <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
                     </button>
                 </div>
             </div>
@@ -133,39 +154,10 @@
                                 </tr>
                             </thead>
                             <tbody id="products">
-                                <!-- Esempio Prodotto 1 -->
+                                <!-- Prodotti caricati dal js -->
                                 <tr>
-                                    <td><a href="modificaProdotto.html" class="product-link"><i class="bi bi-pencil-square"></i> Vaso in Ceramica Dipinto a Mano</a></td>
-                                    <td class="text-center">12</td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" class="form-control" placeholder="Q.tà" value="0" min="0" aria-label="Aggiungi quantità">
-                                            <button class="btn btn-outline-primary btn-sm" type="button">Aggiungi</button>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="delete-product-icon" title="Elimina Prodotto">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
+                                    <td colspan="4" class="text-center text-muted">Caricamento prodotti...</td>
                                 </tr>
-                                <!-- Esempio Prodotto 2 -->
-                                <tr>
-                                    <td><a href="modificaProdotto.html" class="product-link"><i class="bi bi-pencil-square"></i> Collana Artigianale con Pietre Naturali</a></td>
-                                    <td class="text-center">5</td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" class="form-control" placeholder="Q.tà" value="0" min="0" aria-label="Aggiungi quantità">
-                                            <button class="btn btn-outline-primary btn-sm" type="button">Aggiungi</button>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="delete-product-icon" title="Elimina Prodotto">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <!-- Aggiungere altre righe per ulteriori prodotti -->
                             </tbody>
                         </table>
                     </div>
@@ -174,20 +166,31 @@
         </div>
     </main>
 
+        <!-- Message Placeholder -->
+    <div id="actionMessage" class="alert" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1050; display: none; transition: opacity 0.5s ease-out; min-width: 300px; text-align: center;" role="alert">
+        <!-- Message will be injected here -->
+    </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/fetcher.js"></script>
     <script src="js/getUsernameArt.js"></script>
     <script>
-        function showProducts(result){
+        function showProducts(result) {
+            const productsTableBody = document.getElementById("products");
+            if (!result || !result.data || result.data.length === 0) {
+                productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nessun prodotto inserito.</td></tr>`;
+                return;
+            }
             let productsRes = ``;
-                const products = result.data.map((product) => {
-                    productsRes += (
-                        `<tr>
+            const products = result.data.map((product) => {
+                productsRes += (
+                    `<tr id="product-row-${product.idprodotto}">
                             <td><a href="modificaProdotto.html?id=${product.idprodotto}" class="product-link"><i class="bi bi-pencil-square"></i> ${product.nome}</a></td>
-                            <td class="text-center">${product.quantitadisponibile}</td>
+                            <td class="text-center" id="qty-${product.idprodotto}">${product.quantitadisponibile}</td>
                             <td>
                                 <div class="input-group input-group-sm">
-                                    <input id="numProd-${product.idprodotto}" type="number" class="form-control" placeholder="Q.tà" value="0" min="0" aria-label="Aggiungi quantità">
+                                    <input id="numProd-${product.idprodotto}" type="number" class="form-control" placeholder="Q.tà" value="1" min="1" aria-label="Aggiungi quantità">
                                     <button onclick="addProduct(${product.idprodotto})" class="btn btn-outline-primary btn-sm" type="button">Aggiungi</button>
                                 </div>
                             </td>
@@ -197,35 +200,112 @@
                                 </button>
                             </td>
                         </tr>`
-                    )
-                });
+                )
+            });
 
 
-                document.getElementById("products").innerHTML = productsRes;
+            productsTableBody.innerHTML = productsRes;
         }
 
-        document.addEventListener("DOMContentLoaded", async function(){
+        document.addEventListener("DOMContentLoaded", async function () {
 
-            let id = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
-            let result = await fetchData(`/api/products/notdeleted?idartigiano=${id}`, "GET");
-            if(result.status == 200){
-                showProducts(result);
-            }else{
+            const productsTableBody = document.getElementById("products");
+            productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Caricamento informazioni account...</td></tr>`;
+            let sessionInfo = await fetchData("/api/auth/session-info", "GET");
+
+            if (sessionInfo.status === 200 && sessionInfo.data.tipologia === "Artigiano") {
+                if (sessionInfo.data.esitoapprovazione === "Approvato") {
+                    productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Caricamento prodotti...</td></tr>`;
+                    let idArtigiano = sessionInfo.data.idutente;
+                    let productsResult = await fetchData(`/api/products/notdeleted?idartigiano=${idArtigiano}`, "GET");
+                    if (productsResult.status == 200) {
+                        showProducts(productsResult);
+                    } else {
+                        productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Errore nel caricamento dei prodotti.</td></tr>`;
+                    }
+                } else if (sessionInfo.data.esitoapprovazione === "In lavorazione" || sessionInfo.data.esitoapprovazione === "Rifiutato") {
+                    productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-warning">Il tuo account artigiano non è ancora stato approvato. Non puoi visualizzare, aggiungere o modificare prodotti al momento.</td></tr>`;
+                } else {
+                    productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Stato account artigiano non riconosciuto.</td></tr>`;
+                }
+
+            } else {
                 //console.log("Errore caricamento dati!")
+                productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Impossibile caricare le informazioni dell'utente o non sei un artigiano.</td></tr>`;
+
             }
         });
     </script>
     <script>
-        async function addProduct(id){
-            const numAdding = parseInt(document.getElementById(`numProd-${id}`).value);
-            console.log(id);
-            let result = await fetchData(`/api/products/${id}/stock/add`, "PUT", {"quantita": numAdding});
-            window.location.reload();
+                const actionMessageEl = document.getElementById('actionMessage');
+        let messageTimeout;
+
+        function displayActionMessage(message, type = 'success') {
+            if (!actionMessageEl) return;
+
+            clearTimeout(messageTimeout); // Clear any existing timeout
+
+            actionMessageEl.textContent = message;
+            actionMessageEl.className = 'alert'; // Reset classes
+            actionMessageEl.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
+            
+            actionMessageEl.style.display = 'block';
+            actionMessageEl.style.opacity = '1';
+
+            messageTimeout = setTimeout(() => {
+                actionMessageEl.style.opacity = '0';
+                // Wait for fade out transition to complete before hiding
+                setTimeout(() => {
+                    actionMessageEl.style.display = 'none';
+                }, 500); // Matches the CSS transition duration
+            }, 3000); // Message visible for 3 seconds
         }
-        async function deleteProduct(id){
-            let result = await fetchData(`/api/products/${id}`, "DELETE");
-            window.location.reload();
+
+
+        async function addProduct(id) {
+            const quantityInput = document.getElementById(`numProd-${id}`);
+            const numAdding = parseInt(quantityInput.value);
+
+            if (isNaN(numAdding) || numAdding <= 0) {
+                displayActionMessage("Inserisci una quantità valida (maggiore di 0).", "danger");
+                return;
+            }
+
+
+            const result = await fetchData(`/api/products/${id}/stock/add`, "PUT", { "quantita": numAdding });
+
+            if (result.status === 200 && result.data) {
+                console.log(result);
+                const quantityCell = document.getElementById(`qty-${id}`);
+                if (quantityCell) {
+                    quantityCell.textContent = result.data.product.quantitadisponibile;
+                }
+                quantityInput.value = "1"; // Reset input to 1
+                displayActionMessage(`Quantità aggiornata con successo!`, 'success');
+            } else {
+                console.warn("Errore nell'aggiornamento della quantità);", result);
+                displayActionMessage(result.message || "Errore nell'aggiornamento della quantità.", 'danger');
+            }
+        }
+    
+        
+        async function deleteProduct(id) {
+            // Optional: Add a confirmation dialog here if desired
+            // if (!confirm("Sei sicuro di voler eliminare questo prodotto?")) return;
+
+            const result = await fetchData(`/api/products/${id}`, "DELETE");
+            if (result.status === 200 || result.status === 204) { // 204 No Content is also a success for DELETE
+                const productRow = document.getElementById(`product-row-${id}`);
+                if (productRow) {
+                    productRow.remove();
+                }
+                displayActionMessage("Prodotto eliminato con successo!", 'success');
+            } else {
+                displayActionMessage(result.message || "Errore durante l'eliminazione del prodotto.", 'danger');
+            }
         }
     </script>
+    
 </body>
+
 </html>

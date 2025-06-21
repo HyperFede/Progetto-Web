@@ -27,11 +27,6 @@ body {
     font-weight: 500;
     padding: 0.5rem 1rem;
 }
-.add-product-btn:hover {
-    background-color: var(--tigers-eye);
-    border-color: var(--tigers-eye);
-    color: var(--text-light);
-}
 
 .dashboard-sidebar {
     background-color: var(--border-color);
@@ -149,6 +144,19 @@ body {
 @media (max-width: 991.98px) { /* Il breakpoint 'lg' di Bootstrap è 992px */
     main.container.my-4.pt-lg-0 { /* Rimosso .pt-5 dal selettore */
         padding-top: 7rem !important; /* Aumentato valore e aggiunto !important per test */
+    }
+
+    .dashboard-sidebar,
+    .dashboard-sidebar .nav-link {
+        display: none !important;
+    }
+    
+    .col-md-3{
+        width: 0 !important;
+    }
+
+    .col-md-9{
+        width: 100% !important;
     }
 }
 

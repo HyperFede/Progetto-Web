@@ -259,7 +259,7 @@ router.get('/product/:productId', async (req, res) => {
     queryBuilder(req, res, async () => { // Call the middleware function
         try {
             let queryParams = [productId];
-            let whereClauses = [`r.IDProdotto = $${queryParams.length}`];
+            let whereClauses = [`r.IDProdotto = $${queryParams.length}`, `p.deleted = FALSE`];
 
             if (req.sqlWhereClause && req.sqlWhereClause.trim() !== '') {
                 let middlewareWhere = req.sqlWhereClause.replace(/^WHERE\s+/i, '').trim();
