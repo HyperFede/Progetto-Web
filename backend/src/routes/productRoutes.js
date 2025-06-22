@@ -2,11 +2,17 @@ const express = require('express');
 const router = express.Router();
 // Modifica il percorso del file del pool di connessione al database secondo necessitàù
 
+
+
 const pool = require('../config/db-connect.js');
 const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare.js'); // Import authentication middleware
 const FileType = require('file-type'); // For inferring image MIME type
 const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js'); // Import the new middleware
 const { rawImageParser } = require('../middleware/fileUploadMiddleware.js'); // Importa il middleware specifico per le immagini
+const serverApp = require('../server.js');
+
+const serverPortDoNotChange = 3000;
+const hostToSendWithCorrectPort = `localhost:${serverPortDoNotChange}`;
 
 // Funzioni di aiuto per la gestione delle transazioni.
 // Possibile da mettere in un middleWare.
@@ -19,7 +25,7 @@ const rollbackTransaction = async () => pool.query('ROLLBACK');
 function transformProductForResponse(product, req) {
     const transformedProduct = { ...product }; // Create a copy to avoid modifying the original object from query
     if (transformedProduct.immagine) {
-        transformedProduct.immagine_url = `${req.protocol}://${req.get('host')}/api/products/${transformedProduct.idprodotto}/image_content`;
+        transformedProduct.immagine_url = `${req.protocol}://${hostToSendWithCorrectPort}/api/products/${transformedProduct.idprodotto}/image_content`;
         delete transformedProduct.immagine; // Rimuove il campo immagine coi dati binari dal risultato 
     }
     if (transformedProduct.prezzounitario !== null && transformedProduct.prezzounitario !== undefined) {
