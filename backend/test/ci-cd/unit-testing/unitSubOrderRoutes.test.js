@@ -2,7 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
 
 const request = require('supertest');
-import express from 'express';
+const express = require('express');
 
 // Mock authentication middleware
 // This variable will hold the user object that isAuthenticated will inject into req.user
