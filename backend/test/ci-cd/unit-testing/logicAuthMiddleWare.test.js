@@ -1,18 +1,29 @@
 // Definisce e imposta il mock JWT_SECRET all'inizio del file, PRIMA che qualsiasi modulo dell'applicazione venga importato.
 // Questo è cruciale perché il middleware authMiddleWare legge process.env.JWT_SECRET al momento del caricamento.
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
+
 const mockJwtSecret = 'test_secret';
 process.env.JWT_SECRET = mockJwtSecret; // Imposta la variabile d'ambiente per il middleware PRIMA che venga caricato.
-
-// Importa i moduli necessari per i test.
-const jwt = require('jsonwebtoken');
-const pool = require('../../../src/config/db-connect');
-const { isAuthenticated, hasPermission } = require('../../../src/middleware/authMiddleWare');
-
 // Mock delle dipendenze esterne.
 // 'jsonwebtoken' viene mockato per controllare il comportamento della verifica e della firma dei token.
 jest.mock('jsonwebtoken');
 // '../../../src/config/db-connect' viene mockato per simulare le interazioni con il database senza effettuare query reali.
-jest.mock('../../../src/config/db-connect');
+// Mock database connection
+jest.mock('../../../src/config/db-connect', () => ({
+    query: jest.fn(),
+    connect: jest.fn(() => ({ // Mock connect to return an object
+        query: jest.fn(),    // This mock client also needs a query method if it's used
+        release: jest.fn(),  // Add the release method
+    })),
+    end: jest.fn(),
+}));
+const pool = require('../../../src/config/db-connect');
+
+// Importa i moduli necessari per i test.
+const jwt = require('jsonwebtoken');
+const { isAuthenticated, hasPermission } = require('../../../src/middleware/authMiddleWare');
+
 
 // Suite di test per i middleware di autenticazione e autorizzazione.
 describe('Auth Middleware: Logic test', () => {
