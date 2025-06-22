@@ -17,10 +17,7 @@ jobs:
         run: cd backend
       
       - name: dependencies
-        run:  npm install file-type mime jest supertest express
-      
-      - name: babel
-        run:  npm install --save-dev @babel/core @babel/preset-env
+        run:  npm install
       
       - name: Jest test
         run: npx jest ci-cd/unit-test
