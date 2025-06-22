@@ -17,9 +17,7 @@ jobs:
         run: cd backend
       
       - name: dependencies
-        run:  npm install file-type mime jest supertest express
+        run:  npm install file-type mime jest supertest express babel
       
       - name: Jest test
         run: npx jest ci-cd/unit-test
-
-        
