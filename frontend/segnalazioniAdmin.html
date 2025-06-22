@@ -116,7 +116,7 @@
                     <!-- Contenitore per messaggi (successo, errore) -->
                     <div id="adminProblemMessages" class="my-3"></div>
 
-                    <div id="div-segnalazioni" class="table-responsive">
+                    <div id="div-segnalazioni" style="overflow: hidden;" class="table-responsive">
                         <table id="table-segnalazioni" class="table table-hover">
                             <thead>
                                 <tr>
@@ -219,16 +219,24 @@
     <script src="js/segnalazioniAdmin.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const table = document.getElementById("table-segnalazioni");
-            const divTable = document.getElementById("div-segnalazioni");
-            table.addEventListener('wheel', (event) => {
-                console.log(event.deltaX);
-                console.log(table.scrollLeft);
-                if(Math.abs(event.deltaY) > Math.abs(event.deltaX)){
-                    event.preventDefault();
+            setTimeout(() => {
+                const table = document.getElementById("table-segnalazioni");
+                const divTable = document.getElementById("div-segnalazioni");
+                const isScrollable = divTable.scrollWidth > divTable.clientWidth;
+                console.log(divTable.scrollWidth, divTable.clientWidth)
+                console.log(isScrollable);
+                if(isScrollable){
+                    divTable.style.overflow = "auto";
+                    table.addEventListener('wheel', (event) => {
+                        console.log(event.deltaX);
+                        console.log(table.scrollLeft);
+                        if(Math.abs(event.deltaY) > Math.abs(event.deltaX)){
+                            event.preventDefault();
+                        }
+                        divTable.scrollLeft += event.deltaY;
+                    })
                 }
-                divTable.scrollLeft += event.deltaY;
-            })
+            }, 150)
         })
     </script>
 </body>
