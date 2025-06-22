@@ -19,7 +19,7 @@
 ####Criteri di accettazione:
 -  Il carrello consente di aggiungere, rimuovere o modificare la quantità dei prodotti selezionati.
 -  Il sistema calcola il totale del carrello in base ai prodotti selezionati.
--  Il checkout richiede i dati di pagamento e conferma l'ordine e lo notifica all'utente.
+-  Il checkout richiede i dati di pagamento tramite stripe e conferma l'ordine e lo notifica all'utente.
 
 
 ###-Gestione Account:
@@ -28,9 +28,9 @@
 **per** poter salvare i miei dati personali e visualizzare lo storico degli ordini.
 
 ####Criteri di accettazione:
- - La registrazione richiede i campi obbligatori: nome, cognome, email, indirizzo, username e password.
+ - La registrazione richiede i campi obbligatori: username, password, email e indirizzo.
  - L’utente autenticato può modificare i dati personali dal proprio profilo.
- - Lo storico degli ordini mostra la lista degli ordini con dettagli: ID ordine, data, importo e stato.
+ - Lo storico degli ordini mostra la lista degli ordini con dettagli: ID ordine, data, importo, stato e prodotti ordinati con le relative quantità.
 
 
 ###-Scrivere Recensioni:
@@ -45,8 +45,8 @@
 
 ###-Segnalare Problemi:
 **Come** cliente, 
-**voglio** poter avviare una richiesta di assistenza quando ho un problema con un mio ordine 
-**così che** verrà gestito da un admin
+**voglio** poter avviare una richiesta di assistenza quando ho un problema con un mio ordine,
+**così che** verrà gestito da un admin.
 
 ####Criteri di accettazione:
 - le segnalazioni e il loro stato può essere visto dall'area appostita nella propria area personale.
@@ -113,4 +113,15 @@
 ####Criteri di accettazione:
 - I nuovi profili di artigiani sono contrassegnati con lo stato “In attesa di approvazione”.
 - L’amministratore può approvare o rifiutare un profilo dalla dashboard di gestione utenti.
-- Il sistema notifica l’artigiano in caso di approvazione o rifiuto del profilo.
+- Il sistema notifica l’artigiano via mail in caso di approvazione o rifiuto del profilo.
+
+
+###-Approvazione Artigiani:
+**Come** amministratore,
+**voglio** rimuovere recensioni e prodotti indesiderati,
+**in modo da** assicurarmi che siano conformi agli standard della piattaforma.
+
+####Criteri di accettazione:
+- affianco alle recensioni dei prodotti troviamo dei pulsanti per l'eliminazione delle recensioni;
+- sotto i prodotti è possibile trovare un pulsante apposito per l'eliminazione del prodotto.
+- i bottoni sono visibili solo dall'amministratore.
