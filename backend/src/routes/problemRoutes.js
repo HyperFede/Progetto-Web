@@ -8,6 +8,9 @@ const { rawImageParser } = require('../middleware/fileUploadMiddleware.js'); // 
 const FileType = require('file-type'); // For inferring image MIME type
 const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js'); // Import the query builder middleware
 
+
+const serverPortDoNotChange = 3000;
+const hostToSendWithCorrectPort = `localhost:${serverPortDoNotChange}`;
 // Use the actual database pool
 const db = pool;
 
@@ -19,7 +22,7 @@ const transformProblemaForResponse = (problema, req) => {
     // Check for the raw image data (lowercase key from pg driver)
     if (transformedProblema.immagine && Buffer.isBuffer(transformedProblema.immagine)) {
         // Add the URL for the image content endpoint
-        transformedProblema.immagine_url = `${req.protocol}://${req.get('host')}/api/problems/${transformedProblema.idproblema}/image_content`;
+        transformedProblema.immagine_url = `${req.protocol}://${hostToSendWithCorrectPort}/api/problems/${transformedProblema.idproblema}/image_content`;
     }
 
     // Remove the raw image data from the JSON response
