@@ -1,4 +1,9 @@
 function showOrdini(result){
+    const ordersTableBody = document.getElementById("orders");
+    if (!result || !result.data || result.data.length === 0) {
+        ordersTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Nessun ordine effettuato.</td></tr>`;
+        return;
+    }
     let ordersRes = ``;
         const orders = result.data.map((order) => {
             if(order.status != "Scaduto"){
@@ -54,7 +59,7 @@ function showOrdini(result){
         });
 
 
-        document.getElementById("orders").innerHTML = ordersRes;
+        ordersTableBody.innerHTML = ordersRes;
 }
 
 
