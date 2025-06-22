@@ -32,15 +32,31 @@ jest.mock('../../../src/config/db-connect.js', () => {
   }
 })
 const pool = require('../../../src/config/db-connect.js')
-
+//const { request } = require('http');
 // ------------------------------
 // 2) MOCK out auth middleware
 //    - isAuthenticated should inject req.user
 //    - hasPermission just calls next()
 // ------------------------------
+
+const mockAuthenticatedUser = {
+    idutente: 1,
+    username: 'mockcliente',
+    tipologia: 'Cliente',
+};
+
+const mockAdminUser = {
+    idutente: 2,
+    username: 'mockadmin',
+    tipologia: 'Admin',
+};
+
 jest.mock('../../../src/middleware/authMiddleWare.js', () => ({
   isAuthenticated: (req, res, next) => {
     // By default, pretend the user is a Cliente with id = 1
+    const userTypeHeader = req.headers['x-mock-user-type'];
+    req.user = userTypeHeader === 'Admin' ? mockAdminUser : mockAuthenticatedUser;
+
     req.user = { idutente: 1, tipologia: 'Cliente' }
     next()
   },
@@ -49,6 +65,7 @@ jest.mock('../../../src/middleware/authMiddleWare.js', () => ({
     next()
   },
 }))
+
 
 // ------------------------------
 // 3) MOCK out file‐upload middleware
@@ -77,8 +94,8 @@ jest.mock(
       req.sqlQueryValues = []
       next()
     },
-  })
-)
+  }
+));
 
 // ------------------------------
 // 5) Require the router UNDER TEST
@@ -147,7 +164,7 @@ describe('Review Routes', () => {
       // 2) Then insert into Recensione returns the newly created row
       //    We mimic returning columns: IDRecensione, IDUtente, IDProdotto, Testo, Valutazione, Immagine=null, Data, Ora, plus joined username/nomeprodotto are not here in INSERT
       const fakeReviewRow = {
-        idrecensione: 123,
+        idrecensione: 123, // pg returns lowercase
         idutente: 1,
         idprodotto: 42,
         testo: 'Perfect!',
@@ -165,7 +182,7 @@ describe('Review Routes', () => {
       })
 
       expect(res.status).toBe(201)
-      // The response body should match transformReviewForResponse:
+      // The response body should match transformedReviewForResponse:
       // - it should include all fields except `immagine`
       // - it should add `immagine_url` only if immagine existed (here immagine is null → no immagine_url)
       expect(res.body).toEqual({
@@ -193,7 +210,7 @@ describe('Review Routes', () => {
   })
 
   //
-  // GET /api/reviews/:id
+  // GET /api/reviews/:id 
   //
   describe('GET  /api/reviews/:id', () => {
     const baseUrl = '/api/reviews/'
@@ -390,6 +407,52 @@ describe('Review Routes', () => {
       )
     })
   })
+    describe('GET /api/reviews', () => {
+        it('should retrieve all reviews successfully for Admin', async () => {
+            // Simulate Admin retrieving all reviews
+            pool.query.mockResolvedValueOnce({
+                rows: [{
+                    idrecensione: 1,
+                    idutente: 1,
+                    idprodotto: 1,
+                    testo: 'Ottimo prodotto',
+                    valutazione: 5,
+                    data: '2024-01-01',
+                    ora: '12:00:00',
+                    username: 'testuser',
+                    nomeprodotto: 'Test Product',
+                }]
+            });
+
+            const res = await request(app)
+                .get('/api/reviews')
+                .set('x-mock-user-type', 'Admin'); // Imposta il tipo di utente a 'Admin'
+
+            expect(res.statusCode).toBe(200);
+            expect(Array.isArray(res.body)).toBe(true);
+        });
+
+        it('should handle error and return 500 for invalid artisan ID format', async () => {
+            // Simulate a database error
+            pool.query.mockRejectedValue(new Error('Simulated database error'));
+            const res = await request(app)
+            .get(`/api/reviews`)
+            .set('x-mock-user-type', 'Admin'); // Imposta il tipo di utente a 'Admin'
+
+            expect(res.statusCode).toBe(500);
+            expect(res.body).toHaveProperty('error', 'Errore del server durante il recupero di tutte le recensioni');
+
+        });
+
+
+    });
+
+
+
+
+
+
+
 
   //
   // GET /api/reviews/product/:productId
