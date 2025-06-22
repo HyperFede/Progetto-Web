@@ -10,10 +10,6 @@ const { sendEmail } = require("../utils/emailSender");
 
 // Assicurati che JWT_SECRET sia definito nelle variabili d'ambiente
 const jwtSecret = process.env.JWT_SECRET;
-if (!jwtSecret) {
-    console.error('FATAL ERROR: JWT_SECRET is not defined.');
-    process.exit(1); // Termina l'applicazione se la chiave segreta non è configurata
-}
 
 // Potresti voler usare una chiave diversa o un payload specifico per i token di reset password
 // per distinguerli dai token di sessione. Per semplicità, useremo la stessa chiave
