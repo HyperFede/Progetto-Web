@@ -45,7 +45,7 @@ async function initDb() {
 // Main function to orchestrate image updates for all configured tables
 async function updateImages(client) { 
     try {
-        const imageBaseFolder = path.join(__dirname, '..', '..', '..', '..', 'Progetto-Web', 'backend', 'database', 'db_images');
+        const imageBaseFolder = path.join(__dirname, '..', '..', 'database', 'db_images');
         console.log(`Image base folder: ${imageBaseFolder}`);
 
         if (!fs.existsSync(imageBaseFolder)) {
