@@ -16,6 +16,9 @@ jobs:
       - name: backend dir
         run: cd backend
       
+      - name: dependencies
+        run:  npm install file-type mime jest supertest
+      
       - name: Jest test
         run: npx jest ci-cd/unit-test
 
