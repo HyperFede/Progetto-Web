@@ -11,7 +11,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # Questo passo clona il tuo repository nella macchina virtuale
+        uses: actions/checkout@v4
 
-      - name: Run a terminal command
+      - name: backend dir
+        run: cd backend
+      
+      - name: Jest test
         run: npx jest ci-cd/unit-test
+
+        
