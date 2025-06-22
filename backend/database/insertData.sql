@@ -29,7 +29,7 @@ BEGIN
 
         -- Art3 products
         ('Scultura Cavallo', 'Scultura in legno di noce', 'Sculture', 120.00, 5, 4),
-        ('Bassorilievo', 'Decorazione muraria in legno di ciliegio', 'Sculture', 85.00, 7, 4),
+        ('Bassorilievo', 'Decorazione muraria in marmo bianco fatta a mano', 'Sculture', 85.00, 7, 4),
         ('Porta Gioie', 'Scatola intarsiata con coperchio', 'Mobili e arredamento', 95.00, 12, 4);
 
         -- 3. MODIFIED: Changed order statuses to at least "Spedito" or "Consegnato"
