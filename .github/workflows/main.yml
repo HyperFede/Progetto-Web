@@ -1,0 +1,17 @@
+name: CI on Commit
+
+on:
+  push:
+    branches:
+      - main  # Puoi specificare il branch che vuoi monitorare, ad esempio 'main', 'master', o '*' per tutti i branch.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Specifica il sistema operativo su cui eseguire il job
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Questo passo clona il tuo repository nella macchina virtuale
+
+      - name: Run a terminal command
+        run: npx jest ci-cd/unit-test
