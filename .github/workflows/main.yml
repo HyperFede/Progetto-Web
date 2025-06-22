@@ -34,4 +34,4 @@ jobs:
 
       - name: Run Jest tests
         working-directory: backend
-        run: npx jest ci-cd/unit-testing
+        run: npm test -- unitAuthRoutes.test.js
