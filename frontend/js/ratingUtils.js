@@ -18,7 +18,7 @@ async function getHTMLforAverageRating(idprodotto) {
     try {
         const apiUrl = `/api/products/${idprodotto}/average-rating`;
         const result = await fetchData(apiUrl, "GET");
-        console.log(idprodotto, result)
+        //console.log(idprodotto, result)
 
         if (result && result.status === 200 && result.data) {
             const ratingData = result.data;

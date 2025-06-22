@@ -223,13 +223,13 @@
                 const table = document.getElementById("table-segnalazioni");
                 const divTable = document.getElementById("div-segnalazioni");
                 const isScrollable = divTable.scrollWidth > divTable.clientWidth;
-                console.log(divTable.scrollWidth, divTable.clientWidth)
-                console.log(isScrollable);
+                //console.log(divTable.scrollWidth, divTable.clientWidth)
+                //console.log(isScrollable);
                 if(isScrollable){
                     divTable.style.overflow = "auto";
                     table.addEventListener('wheel', (event) => {
-                        console.log(event.deltaX);
-                        console.log(table.scrollLeft);
+                        //console.log(event.deltaX);
+                        //console.log(table.scrollLeft);
                         if(Math.abs(event.deltaY) > Math.abs(event.deltaX)){
                             event.preventDefault();
                         }

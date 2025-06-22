@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         imageFile,
                         { isRawBody: true, customContentType: imageFile.type }
                     );
-                    console.log(imageUploadResponse);
+                    //console.log(imageUploadResponse);
                     if (imageUploadResponse.status !== 200) {
                         console.warn(`Errore aggiornamento immagine: ${imageUploadResponse.message || 'Dettaglio non disponibile.'}`);
                         // Optionally mark image input as invalid, though it's tricky for file inputs

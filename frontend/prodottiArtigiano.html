@@ -230,7 +230,7 @@
                 }
 
             } else {
-                //console.log("Errore caricamento dati!")
+                ////console.log("Errore caricamento dati!")
                 productsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Impossibile caricare le informazioni dell'utente o non sei un artigiano.</td></tr>`;
 
             }
@@ -275,7 +275,7 @@
             const result = await fetchData(`/api/products/${id}/stock/add`, "PUT", { "quantita": numAdding });
 
             if (result.status === 200 && result.data) {
-                console.log(result);
+                //console.log(result);
                 const quantityCell = document.getElementById(`qty-${id}`);
                 if (quantityCell) {
                     quantityCell.textContent = result.data.product.quantitadisponibile;

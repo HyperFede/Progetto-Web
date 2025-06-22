@@ -64,9 +64,9 @@ async function sendApproval(approval, email){
 </html>`;
         result = await fetchData("api/utils/send-email", "POST", {destinatario: email, oggetto: sub, testo: text, attach: true});
         if(result == 200){
-            // console.log("Email inviata");
+            // //console.log("Email inviata");
         }else{
-            // console.log("Errore nell'invio dell'email")
+            // //console.log("Errore nell'invio dell'email")
         }
     }else{
         text = `<!DOCTYPE html>
@@ -131,9 +131,9 @@ async function sendApproval(approval, email){
 </html>`;
         result = await fetchData("api/utils/send-email", "POST", {destinatario: email, oggetto: sub, testo: text, attach: true});
         if(result == 200){
-            console.log("Email inviata");
+            //console.log("Email inviata");
         }else{
-            console.log("Errore nell'invio dell'email")
+            //console.log("Errore nell'invio dell'email")
         }
     }
 }

@@ -176,7 +176,7 @@
     <script>
         const ordersTableBody = document.getElementById("ordini");
         function showOrders(result) {
-            // console.log(ordersTableBody); // Debugging line, can be removed or commented out
+            // //console.log(ordersTableBody); // Debugging line, can be removed or commented out
             if (!result || !result.data || result.data.length === 0) {
                 ordersTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Nessun ordine ricevuto.</td></tr>`;
                 return;
@@ -231,7 +231,7 @@
                 }
 
             } else {
-                //console.log("Errore caricamento dati!")
+                ////console.log("Errore caricamento dati!")
                 ordersTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Impossibile caricare le informazioni dell'utente o non sei un artigiano.</td></tr>`;
 
             }

@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
     
-                // console.log(formObj);
+                // //console.log(formObj);
     
                 if(formObj.checkArtigiano){
                     formObj.tipologia = "Artigiano";

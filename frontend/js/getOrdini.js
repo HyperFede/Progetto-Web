@@ -65,6 +65,6 @@ document.addEventListener("DOMContentLoaded", async function(){
         showOrdini(result);
 
     }else{
-        //console.log("Errore caricamento ordini!")
+        ////console.log("Errore caricamento ordini!")
     }
 })

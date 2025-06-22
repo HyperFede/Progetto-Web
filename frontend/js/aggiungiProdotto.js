@@ -54,7 +54,7 @@
 
                     try {
                         let response = await fetchData("/api/products", "POST", bodyreq);
-                        //console.log('Product creation response:', response);
+                        ////console.log('Product creation response:', response);
 
                         if (response.status === 201 && response.data && response.data.idprodotto) { // Check for 201 Created
                             let successMsg = `Prodotto "${response.data.nome}" aggiunto con successo!`;
@@ -64,7 +64,7 @@
                             const imageFile = imageInput.files[0]; // Get the first selected file from the corrected input
 
                             if (imageFile) { // Only attempt to upload if an image file is present
-                                //console.log("Tentativo di caricamento immagine per prodotto ID:", productId);
+                                ////console.log("Tentativo di caricamento immagine per prodotto ID:", productId);
                                 let putResponse = await fetchData(
                                     `/api/products/${productId}/image`,
                                     "PUT",

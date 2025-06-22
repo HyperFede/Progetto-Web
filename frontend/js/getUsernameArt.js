@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
                        // Select all buttons that should be managed for adding products
             const addProductButtons = document.querySelectorAll(".add-product-btn"); 
-            console.log("getUsernameArt.js", addProductButtons);
+            //console.log("getUsernameArt.js", addProductButtons);
             addProductButtons.forEach(button => {
                 if (button) { 
                     if (result.data.esitoapprovazione == "In lavorazione" || result.data.esitoapprovazione == "Rifiutato") {

@@ -111,7 +111,7 @@ async function loadAndDisplayAverageRating(productId) {
         const productDetailsContent = document.getElementById('product-details-content');
         const productActionBar = document.getElementById('product-action-bar'); // Get the action bar
 
-            console.log("DTG prodotto:", productActionBar.style.display);
+            //console.log("DTG prodotto:", productActionBar.style.display);
             if (productActionBar.style.display !== 'none'){
 
                 productActionBar.style.display = 'grid'; // Show the action bar (it uses d-grid)

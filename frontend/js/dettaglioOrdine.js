@@ -75,7 +75,7 @@ function populateSubOrderStatus(data) {
 
     const selectEl = document.getElementById('orderStatus');
 
-    console.log(data);
+    //console.log(data);
     // 1) Set the dropdown to the incoming status (so the form control matches)
     selectEl.value = data.subOrdineStatus || data.subordinestatus || 'In attesa';
 

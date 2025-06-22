@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 200 && response.data) {
                 // Filter out problems with status 'Risolto' on the client side
                 const problemsToDisplay = response.data.filter(problem => problem.status !== 'Risolto');
-                console.log('Segnalazioni da visualizzare (escluso "Risolto"):', problemsToDisplay);
+                //console.log('Segnalazioni da visualizzare (escluso "Risolto"):', problemsToDisplay);
 
                 problemsTableBody.innerHTML = ''; // Pulisci il messaggio di caricamento
 

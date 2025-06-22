@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async function(){
         showProducts(result); // Render product cards first
         await loadAndDisplayProductRatings(result.data); // Then load and display their ratings
     }else{
-        //console.log("Errore caricamento prodotti!")
+        ////console.log("Errore caricamento prodotti!")
     }
 
     

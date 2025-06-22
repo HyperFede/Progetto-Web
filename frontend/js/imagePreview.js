@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const imageContainer = document.querySelector('.product-detail-image-container');
     if (!imageContainer) {
-        // console.log("Image preview script: .product-detail-image-container not found.");
+        // //console.log("Image preview script: .product-detail-image-container not found.");
         return;
         
     }
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
             addImageAggiungiTxt.style.display = 'none';
             imageContainer.classList.add('state-has-image');
             imageContainer.classList.remove('state-add-image');
-            console.log(addImageTrigger);
+            //console.log(addImageTrigger);
         } else {
             // State: No image, show placeholder and add trigger
             currentImageDisplay.style.display = 'flex';
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Handle file selection
     productImageInput.addEventListener('change', function (e) {
-        console.log(addImageTrigger);
+        //console.log(addImageTrigger);
         const file = e.target.files[0];
         if (file && file.type.startsWith('image/')) {
             const reader = new FileReader();

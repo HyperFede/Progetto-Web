@@ -338,7 +338,7 @@
 
             if (!result || !result.data || result.data.length === 0) {
                 problemsTbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nessuna segnalazione disponibile.</td></tr>';
-                // console.log("No problems data to display or data is empty.");
+                // //console.log("No problems data to display or data is empty.");
                 return;
             }
 
@@ -375,7 +375,7 @@
                     </tr>`;
             }).join('');
 
-            // console.log("Generated HTML for problems:", problemRowsHtml); // For debugging
+            // //console.log("Generated HTML for problems:", problemRowsHtml); // For debugging
             problemsTbody.innerHTML = problemRowsHtml;
         }
 

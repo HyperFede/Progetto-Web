@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         response = await fetchData('api/auth/send-recovery-email', "POST", {email: emailDaMandare});
         if (response.status === 200){
-            console.log("Email inviata con successo");
+            //console.log("Email inviata con successo");
             verifyMessage.innerHTML = '<span class="success-text">Tii abbiamo inviato un link per il recupero della password.</span>';
             verifyMessage.classList.add('alert', 'alert-success'); // Add Bootstrap success alert styles
             verifyMessage.style.display = 'block'; // Show the message

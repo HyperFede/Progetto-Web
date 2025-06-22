@@ -65,7 +65,7 @@ async function aggiungiAlCarrello(id = null, quantita = 1, buttonElement = null)
 
     let result = await fetchData(`api/cart/items/${id}/add`, "PUT", obj);
     if (result.status == 200) {
-        // console.log("Aggiunto al carrello (quantità aggiornata)!")
+        // //console.log("Aggiunto al carrello (quantità aggiornata)!")
         if (typeof fetchAndUpdateCartCounter === 'function') {
             await fetchAndUpdateCartCounter(true); // Passa true per animare
         }
@@ -81,7 +81,7 @@ async function aggiungiAlCarrello(id = null, quantita = 1, buttonElement = null)
         
         let postResult = await fetchData("/api/cart/items", "POST", obj); // Rinominato result per evitare confusione
         if (postResult.status == 201) {
-            // console.log("Aggiunto al carrello (nuovo prodotto)!")
+            // //console.log("Aggiunto al carrello (nuovo prodotto)!")
             if (typeof fetchAndUpdateCartCounter === 'function') {
                 await fetchAndUpdateCartCounter(true); // Passa true per animare
             }
@@ -90,7 +90,7 @@ async function aggiungiAlCarrello(id = null, quantita = 1, buttonElement = null)
             //     animateItemToCart(buttonElement);
             // }
         } else {
-            // console.log("Errore nella aggiunta (POST)!", postResult)
+            // //console.log("Errore nella aggiunta (POST)!", postResult)
             // Qui si potrebbe mostrare un messaggio di errore all'utente
                         let userMessage = "Si è verificato un errore durante l'aggiunta del prodotto.";
 
@@ -124,7 +124,7 @@ async function aggiungiAlCarrello(id = null, quantita = 1, buttonElement = null)
             return; // Esce per non eseguire la logica di successo del pulsante
         }
     } else {
-        // console.log("Errore nell'aggiunta (PUT) o stock terminato!", result)
+        // //console.log("Errore nell'aggiunta (PUT) o stock terminato!", result)
         // Qui si potrebbe mostrare un messaggio di errore all'utente (es. stock non disponibile)
                 let userMessage = "Si è verificato un errore durante l'aggiornamento del carrello.";
 
