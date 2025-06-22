@@ -9,7 +9,6 @@ const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare
 const FileType = require('file-type'); // For inferring image MIME type
 const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js'); // Import the new middleware
 const { rawImageParser } = require('../middleware/fileUploadMiddleware.js'); // Importa il middleware specifico per le immagini
-const serverApp = require('../server.js');
 
 const serverPortDoNotChange = 3000;
 const hostToSendWithCorrectPort = `localhost:${serverPortDoNotChange}`;
@@ -526,7 +525,7 @@ router.delete('/:id', isAuthenticated, hasPermission(['Artigiano','Admin']), asy
         // Autorizzazione: L'Artigiano può eliminare solo i propri prodotti. L'Admin può eliminare qualsiasi prodotto.
         if (authenticatedUser.tipologia === 'Artigiano' && productCheck.rows[0].idartigiano !== authenticatedUser.idutente) {
             return res.status(403).json({ error: "Vietato: l'artigiano può eliminare solo i propri prodotti." });
-        }
+        }   
 
         let deleteQueryText;
         let deleteQueryValues;

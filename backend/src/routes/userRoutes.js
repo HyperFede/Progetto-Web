@@ -140,7 +140,7 @@ router.post('/', async (req, res) => {
             client.release(); // Rilascia sempre il client al pool
         }
     } catch (error) { // Questo catch esterno è per errori come bcrypt.genSalt o bcrypt.hash
-        console.log('Errore generale prima della transazione DB:', error);
+        console.error('Errore generale prima della transazione DB:', error);
         res.status(500).json({ message: 'Errore del server durante la preparazione della creazione utente.' });
     }
 });
