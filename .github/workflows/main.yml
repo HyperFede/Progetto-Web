@@ -22,7 +22,14 @@ jobs:
         working-directory: backend # Esegui i comandi all'interno della cartella 'backend'
         run: |
           npm cache clean --force
-          npm install
+          npm ci
+          npm install jest
+
+      - name: Verify Jest executable (Optional, for debugging)
+        working-directory: backend
+        run: |
+          ls -la node_modules/.bin/jest
+          which npx
 
       - name: Run Jest tests
         working-directory: backend
