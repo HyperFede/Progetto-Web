@@ -68,11 +68,12 @@ body {
 
 .password-field-container {
     position: relative;
+    display: flex; /* Permette all'input di riempire lo spazio e al bottone di posizionarsi */
+    align-items: center;
 }
 
-.password-field-container .form-control {
-    padding-right: 3rem;
-    /* spazio per il pulsante */
+.password-field-container input[type="password"] {
+    flex-grow: 1;
 }
 
 #toggle-password {
@@ -90,4 +91,5 @@ body {
 
 #toggle-password .toggle-icon {
     font-size: 1.25rem;
+    vertical-align: middle;
 }
