@@ -12,9 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     <title>Registrazione</title>
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
 </head>
 
 <body>
@@ -23,23 +20,20 @@
             <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 100px;">
         </a>
         <h2 class="title-center mb-5">Registrazione</h2>
-
+        
         <form id="formRegistrazione" class="custom-form">
             <!-- Prima Riga -->
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Nome</label>
-                        <input type="text" id="nome" name="nome" placeholder="Nome" class="form-control" required>
-                        <span class="error-text invisible" id="nome-error"></span>
+                        <input type="text" name="nome" placeholder="Nome" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Cognome</label>
-                        <input type="text" id="cognome" name="cognome" placeholder="Cognome" class="form-control"
-                            required>
-                        <span class="error-text invisible" id="cognome-error"></span>
+                        <input type="text" name="cognome" placeholder="Cognome" class="form-control">
                     </div>
                 </div>
             </div>
@@ -49,8 +43,9 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Username</label>
-                        <input type="text" id="username" name="username" placeholder="Username" class="form-control"
-                            required>
+                        <input type="text" name="username" placeholder="Username" class="form-control" required>
+                        <!-- Quando l'esito di POST api/users/ è username già esistente, cambia display:none -->
+                        
                         <span class="error-text invisible" id="username-error">Username già esistente</span>
                         
                     </div>
@@ -58,59 +53,48 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <div class="password-field-container">
-                            <input type="password" id="password" name="password" placeholder="Password" class="form-control"
-                                required>
-                            <button type="button" id="toggle-password" aria-label="Mostra password">
-                                <i class="bi bi-eye-slash toggle-icon" id="icon-pass"></i>
-                            </button>
-                        </div>
-                        <span class="error-text invisible" id="password-error"></span>
+                        <input type="text" name="password" placeholder="Password" class="form-control" required>
                     </div>
                 </div>
             </div>
 
             <div class="form-group mb-4">
                 <label class="form-label">Email</label>
-                <input type="email" name="email" id="email" placeholder="email@example.com" class="form-control"
-                    required>
+                <input type="email" name="email" placeholder="email@example.com" class="form-control" required>
+                <!-- Quando l'esito di POST api/users/ è email già esistente -->
+                
                 <span class="error-text invisible" id="email-error">Email già esistente</span>
-                <span class="error-text invisible" id="email-invalid">Email non valida (formato xx@yy.zz)</span>
-
+               
             </div>
 
             <!-- Terza Riga -->
             <div class="form-group mb-4">
                 <label class="form-label">Indirizzo</label>
-                <input type="text" name="indirizzo" id="indirizzo" placeholder="via, numero, città" class="form-control"
-                    required>
-                <span class="error-text invisible" id="indirizzo-error"></span>
+                <input type="text" name="indirizzo" placeholder="via, numero, città" class="form-control" required>
             </div>
 
             <!-- Quarta Riga - Switch -->
             <div class="form-group mb-4">
                 <div class="form-check form-switch d-flex align-items-center p-0">
                     <label class="form-check-label me-3">Sei un artigiano?</label>
-                    <input class="form-check-input flex-shrink-0" type="checkbox" id="toggleSwitch"
-                        name="checkArtigiano" style="width: 3em; height: 1.5em; margin: 0;">
+                    <input class="form-check-input flex-shrink-0" 
+                           type="checkbox" 
+                           id="toggleSwitch" 
+                           name="checkArtigiano"
+                           style="width: 3em; height: 1.5em; margin: 0;">
                 </div>
             </div>
 
             <!-- Quinta Riga (Se artigiano) -->
             <div class="form-group mb-4 conditional-section" style="display: none;">
                 <label class="form-label">Partita IVA</label>
-                <input type="text" id="piva" name="piva" id="piva" placeholder="Partita IVA" class="form-control">
-                <span class="error-text invisible" id="piva-invalid">Piva non valida (11 numeri)</span>
-
-                <span class="error-text invisible" id="piva-error"></span>
+                <input type="text" id="piva" name="piva" placeholder="Partita IVA" class="form-control">
             </div>
 
             <!-- Sesta Riga (Se artigiano) -->
             <div class="form-group mb-5 conditional-section" style="display: none;">
                 <label class="form-label">Descrizione - Attività</label>
-                <textarea class="form-control" id="descrizione" name="descrizione" placeholder="Descrizione"
-                    style="min-height: 150px;"></textarea>
-                <span class="error-text invisible" id="descrizione-error"></span>
+                <textarea class="form-control" id="descrizione" name="descrizione" placeholder="Descrizione" style="min-height: 150px;"></textarea>
             </div>
 
             <!-- Bottone Submit -->
@@ -120,7 +104,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/fetcher.js"></script>
-    <script src="js/passwordFieldShower.js"> </script>
     <script src="js/formRegistrazione.js"></script>
 </body>
 
