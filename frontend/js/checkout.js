@@ -156,8 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
         }
         else{
-            errorMessage = "Non hai nessun ordine in attesa di pagamento"
-            displayCheckoutMessage(errorMessage, 'error');
+            window.location.href = 'carrelloUtente.html';
         }
         
         // Logica per annullare l'ordine da implementare qui
