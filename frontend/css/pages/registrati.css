@@ -46,24 +46,3 @@ body {
     font-size: 0.875em; /* Optional: makes the error text a bit smaller */
     margin-top: 0.25rem; /* Optional: adds a little space above the error message */
 }
-    .password-field-container {
-  position: relative;
-}
-.password-field-container .form-control {
-  padding-right: 3rem; /* spazio per il pulsante */
-}
-#toggle-password {
-  position: absolute;
-  top: 50%;
-  right: .75rem;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  padding: .25rem;
-  cursor: pointer;
-  z-index: 2;
-  color: #6c757d;
-}
-#toggle-password .toggle-icon {
-  font-size: 1.25rem;
-}
