@@ -9,7 +9,10 @@ const{createQueryBuilderMiddleware}  =  require('../middleware/queryBuilderMiddl
 
 // Recupera la chiave segreta per JWT dalle variabili d'ambiente.
 // Anche se getUserFromToken la usa internamente, è buona prassi averla disponibile se necessario.
-const jwtSecret = process.env.JWT_SECRET;
+let jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+    jwtSecret = "Stef" // Termina l'applicazione se la chiave segreta non è configurata
+}
 
 // Funzioni di aiuto per la gestione delle transazioni (possono essere spostate in un modulo condiviso se usate altrove)
 const beginTransaction = async (client) => client.query('BEGIN');

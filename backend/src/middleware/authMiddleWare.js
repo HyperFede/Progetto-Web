@@ -10,7 +10,6 @@ let jwtSecret = process.env.JWT_SECRET;
 // Controllo critico: se JWT_SECRET non è definito, l'applicazione non può funzionare in modo sicuro.
 // Stampa un errore fatale e termina il processo.
 if (!jwtSecret) {
-    console.error('FATAL ERROR: JWT_SECRET is not defined.');
     jwtSecret = "Stef" // Termina l'applicazione se la chiave segreta non è configurata
 }
 

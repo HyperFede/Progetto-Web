@@ -9,7 +9,10 @@ const { isAuthenticated, hasPermission } = require('../middleware/authMiddleWare
 const { sendEmail } = require("../utils/emailSender");
 
 // Assicurati che JWT_SECRET sia definito nelle variabili d'ambiente
-const jwtSecret = process.env.JWT_SECRET;
+let jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+    jwtSecret = "Stef" // Termina l'applicazione se la chiave segreta non è configurata
+}
 
 // Potresti voler usare una chiave diversa o un payload specifico per i token di reset password
 // per distinguerli dai token di sessione. Per semplicità, useremo la stessa chiave
