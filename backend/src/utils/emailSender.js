@@ -6,7 +6,7 @@ function sendEmail(dest, sub, text, attach = false){
         service: 'gmail',
 
         auth: {
-            user: process.env.EMAIL,
+            user: "bazartcommerce@gmail.com",
             pass:"nksl xati rsre rgbq",
         }
     });
