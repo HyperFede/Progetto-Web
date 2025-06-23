@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let response = await fetchData("api/orders/reserve-and-create-checkout-session", "POST");
 
         if (response.status==201){
+            buyNowButton.disabled = false;
             let redirectLink = response.data.stripeSessionUrl;
             window.location.href = redirectLink;
         }
