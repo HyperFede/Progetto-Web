@@ -1,0 +1,32 @@
+name: CI on Commit
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: backend # Esegui i comandi all'interno della cartella 'backend'
+        run: |
+          npm cache clean --force
+          npm ci
+          npm install jest
+          npm install --save-dev @babel/core @babel/preset-env
+
+      - name: Run Jest tests
+        working-directory: backend
+        run: npx jest ci-cd/unit-testing

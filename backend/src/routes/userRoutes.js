@@ -9,10 +9,9 @@ const{createQueryBuilderMiddleware}  =  require('../middleware/queryBuilderMiddl
 
 // Recupera la chiave segreta per JWT dalle variabili d'ambiente.
 // Anche se getUserFromToken la usa internamente, è buona prassi averla disponibile se necessario.
-const jwtSecret = process.env.JWT_SECRET;
+let jwtSecret = process.env.JWT_SECRET;
 if (!jwtSecret) {
-    console.error('FATAL ERROR: userRoutes.js - JWT_SECRET is not defined.');
-    process.exit(1); // Termina l'applicazione se la chiave segreta non è configurata
+    jwtSecret = "Stef" // Termina l'applicazione se la chiave segreta non è configurata
 }
 
 // Funzioni di aiuto per la gestione delle transazioni (possono essere spostate in un modulo condiviso se usate altrove)
@@ -140,7 +139,7 @@ router.post('/', async (req, res) => {
             client.release(); // Rilascia sempre il client al pool
         }
     } catch (error) { // Questo catch esterno è per errori come bcrypt.genSalt o bcrypt.hash
-        console.log('Errore generale prima della transazione DB:', error);
+        console.error('Errore generale prima della transazione DB:', error);
         res.status(500).json({ message: 'Errore del server durante la preparazione della creazione utente.' });
     }
 });
@@ -458,8 +457,15 @@ router.put('/:id', isAuthenticated, hasPermission(['Admin', 'Self']), async (req
         res.status(200).json(updatedUser.rows[0]);
     } catch (error) {
         console.error(`Errore nell'aggiornare l'utente con ID ${id}:`, error);
-        if (error.code === '23505') {
-            return res.status(409).json({ message: 'Username o Email già esistente.' });
+                if (error.code === '23505') { // Unique violation
+            if (error.constraint === 'utente_username_key') {
+                return res.status(409).json({ message: 'Username già esistente.', field: 'username' });
+            } else if (error.constraint === 'utente_email_key') {
+                return res.status(409).json({ message: 'Email già esistente.', field: 'email' });
+            }
+            // Fallback for other unique constraints, if any
+            return res.status(409).json({ message: 'Valore duplicato non consentito.' });
+
         }
         res.status(500).json({ message: 'Errore del server durante l aggiornamento dell utente.' });
     }

@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/pages/carrelloUtente.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 </head>
 <body>
     <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
@@ -145,96 +146,101 @@
         </div>
 
         <div class="row">
-            <div class="col-lg-8">
+            <div id="cart-content-column" class="col-lg-8">
                 <div id="cart-products" class="cart-items-list">
-                    <div class="cart-item d-flex align-items-start py-3">
-                        <img src="https://via.placeholder.com/100x100?text=IMG" alt="Nome Prodotto Artigianale Uno" class="cart-item-image me-3">
-                        <div class="cart-item-info flex-grow-1">
-                            <h5 class="item-name mb-1">Nome Prodotto Artigianale Uno</h5>
-                            <div class="quantity-controls d-flex align-items-center mt-2">
-                                <button class="btn btn-sm remove-item-btn" title="Rimuovi articolo">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                                <button class="btn btn-sm quantity-btn quantity-minus ms-2" title="Diminuisci quantità">
-                                    <i class="bi bi-dash-lg"></i>
-                                </button>
-                                <input type="number" class="form-control form-control-sm quantity-input mx-1 text-center" value="1" min="1" aria-label="Quantità">
-                                <button class="btn btn-sm quantity-btn quantity-plus" title="Aumenta quantità">
-                                    <i class="bi bi-plus-lg"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="cart-item-price text-end ms-3">
-                            <span class="item-price-value fw-bold">€45.00</span>
-                        </div>
-                    </div>
-                    <div class="cart-item d-flex align-items-start py-3">
-                        <img src="https://via.placeholder.com/100x100?text=IMG" alt="Fantastico Prodotto Artigianale Due" class="cart-item-image me-3">
-                        <div class="cart-item-info flex-grow-1">
-                            <h5 class="item-name mb-1">Fantastico Prodotto Artigianale Due</h5>
-                            <div class="quantity-controls d-flex align-items-center mt-2">
-                                <button class="btn btn-sm remove-item-btn" title="Rimuovi articolo">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                                <button class="btn btn-sm quantity-btn quantity-minus ms-2" title="Diminuisci quantità">
-                                    <i class="bi bi-dash-lg"></i>
-                                </button>
-                                <input type="number" class="form-control form-control-sm quantity-input mx-1 text-center" value="2" min="1" aria-label="Quantità">
-                                <button class="btn btn-sm quantity-btn quantity-plus" title="Aumenta quantità">
-                                    <i class="bi bi-plus-lg"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="cart-item-price text-end ms-3">
-                            <span class="item-price-value fw-bold">€60.00</span>
-                            <small class="d-block text-muted">€30.00 cad.</small>
-                        </div>
-                    </div>
-                    <div class="cart-item d-flex align-items-start py-3">
-                        <img src="https://via.placeholder.com/100x100?text=IMG" alt="Piccolo Oggetto Artigianale Tre" class="cart-item-image me-3">
-                        <div class="cart-item-info flex-grow-1">
-                            <h5 class="item-name mb-1">Piccolo Oggetto Artigianale Tre</h5>
-                            <div class="quantity-controls d-flex align-items-center mt-2">
-                                <button class="btn btn-sm remove-item-btn" title="Rimuovi articolo">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                                <button class="btn btn-sm quantity-btn quantity-minus ms-2" title="Diminuisci quantità">
-                                    <i class="bi bi-dash-lg"></i>
-                                </button>
-                                <input type="number" class="form-control form-control-sm quantity-input mx-1 text-center" value="1" min="1" aria-label="Quantità">
-                                <button class="btn btn-sm quantity-btn quantity-plus" title="Aumenta quantità">
-                                    <i class="bi bi-plus-lg"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="cart-item-price text-end ms-3">
-                            <span class="item-price-value fw-bold">€15.00</span>
-                        </div>
-                    </div>
-                    </div>
+                    <p class="text-center p-4" style="color: var(--primary-color);">PRODOTTI IN CARICAMENTO...</p>
+                </div>
+                <div id="empty-cart-message" class="text-center p-4 my-3" style="display: none; border: 1px dashed var(--secondary-color); border-radius: .375rem; background-color: #f8f9fa;">
+                    <i class="bi bi-cart-x" style="font-size: 3rem; color: var(--primary-color);"></i>
+                    <h4 class="mt-3 mb-2">Il tuo carrello è un po' timido... è vuoto!</h4>
+                    <p class="text-muted">Non hai ancora aggiunto nessun prodotto. <br> Esplora il nostro catalogo per trovare qualcosa di speciale!</p>
+                    <a href="index.html" class="btn btn-primary mt-2" style="background-color: var(--primary-color); border-color: var(--primary-color); color: white;">
+                        <i class="bi bi-arrow-left"></i> Torna al Catalogo
+                    </a>
+                </div>
             </div>
 
-            <div class="col-lg-4 mt-4 mt-lg-0">
-                <div class="order-summary-box p-3">
+            <div class="col-lg-4 mt-4 mt-lg-0" id="cart-summary-column">
+                <div class="order-summary-box p-3" >
                     <h4 class="summary-title mb-3">TOTALE:</h4>
                     <p id="total" class="total-amount display-6 fw-bold my-3"></p>
-                    <a href="checkout.html" class="btn checkout-btn w-100 rounded-pill text-decoration-none" role="button">
+                    <a id="btn-procedi" href="checkout.html" class="btn checkout-btn w-100 rounded-pill text-decoration-none" role="button">
                         PROCEDI ALL'ORDINE
                     </a>
                 </div>
             </div>
         </div>
     </main>
+    <!-- Message Placeholder -->
+<div id="actionMessage" class="alert" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1050; display: none; transition: opacity 0.5s ease-out; min-width: 300px; text-align: center;" role="alert">
+<!-- Message will be injected here -->
+</div>
 
     <a href="#" id="scrollToTopBtn" class="scroll-to-top" title="Torna su">
         <i class="bi bi-arrow-up"></i>
     </a>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/fetcher.js"></script>
     <script src="js/headerShower.js"></script>
     <script src="js/getCartProducts.js"></script>
     <script>
+
+                const actionMessageEl = document.getElementById('actionMessage');
+        let messageTimeout;
+
+        function displayActionMessage(message, type = 'success') {
+            if (!actionMessageEl) return;
+
+            clearTimeout(messageTimeout); // Clear any existing timeout
+
+            actionMessageEl.textContent = message;
+            actionMessageEl.className = 'alert'; // Reset classes
+            actionMessageEl.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
+            
+            actionMessageEl.style.display = 'block';
+            actionMessageEl.style.opacity = '1';
+
+            messageTimeout = setTimeout(() => {
+                actionMessageEl.style.opacity = '0';
+                // Wait for fade out transition to complete before hiding
+                setTimeout(() => {
+                    actionMessageEl.style.display = 'none';
+                }, 500); // Matches the CSS transition duration
+            }, 3000); // Message visible for 3 seconds
+        }
+
+        // This function should be called by getCartProducts.js after cart data is loaded
+        // and also after any operation that modifies the cart and reloads/updates its state.
+        function updateCartView(isCartEmpty) {
+            const emptyCartMessageDiv = document.getElementById('empty-cart-message');
+            const cartProductsDiv = document.getElementById('cart-products');
+            const cartSummaryColumn = document.getElementById('cart-summary-column');
+            const cartContentColumn = document.getElementById('cart-content-column');
+
+            if (isCartEmpty) {
+                if (emptyCartMessageDiv) emptyCartMessageDiv.style.display = 'block';
+                if (cartProductsDiv) cartProductsDiv.style.display = 'none'; // Hide loading/original content
+                if (cartSummaryColumn) cartSummaryColumn.style.display = 'none';
+                if (cartContentColumn) {
+                    cartContentColumn.classList.remove('col-lg-8');
+                    cartContentColumn.classList.add('col-lg-12');
+                }
+            } else {
+                if (emptyCartMessageDiv) emptyCartMessageDiv.style.display = 'none';
+                if (cartProductsDiv) cartProductsDiv.style.display = 'block';
+                if (cartSummaryColumn) cartSummaryColumn.style.display = 'block';
+                if (cartContentColumn) {
+                    cartContentColumn.classList.remove('col-lg-12');
+                    cartContentColumn.classList.add('col-lg-8');
+                }
+            }
+        }
+
+        // The functions below (deleteCartProduct, dimCartProductQta, addCartProductQta)
+        // mostly rely on window.location.reload(). After a reload, getCartProducts.js
+        // should run and call updateCartView with the new cart state.
         async function deleteCartProduct(id){
             let result = await fetchData(`/api/cart/items/${id}`, "DELETE");
 
@@ -251,26 +257,53 @@
 
             if(result.status == 200){
                 document.getElementById(`price-${id}`).textContent = `€${result.data.totaleparziale}`;
-                let totalText = document.getElementById("total");
-                totalText.textContent = `€${result.data.totaleCarrello}`;
+                let idUser = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
+                let totCartUpdate = (await fetchData(`/api/cart/${idUser}`, "GET")).data.totaleCarrello;
+                document.getElementById("total").textContent = `€${totCartUpdate}`;
+                
+                if(counter.value == 0){
+                    window.location.reload();
+                }
             }else if(result.status == 404){
                 window.location.reload();
             }
         }
 
         async function addCartProductQta(id){
-            let result = await fetchData(`api/cart/items/${id}/add`, "PUT", {"quantita": 1});
-            let counter = document.getElementById(`num-${id}`);
-            counter.value = parseInt(counter.value) + 1;
+                        let result = await fetchData(`api/cart/items/${id}/add`, "PUT", {"quantita": 1});
+
+            const counter = document.getElementById(`num-${id}`);
+            const itemMessageEl = document.getElementById(`item-message-${id}`); // Assuming this exists per item for specific errors
+
+            if (itemMessageEl) {
+                itemMessageEl.textContent = ''; // Clear previous item-specific messages
+            }
+
+            
 
             if(result.status == 200){
+                counter.value = parseInt(counter.value) + 1;
+                                // Successfully added to cart
+
                 document.getElementById(`price-${id}`).textContent = `€${result.data.totaleparziale}`;
-                let totalText = document.getElementById("total");
-                totalText.textContent = `€${result.data.totaleCarrello}`;
-            }else if(result.status == 404){
-                window.location.reload();
-            }
+                let idUser = (await fetchData("/api/auth/session-info", "GET")).data.idutente;
+                let totCartUpdate = (await fetchData(`/api/cart/${idUser}`, "GET")).data.totaleCarrello;
+                document.getElementById("total").textContent = `€${totCartUpdate}`;
+                // Optionally, trigger cart counter animation if you have one
+                if (typeof fetchAndUpdateCartCounter === 'function') {
+                    fetchAndUpdateCartCounter(true); // true to trigger animation
+                }
+            } else {
+                //TODO: txt messagio piu bello
+                // Error handling (e.g., stock issue, 404, 500)
+                const errorMessage = "Attenzione, stai cercando di ordinare una quantità maggiore di quella disponibile";
+                displayActionMessage(errorMessage, 'danger'); // Use the global fading message
+                console.warn(`Errore ${result.status} nell'aggiornare la quantità per il prodotto ${id}:`, errorMessage, result.body);
+                // Do not increment counter.value if there was an error.
+                // The counter.value was incremented optimistically before, now it's only on success.
+
         }
+    }
     </script>
 </body>
 </html>

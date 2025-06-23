@@ -1,6 +1,152 @@
+async function sendApproval(approval, email){
+    let result;
+    let sub = "Bazart: Approvazione Account Artigiano";
+    if(approval == "Approvato"){
+        text = `<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Il suo account è stato approvato!</title>
+    <style>
+        /* Stili per client che li supportano nel head */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+        body, html {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+            width: 100% !important;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; width: 100%; background-color: #e9d3ae;">
+    <!--[if mso | IE]>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #e9d3ae;">
+        <tr>
+            <td>
+    <![endif]-->
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #e9d3ae; width: 100%; height: 100%;">
+        <tr>
+            <td align="center" valign="middle" style="padding: 1rem;">
+                <!-- Contenitore principale -->
+                <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 6px;">
+                    <tr>
+                        <td style="padding: 2rem; text-align: center;">
+                            <!-- Logo -->
+                            
+                            <img src="cid:logo@bazart" alt="Logo" width="150" style="display: block; margin: 0 auto 1rem auto; max-width: 100%; height: auto; border: 0;">
+                            
+                            
+                            <!-- Titolo -->
+                            <h2 style="font-family: 'Montserrat', Arial, sans-serif; color: #283618; font-size: 24px; font-weight: 700; letter-spacing: 1px; margin: 0 0 1rem 0;">
+                                Il suo account è stato approvato!
+                            </h2>
+                            
+                            <!-- Testo -->
+                            <p style="font-family: 'Montserrat', Arial, sans-serif; color: #283618; font-size: 16px; line-height: 1.5; margin: 0;">
+                                Adesso può accedere liberamente alle funzionalità della sua area personale.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <!--[if mso | IE]>
+            </td>
+        </tr>
+    </table>
+    <![endif]-->
+</body>
+</html>`;
+        result = await fetchData("api/utils/send-email", "POST", {destinatario: email, oggetto: sub, testo: text, attach: true});
+        if(result == 200){
+            // //console.log("Email inviata");
+        }else{
+            // //console.log("Errore nell'invio dell'email")
+        }
+    }else{
+        text = `<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Il suo account è stato approvato!</title>
+    <style>
+        /* Stili per client che li supportano nel head */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+        body, html {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+            width: 100% !important;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; width: 100%; background-color: #e9d3ae;">
+    <!--[if mso | IE]>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #e9d3ae;">
+        <tr>
+            <td>
+    <![endif]-->
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #e9d3ae; width: 100%; height: 100%;">
+        <tr>
+            <td align="center" valign="middle" style="padding: 1rem;">
+                <!-- Contenitore principale -->
+                <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 6px;">
+                    <tr>
+                        <td style="padding: 2rem; text-align: center;">
+                            <!-- Logo -->
+                            
+                            <img src="cid:logo@bazart" alt="Logo" width="150" style="display: block; margin: 0 auto 1rem auto; max-width: 100%; height: auto; border: 0;">
+                            
+                            
+                            <!-- Titolo -->
+                            <h2 style="font-family: 'Montserrat', Arial, sans-serif; color: #283618; font-size: 24px; font-weight: 700; letter-spacing: 1px; margin: 0 0 1rem 0;">
+                                Il suo account è stato rifiutato!
+                            </h2>
+                            
+                            <!-- Testo -->
+                            <p style="font-family: 'Montserrat', Arial, sans-serif; color: #283618; font-size: 16px; line-height: 1.5; margin: 0;">
+                                Il suo account non è conforme alle nostre policy di sicurezza. Si prega di registrarsi nuovamente attenendosi alla nostra regolamentazione.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <!--[if mso | IE]>
+            </td>
+        </tr>
+    </table>
+    <![endif]-->
+</body>
+</html>`;
+        result = await fetchData("api/utils/send-email", "POST", {destinatario: email, oggetto: sub, testo: text, attach: true});
+        if(result == 200){
+            //console.log("Email inviata");
+        }else{
+            //console.log("Errore nell'invio dell'email")
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const pendingApprovalsContainer = document.getElementById('pendingApprovalsContainer');
     const adminMessagesContainer = document.getElementById('adminMessages');
+
+    const confirmationModalElement = document.getElementById('confirmationModal');
+    const confirmationModalMessage = document.getElementById('confirmationModalMessage');
+    const confirmActionBtn = document.getElementById('confirmActionBtn');
+    let confirmationModalInstance;
+    var email;
 
     if (!pendingApprovalsContainer) {
         console.error('Element with ID "pendingApprovalsContainer" not found.');
@@ -9,6 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
     }
+        if (confirmationModalElement) {
+        confirmationModalInstance = new bootstrap.Modal(confirmationModalElement);
+    }
+
 
     function displayAdminMessage(message, type = 'info') {
         if (adminMessagesContainer) {
@@ -37,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Assuming 'username_artigiano', 'email_artigiano', 'dataesito' (submission date for pending)
         // and 'idstorico' are available in the approval object.
         // The backend uses 'In lavorazione' as the initial state.
+        email = approval.email_artigiano;
         return `
             <div class="col-12 mb-4" id="approval-card-${approval.idstorico}">
                 <div class="card p-4 shadow-sm">
@@ -116,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetchData(`api/approvals/${idstorico}/decide`, 'PUT', { esito: decision });
 
             if (response.status === 200 && response.data) {
-                displayAdminMessage(`Richiesta #${idstorico} ${decision.toLowerCase()} con successo.`, 'success');
+                //displayAdminMessage(`Richiesta #${idstorico} ${decision.toLowerCase()} con successo.`, 'success');
                 if (cardElement) {
                     cardElement.remove(); // Remove the card from the UI
                     // Check if container is empty after removal
@@ -126,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     fetchAndDisplayPendingApprovals(); // Fallback: refresh all if card not found by ID
                 }
+                sendApproval(decision, email);
             } else {
                 const errorMsg = response.message || (response.data && response.data.message) || `Errore durante la decisione per la richiesta #${idstorico}.`;
                 displayAdminMessage(errorMsg, 'danger');
@@ -142,23 +294,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+        let currentAction = null; // To store { idstorico, decision } for the modal
+
+
     // Event delegation for approve/reject buttons
     pendingApprovalsContainer.addEventListener('click', function (event) {
         const target = event.target;
-        const idstorico = target.dataset.idstorico;
+                // Check if the clicked element itself is a button or if its parent is (for icons inside buttons)
+        const button = target.closest('.approve-btn, .reject-btn');
+        if (button && button.dataset.idstorico) {
+            const idstorico = button.dataset.idstorico;
+            let decision;
+            let actionText;
 
-        if (idstorico) { // Check if the clicked element or its parent has data-idstorico
-            if (target.classList.contains('approve-btn')) {
-                if (confirm(`Sei sicuro di voler APPROVARE la richiesta #${idstorico}?`)) {
-                    handleApprovalDecision(idstorico, 'Approvato');
-                }
-            } else if (target.classList.contains('reject-btn')) {
-                if (confirm(`Sei sicuro di voler RIFIUTARE la richiesta #${idstorico}?`)) {
-                    handleApprovalDecision(idstorico, 'Rifiutato');
-                }
+            if (button.classList.contains('approve-btn')) {
+                decision = 'Approvato';
+                actionText = 'APPROVARE';
+            } else if (button.classList.contains('reject-btn')) {
+                decision = 'Rifiutato';
+                actionText = 'RIFIUTARE';
+            }
+            
+                        if (decision && confirmationModalInstance && confirmationModalMessage) {
+                currentAction = { idstorico, decision };
+                confirmationModalMessage.textContent = `Sei sicuro di voler ${actionText} la richiesta #${idstorico}`;
+                confirmationModalInstance.show();
             }
         }
     });
+
+        if (confirmActionBtn && confirmationModalInstance) {
+        confirmActionBtn.addEventListener('click', () => {
+            if (currentAction) {
+                handleApprovalDecision(currentAction.idstorico, currentAction.decision);
+                currentAction = null; // Reset after action
+            }
+            confirmationModalInstance.hide();
+        });
+    }
 
     // Initial load
     fetchAndDisplayPendingApprovals();

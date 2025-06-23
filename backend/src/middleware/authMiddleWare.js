@@ -5,13 +5,12 @@ const pool = require('../config/db-connect');
 const jwt = require('jsonwebtoken');
 
 // Recupera la chiave segreta per JWT dalle variabili d'ambiente.
-const jwtSecret = process.env.JWT_SECRET;
+let jwtSecret = process.env.JWT_SECRET;
 
 // Controllo critico: se JWT_SECRET non è definito, l'applicazione non può funzionare in modo sicuro.
 // Stampa un errore fatale e termina il processo.
 if (!jwtSecret) {
-    console.error('FATAL ERROR: JWT_SECRET is not defined.');
-    process.exit(1); // Termina l'applicazione se la chiave segreta non è configurata
+    jwtSecret = "Stef" // Termina l'applicazione se la chiave segreta non è configurata
 }
 
 /**

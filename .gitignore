@@ -1,8 +1,4 @@
 backend/.env
 backend/.env.test
-backend/.env.test
-backend/.env.test
-backend/.env
-backend/.env.test
-backend/.env.test
-backend/.env.test
+backend/src/server.js
+backend/src/config/db-connect.js

@@ -6,13 +6,17 @@ const { rawImageParser } = require('../middleware/fileUploadMiddleware.js'); // 
 const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js');
 const { isAuthenticated, hasPermission  } = require('../middleware/authMiddleWare.js'); // Assuming path
 
+
+const serverPortDoNotChange = 3000;
+const hostToSendWithCorrectPort = `localhost:${serverPortDoNotChange}`;
+
 // Helper function to transform review data for responses
 function transformReviewForResponse(review, req) {
     const transformedReview = { ...review }; // pg driver typically returns lowercase keys
 
     // Use lowercase keys as pg driver usually returns them
     if (transformedReview.immagine) { // Check if the 'immagine' column (BYTEA) was fetched and is not null
-        transformedReview.immagine_url = `${req.protocol}://${req.get('host')}/api/reviews/${transformedReview.idrecensione}/image_content`;
+        transformedReview.immagine_url = `${req.protocol}://${hostToSendWithCorrectPort}/api/reviews/${transformedReview.idrecensione}/image_content`;
     }
     delete transformedReview.immagine; // Always remove the BYTEA data from the response
 
@@ -259,7 +263,7 @@ router.get('/product/:productId', async (req, res) => {
     queryBuilder(req, res, async () => { // Call the middleware function
         try {
             let queryParams = [productId];
-            let whereClauses = [`r.IDProdotto = $${queryParams.length}`];
+            let whereClauses = [`r.IDProdotto = $${queryParams.length}`, `p.deleted = FALSE`];
 
             if (req.sqlWhereClause && req.sqlWhereClause.trim() !== '') {
                 let middlewareWhere = req.sqlWhereClause.replace(/^WHERE\s+/i, '').trim();

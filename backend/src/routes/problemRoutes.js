@@ -8,6 +8,9 @@ const { rawImageParser } = require('../middleware/fileUploadMiddleware.js'); // 
 const FileType = require('file-type'); // For inferring image MIME type
 const { createQueryBuilderMiddleware } = require('../middleware/queryBuilderMiddleware.js'); // Import the query builder middleware
 
+
+const serverPortDoNotChange = 3000;
+const hostToSendWithCorrectPort = `localhost:${serverPortDoNotChange}`;
 // Use the actual database pool
 const db = pool;
 
@@ -19,7 +22,7 @@ const transformProblemaForResponse = (problema, req) => {
     // Check for the raw image data (lowercase key from pg driver)
     if (transformedProblema.immagine && Buffer.isBuffer(transformedProblema.immagine)) {
         // Add the URL for the image content endpoint
-        transformedProblema.immagine_url = `${req.protocol}://${req.get('host')}/api/problems/${transformedProblema.idproblema}/image_content`;
+        transformedProblema.immagine_url = `${req.protocol}://${hostToSendWithCorrectPort}/api/problems/${transformedProblema.idproblema}/image_content`;
     }
 
     // Remove the raw image data from the JSON response
@@ -120,8 +123,8 @@ router.get('/', isAuthenticated, hasPermission(['Admin']), createQueryBuilderMid
             -- Select all problems, with optional filters and sorting applied by middleware
             -- Joins are needed to potentially filter/sort by related user info in the future
             SELECT p.*, 
-                   uc.username AS username_cliente,
-                   ua.username AS username_artigiano,
+                   uc.email AS email_cliente,
+                   ua.email AS email_artigiano,
                    uadmin.username AS username_admin
             FROM Problema p
             LEFT JOIN Utente uc ON p.idcliente = uc.idutente
@@ -238,10 +241,6 @@ router.put('/:id/status', isAuthenticated, hasPermission(['Admin']), async (req,
     const { id } = req.params;
     const { status } = req.body; // Using lowercase to match schema
     const { idutente: idadmin } = req.user; // Admin taking action
-
-    if (!status || !['In lavorazione', 'Risolto'].includes(status)) {
-        return res.status(400).json({ error: "Invalid status. Must be 'In lavorazione' or 'Risolto'." });
-    }
 
     try {
         const updateQuery = `

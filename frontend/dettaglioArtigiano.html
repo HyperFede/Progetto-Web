@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +9,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/pages/dettaglioArtigiano.css">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 </head>
+
 <body>
-    <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
+    <header class="py-3 mb-4 border-bottom d-none d-lg-block fixed-top custom-header">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <img src="assets/Logo.svg" alt="Logo" class="me-2" style="height: 80px;">
@@ -18,33 +21,46 @@
 
             <ul class="nav nav-pills align-items-center">
                 <li class="nav-item dropdown invisible">
-                    <a class="nav-link dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--secondary-color);">
+                    <a class="nav-link dropdown-toggle" href="#" id="userAccountDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--secondary-color);">
                         <i class="bi bi-person-circle fs-3 me-2"></i> <span id="nav-username">Username</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
-                        <li><a class="dropdown-item" href="dashboardUtente.html"><i class="bi bi-person-fill me-2"></i>IL MIO PROFILO</a></li>
-                        <li><a class="dropdown-item" href="dashboardStoricoOrdini.html"><i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI</a></li>
-                        <li><a class="dropdown-item" href="leMieSegnalazioni.html"><i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="logout.html"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
+                        <li><a class="dropdown-item" href="dashboardUtente.html"><i
+                                    class="bi bi-person-fill me-2"></i>IL MIO PROFILO</a></li>
+                        <li><a class="dropdown-item" href="dashboardStoricoOrdini.html"><i
+                                    class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI</a></li>
+                        <li><a class="dropdown-item" href="leMieSegnalazioni.html"><i
+                                    class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="logout.html"><i
+                                    class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown invisible-admin">
-                    <a class="nav-link dropdown-toggle" href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--secondary-color);">
+                    <a class="nav-link dropdown-toggle" href="#" id="userAccountDropdownAdmin" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--secondary-color);">
                         <i class="bi bi-person-circle fs-3 me-2"></i> <span id="nav-username">Username</span>
                     </a>
                     <!-- ADMIN -->
-                    <ul class="invisible-admin dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
-                        <li><a class="dropdown-item" href="accettazioniAdmin.html"><i class="bi bi-person-fill me-2"></i>ACCETTAZIONE</a></li>
-                        <li><a class="dropdown-item" href="segnalazioniAdmin.html"><i class="bi bi-box-seam-fill me-2"></i>GESTIONE SEGNALAZIONE</a></li>
-                        <li><a class="dropdown-item" href="logout.html"><i class="bi bi-flag-fill me-2"></i>LOGOUT</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdownAdmin">
+                        <li><a class="dropdown-item" href="accettazioniAdmin.html"><i
+                                    class="bi bi-person-fill me-2"></i>ACCETTAZIONE</a></li>
+                        <li><a class="dropdown-item" href="segnalazioniAdmin.html"><i
+                                    class="bi bi-box-seam-fill me-2"></i>GESTIONE SEGNALAZIONE</a></li>
+                        <li><a class="dropdown-item" href="logout.html"><i class="bi bi-flag-fill me-2"></i>LOGOUT</a>
+                        </li>
                     </ul>
                     <!-- FINE -->
                 </li>
                 <!-- UNLOGGED -->
-                <li class="nav-item unlogged"><a href="login.html" class="nav-link" style="color: var(--secondary-color);">ACCEDI</a></li>
+                <li class="nav-item unlogged"><a href="login.html" class="nav-link"
+                        style="color: var(--secondary-color);">ACCEDI</a></li>
                 <li class="nav-item unlogged" style="color: var(--secondary-color)">|</li>
-                <li class="nav-item unlogged"><a href="registrati.html" class="nav-link" style="color: var(--secondary-color);">REGISTRATI</a></li>
+                <li class="nav-item unlogged"><a href="registrati.html" class="nav-link"
+                        style="color: var(--secondary-color);">REGISTRATI</a></li>
                 <!--FINE-->
                 <li class="nav-item">
                     <!-- UNLOGGED -->
@@ -53,17 +69,22 @@
                     </a>
                     <!--FINE-->
                     <a href="carrelloUtente.html" class="nav-link invisible" style="color: var(--secondary-color);">
-                        <i class="bi bi-cart fs-3"></i>
+                        <span class="position-relative d-inline-block">
+                            <i id="cart-icon-lg" class="bi bi-cart fs-3"></i>
+                            <span id="cart-item-count-lg" class="position-absolute top-0 start-100 mt-2 cart-item-badge-position badge rounded-pill bg-danger" style="display: none;">0</span>
+                        </span>
                     </a>
                 </li>
             </ul>
         </div>
     </header>
 
-<!-- Navbar per schermi < lg -->
-    <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none"> <!-- Mantenuto fixed-top come richiesto in precedenza -->
-         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+    <!-- Navbar per schermi < lg -->
+    <nav class="py-3 navbar bg-body-tertiary fixed-top d-lg-none">
+        <!-- Mantenuto fixed-top come richiesto in precedenza -->
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
@@ -73,23 +94,25 @@
             <div class="ms-auto"></div> <!-- Spacer to push toggler and logo to the left -->
 
             <!-- Offcanvas UNLOGGED -->
-            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel">
                 <div class="offcanvas-header unlogged">
                     <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menù</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body unlogged">
                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
                         <ul class="nav nav-pills flex-column mb-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="login.html">
-                                <i class="bi bi-person-fill me-2"></i>ACCEDI
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                             <a class="nav-link active" aria-current="page" href="registrati.html"> <i class="bi bi-pencil-square me-2"></i>REGISTRATI
-                             </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="login.html">
+                                    <i class="bi bi-person-fill me-2"></i>ACCEDI
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="registrati.html"> <i
+                                        class="bi bi-pencil-square me-2"></i>REGISTRATI
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -97,25 +120,27 @@
                 <!-- Offcanvas menu LOGGED-->
                 <div class="offcanvas-header invisible">
                     <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Il Mio Account</h5>
-                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body invisible">
-                     <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                    <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
                         <ul class="nav nav-pills flex-column mb-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="dashboardUtente.html">
-                                <i class="bi bi-person-fill me-2"></i>IL MIO PROFILO
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                             <a class="nav-link" aria-current="page" href="dashboardStoricoOrdini.html"> <i class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
-                             </a>
-                        </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="leMieSegnalazioni.html"> <i class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI
+                                <a class="nav-link" href="dashboardUtente.html">
+                                    <i class="bi bi-person-fill me-2"></i>IL MIO PROFILO
                                 </a>
                             </li>
-                            </ul>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="dashboardStoricoOrdini.html"> <i
+                                        class="bi bi-box-seam-fill me-2"></i>I MIEI ORDINI
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="leMieSegnalazioni.html"> <i
+                                        class="bi bi-flag-fill me-2"></i>LE MIE SEGNALAZIONI
+                                </a>
+                            </li>
+                        </ul>
                         <hr class="sidebar-divider">
                         <a href="logout.html">
                             <button class="btn logout-btn w-100">
@@ -124,11 +149,41 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Offcanvas menu Admin ONLY-->
+                <div class="offcanvas-header invisible-admin">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabelAdmin">Pannello Admin</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body invisible-admin">
+                    <div class="dashboard-sidebar-offcanvas d-flex flex-column h-100">
+                        <ul class="nav nav-pills flex-column mb-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="segnalazioniAdmin.html">
+                                    <i class="bi bi-flag-fill me-2"></i>GESTIONE SEGNALAZIONI
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="accettazioniAdmin.html"> <i
+                                        class="bi bi-patch-check-fill me-2"></i>GESTIONE ARTIGIANI
+                                </a>
+                            </li>
+                        </ul>
+                        <hr class="sidebar-divider">
+                        <button onclick="window.location.href='logout.html'" class="btn logout-btn w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
+                        </button>
+                    </div>
+                </div>
             </div>
-           <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
+            <ul class="nav nav-pills align-items-center">
+                <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
                 <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
-                    <a href="carrelloUtente.html" class="nav-link nav-link-cart invisible">
-                        <i class="bi bi-cart fs-3"></i>
+                    <a href="carrelloUtente.html" class="nav-link nav-link-cart invisible" style="color: var(--secondary-color);">
+                        <span class="position-relative d-inline-block">
+                            <i id="cart-icon-sm" class="bi bi-cart fs-3"></i>
+                            <span id="cart-item-count-sm" class="position-absolute top-0 start-100 mt-2 cart-item-badge-position badge rounded-pill bg-danger" style="display: none;">0</span>
+                        </span>
                     </a>
                     <a href="login.html" class="nav-link nav-link-cart unlogged">
                         <i class="bi bi-cart fs-3"></i>
@@ -148,207 +203,238 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-4 col-md-5 mb-4 mb-md-0">
-                <div class="artisan-info-box">
-                    <h3 id="nomeArtigiano" class="artisan-name">Nome Artigiano Esempio</h3>
-                    <p id="indirizzoArtigiano" class="artisan-address">Via Roma, 123 - 00100 Città (RM)</p>
-                    <hr>
-                    <h5 class="description-label">Descrizione</h5>
-                    <div id="descArtigiano" class="artisan-description-content">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+        <div id="artisan-loading-placeholder" class="text-center p-5 my-5">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Caricamento...</span>
+            </div>
+            <h2 class="mt-3" style="color: var(--primary-color);">Caricamento Vetrina Artigiano...</h2>
+            <p class="text-muted">Stiamo recuperando i dettagli per te.</p>
+        </div>
+
+        <div id="artisan-page-content" style="display: none;">
+            <div class="row">
+                <div class="col-lg-4 col-md-5 mb-4 mb-md-0">
+                    <div class="artisan-info-box">
+                        <h3 id="nomeArtigiano" class="artisan-name"></h3>
+                        <p id="indirizzoArtigiano" class="artisan-address"></p>
+                        <hr>
+                        <h5 class="description-label">Descrizione</h5>
+                        <div id="descArtigiano" class="artisan-description-content">
+                            <!-- Description loaded by JS -->
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-lg-8 col-md-7">
-                <h2 class="products-available-title mb-3">Prodotti Disponibili</h2>
-                <div id="artisan-products" class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4">
-                    <div class="col">
-                        <div class="card h-100 product-card-artisan">
-                            <a href="dettaglioProdotto.html" class="text-decoration-none text-dark">
-                                <div class="product-image-placeholder d-flex align-items-center justify-content-center">IMG</div>
-                            </a>
-                            <div class="card-body d-flex flex-column">
-                                <ul class="list-unstyled mt-2 mb-auto product-info-list">
-                                    <li class="product-name-list-item">Nome Prodotto A</li>
-                                    <li class="product-rating-list-item">
-                                        Valutazione:
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star-half star-icon"></i>
-                                        <i class="bi bi-star star-icon"></i>
-                                    </li>
-                                    <li class="product-price-list-item">Prezzo: €25.00</li>
-                                </ul>
-                                
-                                <!-- UNLOGGED -->
-                                
-                                <a href="login.html" class="nav-link unlogged" style="color: var(--secondary-color);">
-                                    <i class="bi bi-cart fs-4"></i>
-                                </a>
-
-                                <!-- LOGGED (aggiunge il prodotto al carrello)-->
-                                <button class="btn btn-sm mt-3 add-to-cart-button-artisan invisible">
-                                     <i class="bi bi-cart-plus"></i> Aggiungi al Carrello
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card h-100 product-card-artisan">
-                            <a href="dettaglioProdotto.html" class="text-decoration-none text-dark">
-                                <div class="product-image-placeholder d-flex align-items-center justify-content-center">IMG</div>
-                            </a>
-                            <div class="card-body d-flex flex-column">
-                                <ul class="list-unstyled mt-2 mb-auto product-info-list">
-                                    <li class="product-name-list-item">Nome Prodotto B</li>
-                                    <li class="product-rating-list-item">
-                                        Valutazione:
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star star-icon"></i>
-                                    </li>
-                                    <li class="product-price-list-item">Prezzo: €30.50</li>
-                                </ul>
-                                <button class="btn btn-sm mt-3 add-to-cart-button-artisan">
-                                     <i class="bi bi-cart-plus"></i> Aggiungi al Carrello
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col">
-                         <div class="card h-100 product-card-artisan">
-                            <a href="dettaglioProdotto.html" class="text-decoration-none text-dark">
-                                <div class="product-image-placeholder d-flex align-items-center justify-content-center">IMG</div>
-                            </a>
-                            <div class="card-body d-flex flex-column">
-                                <ul class="list-unstyled mt-2 mb-auto product-info-list">
-                                    <li class="product-name-list-item">Nome Prodotto C</li>
-                                    <li class="product-rating-list-item">
-                                        Valutazione:
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star-fill star-icon"></i>
-                                        <i class="bi bi-star-half star-icon"></i>
-                                        <i class="bi bi-star star-icon"></i>
-                                        <i class="bi bi-star star-icon"></i>
-                                    </li>
-                                    <li class="product-price-list-item">Prezzo: €19.99</li>
-                                </ul>
-                                <button class="btn btn-sm mt-3 add-to-cart-button-artisan">
-                                    <i class="bi bi-cart-plus"></i> Aggiungi al Carrello
-                                </button>
-                            </div>
-                        </div>
+                <div class="col-lg-8 col-md-7">
+                    <h2 class="products-available-title mb-3">Prodotti Disponibili</h2>
+                    <div id="artisan-products" class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4">
+                        <!-- Products will be loaded here by JavaScript -->
+                        <!-- The initial "Caricamento prodotti..." message is removed as the parent is hidden -->
                     </div>
                 </div>
             </div>
         </div>
     </main>
+                    <!-- Message Placeholder -->
+    <div id="actionMessage" class="alert" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1050; display: none; transition: opacity 0.5s ease-out; min-width: 300px; text-align: center;" role="alert">
+        <!-- Message will be injected here -->
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/ratingUtils.js"></script>
+    <script src="js/headerShower.js"></script>
     <script src="js/fetcher.js"></script>
+    <script src="js/addCartProduct.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", async function(){
-            const prodottoprec = sessionStorage.getItem("id");
-            const backButton = document.getElementById("backLink");
+        async function showProducts(productsResult, sessionInfo) { // Added sessionInfo parameter
+            const productsContainer = document.getElementById("artisan-products");
+            if (!productsContainer) {
+                console.error("Product container #artisan-products not found.");
+                return;
+            }
+            productsContainer.innerHTML = ''; // Clear previous content
 
-            backButton.href = `/dettaglioProdotto.html?id=${prodottoprec}`;
-        });
+            if (!productsResult || !productsResult.data || productsResult.data.length === 0) {
+                productsContainer.innerHTML = '<p class="col-12 text-muted">Nessun prodotto disponibile per questo artigiano.</p>';
+                return;
+            }
 
-        function showProducts(result){
-            let productsRes = ``;
-                const products = result.data.map((product) => {
-                    
-                    productsRes += (
-                        `<div class="col">
-                            <div class="card h-100 product-card-artisan">
-                                <a href="dettaglioProdotto.html?id=${product.idprodotto}" class="text-decoration-none text-dark">
-                                    <div class="product-image-placeholder d-flex align-items-center justify-content-center"><img src="http://localhost:3000/api/products/${product.idprodotto}/image_content"/ class= "imageProduct"></div>
-                                </a>
-                                <div class="card-body d-flex flex-column">
-                                    <ul class="list-unstyled mt-2 mb-auto product-info-list">
-                                        <li class="product-name-list-item"${product.nome}</li>
-                                        <li class="product-rating-list-item">
-                                            Valutazione:
-                                            <i class="bi bi-star-fill star-icon"></i>
-                                            <i class="bi bi-star-fill star-icon"></i>
-                                            <i class="bi bi-star-fill star-icon"></i>
-                                            <i class="bi bi-star-half star-icon"></i>
-                                            <i class="bi bi-star star-icon"></i>
-                                        </li>
-                                        <li class="product-price-list-item">Prezzo: €${product.prezzounitario}</li>
-                                    </ul>
-                                    
-                                    <!-- UNLOGGED -->
-                                    
-                                    <a href="login.html" class="nav-link unlogged" style="color: var(--secondary-color);">
-                                        <i class="bi bi-cart fs-4"></i>
-                                    </a>
+            const productCardPromises = productsResult.data.map(async (product) => {
+                let ratingHtml = '<small class="text-muted">Caricamento rating...</small>';
+                if (typeof getHTMLforAverageRating === 'function') {
+                    try {
+                        ratingHtml = await getHTMLforAverageRating(product.idprodotto);
+                    } catch (e) {
+                        console.error(`Error fetching rating for product ${product.idprodotto}:`, e);
+                        ratingHtml = '<small class="text-muted">Rating non disp.</small>';
+                    }
+                } else {
+                    console.warn('getHTMLforAverageRating function not found. Make sure ratingUtils.js is loaded before this script.');
+                    ratingHtml = '<small class="text-muted">Errore rating (func)</small>';
+                }
 
-                                    <!-- LOGGED (aggiunge il prodotto al carrello)-->
-                                    <button class="btn btn-sm mt-3 add-to-cart-button-artisan invisible">
-                                        <i class="bi bi-cart-plus"></i> Aggiungi al Carrello
-                                    </button>
+                let buttonHtml = '';
+                const isLoggedIn = sessionInfo && sessionInfo.status === 200 && sessionInfo.data;
+                const userType = isLoggedIn ? sessionInfo.data.tipologia : null;
+
+                if (userType === "Admin") {
+                    buttonHtml = `
+                        <button onclick="eliminaProdottoDaVetrina(${product.idprodotto}, this)" class="btn btn-sm btn-danger mt-3 delete-product-button">
+                            <span class="button-text"><i class="bi bi-trash"></i> Elimina Prodotto</span>
+                        </button>`;
+                } else if (userType === "Cliente") {
+                    buttonHtml = `
+                        <button onclick="aggiungiAlCarrello(${product.idprodotto}, 1, this)" class="btn btn-sm mt-3 add-to-cart-button-artisan add-to-cart-button">
+                            <span class="button-text"><i class="bi bi-cart-plus"></i> Aggiungi al Carrello</span>
+                        </button>`;
+                } else { // Unlogged user
+                    buttonHtml = `
+                        <button onclick="window.location.href='login.html'" class="btn btn-sm mt-3 add-to-cart-button-artisan add-to-cart-button">
+                            <span class="button-text"><i class="bi bi-cart-plus"></i> Aggiungi al Carrello</span>
+                        </button>`;
+                }
+
+                return `
+                    <div class="col">
+                        <div class="card h-100 product-card-artisan">
+                            <a href="dettaglioProdotto.html?id=${product.idprodotto}" class="text-decoration-none text-dark">
+                                <div class="product-image-placeholder d-flex align-items-center justify-content-center">
+                                    <img src="/api/products/${product.idprodotto}/image_content" class="imageProduct" alt="${product.nome}" style="max-height: 180px; width: 100%; object-fit: cover;">
                                 </div>
+                            </a>
+                            <div class="card-body d-flex flex-column">
+                                <ul class="list-unstyled mt-2 mb-auto product-info-list">
+                                    <li class="product-name-list-item">${product.nome}</li>
+                                    <li class="product-rating-list-item">
+                                        ${ratingHtml}
+                                    </li>
+                                    <li class="product-price-list-item">Prezzo: €${parseFloat(product.prezzounitario).toFixed(2)}</li>
+                                </ul>
+                                ${buttonHtml}
                             </div>
-                        </div>`
-                    )
-                });
+                        </div>
+                    </div>`;
+            });
 
-
-                document.getElementById("artisan-products").innerHTML = productsRes;
+            const productCardsHtml = await Promise.all(productCardPromises);
+            productsContainer.innerHTML = productCardsHtml.join('');
         }
 
-        document.addEventListener("DOMContentLoaded", async function(){
+        async function eliminaProdottoDaVetrina(productId, buttonElement) {
+            if (!confirm("Sei sicuro di voler eliminare questo prodotto? L'azione è irreversibile.")) {
+                return;
+            }
+
+            try {
+                buttonElement.disabled = true;
+                buttonElement.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Eliminazione...`;
+
+                const deleteResponse = await fetchData(`/api/products/${productId}`, "DELETE");
+
+                if (deleteResponse.status === 200 || deleteResponse.status === 204) {
+                    const productCard = buttonElement.closest('.col');
+                    if (productCard) {
+                        productCard.remove();
+                    }
+                    
+                    const actionMessage = document.getElementById('actionMessage');
+                    actionMessage.className = 'alert alert-success';
+                    actionMessage.textContent = 'Prodotto eliminato con successo.';
+                    actionMessage.style.display = 'block';
+                    setTimeout(() => { actionMessage.style.display = 'none'; }, 3000);
+
+                    const productsContainer = document.getElementById("artisan-products");
+                    if (productsContainer && productsContainer.children.length === 0) {
+                        productsContainer.innerHTML = '<p class="col-12 text-muted">Nessun prodotto disponibile per questo artigiano.</p>';
+                    }
+                } else {
+                    throw new Error(deleteResponse.message || 'Errore sconosciuto durante l\'eliminazione.');
+                }
+            } catch (error) {
+                console.error("Errore durante l'eliminazione del prodotto:", error);
+                alert(`Errore: ${error.message}`);
+                buttonElement.disabled = false;
+                buttonElement.innerHTML = `<span class="button-text"><i class="bi bi-trash"></i> Elimina Prodotto</span>`;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const loadingPlaceholder = document.getElementById('artisan-loading-placeholder');
+            const artisanPageContent = document.getElementById('artisan-page-content');
+            const backButton = document.getElementById("backLink");
+
+            // Logic for the back button (moved from the first DOMContentLoaded listener)
+            const prodottoprec = sessionStorage.getItem("id");
+            if (prodottoprec) {
+                backButton.href = `dettaglioProdotto.html?id=${prodottoprec}`;
+            } else {
+                backButton.href = "index.html"; // Fallback if no previous product ID
+            }
+
+
+            if (!loadingPlaceholder || !artisanPageContent) {
+                console.error("Elementi base per il caricamento (placeholder o content) non trovati.");
+                document.body.innerHTML = "<p class='text-center text-danger p-5'>Errore critico: la pagina non può essere caricata correttamente.</p>";
+                return;
+            }
 
             const urlParams = new URLSearchParams(window.location.search);
-            id = urlParams.get('id');
+            const artisanId = urlParams.get('id');
 
-            let result = await fetchData(`/api/users/${id}`, "GET");
-            if(result.status == 200){
-                document.getElementById("nomeArtigiano").textContent = result.data.username;
-                document.getElementById("indirizzoArtigiano").textContent = result.data.indirizzo;
-                document.getElementById("descArtigiano").textContent = result.data.artigianodescrizione;
-            }else{
-                //console.log("Errore caricamento dati!")
+            if (!artisanId) {
+                loadingPlaceholder.innerHTML = `
+                    <div class="text-center p-5 my-5">
+                        <i class="bi bi-exclamation-triangle-fill fs-1 text-danger"></i>
+                        <h2 class="mt-3 text-danger">ID Artigiano Mancante</h2>
+                        <p class="text-muted">Impossibile caricare i dettagli dell'artigiano senza un ID.</p>
+                        <a href="index.html" class="btn btn-primary">Torna alla Home</a>
+                    </div>`;
+                return;
             }
 
-            let productsReq = await fetchData(`/api/products/notdeleted?idartigiano=${id}`, "GET");
-            if(result.status == 200){
-                showProducts(productsReq);
+            let sessionInfo = null; // To store session info
 
-            }else{
-                //console.log("Errore caricamento prodotti!")
-            }
+            try {
+                sessionInfo = await fetchData("/api/auth/session-info", "GET"); // Fetch session info once
+                // Fetch artisan details using artisanId
+                const artisanResult = await fetchData(`/api/users/${artisanId}`, "GET");
+                if (artisanResult.status === 200 && artisanResult.data) {
+                    document.getElementById("nomeArtigiano").textContent = artisanResult.data.username;
+                    document.getElementById("indirizzoArtigiano").textContent = artisanResult.data.indirizzo || "Indirizzo non specificato";
+                    document.getElementById("descArtigiano").innerHTML = (artisanResult.data.artigianodescrizione || "Nessuna descrizione fornita.").replace(/\n/g, '<br>');
+                } else {
 
-            let info = await fetchData("/api/auth/session-info", "GET");
-                if(info.status == 200){
-                    const selectorInvisible = document.querySelectorAll('.invisible');
-                    selectorInvisible.forEach(section => {
-                        if(info.data.tipologia != "Admin")
-                        section.classList.remove("invisible")
-                        section.classList.add("logged")
-                    });
-
-                    const selectorUnlogged = document.querySelectorAll('.unlogged');
-                    selectorUnlogged.forEach(section => {
-                        section.classList.add("invisible");
-                    });
-                    
-                    if(info.data.tipologia == "Admin"){
-                        const selectorAdmin = document.querySelectorAll('.invisible-admin');
-                        selectorAdmin.forEach(section => {
-                            section.classList.remove("invisible-admin");
-                        });
+                    if (artisanResult.status === 401) {
+                        throw new Error("ID artigiano non valido");
+                    }
+                    throw new Error(artisanResult.message || "Errore nel caricamento dei dati dell'artigiano.");
                 }
+
+                // Fetch artisan products
+                const productsReq = await fetchData(`/api/products/notdeleted?idartigiano=${artisanId}`, "GET");
+                if (productsReq.status === 200) {
+                    await showProducts(productsReq, sessionInfo); // Pass sessionInfo
+                } else {
+                     // If products fail to load, showProducts will handle the message or we can set a general one
+                    document.getElementById("artisan-products").innerHTML = `<p class="col-12 text-warning">Errore nel caricamento dei prodotti dell'artigiano.</p>`;
+                }
+
+                // Show content and hide placeholder
+                loadingPlaceholder.style.display = 'none';
+                artisanPageContent.style.display = 'block';
+
+            } catch (error) {
+                console.error("Errore nel caricamento della pagina artigiano:", error);
+                
+                loadingPlaceholder.innerHTML = `
+                    <div class="text-center p-5 my-5">
+                        <i class="bi bi-emoji-frown fs-1 text-danger"></i>
+                        <h2 class="mt-3 text-danger">Oops! Qualcosa è andato storto.</h2>
+                        <p class="text-muted">Impossibile caricare la vetrina dell'artigiano: ${error.message}. Riprova più tardi.</p>
+                        <a href="index.html" class="btn btn-primary" style = "background-color: var(--primary-color); color: white; border-color: var(--primary-color);">Torna alla Home</a>
+                    </div>`;
+                artisanPageContent.style.display = 'none'; // Ensure content remains hidden
             }
-        })
+        });
     </script>
-    <script src="js/headerShower.js"></script>
 </body>
 </html>

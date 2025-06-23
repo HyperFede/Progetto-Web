@@ -7,7 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/pages/dashboardArtigiano.css"> </head>
+    <link rel="stylesheet" href="css/pages/dashboardArtigiano.css"> 
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+</head>
 <body>
     <header class="py-3 mb-4 border-bottom d-none d-lg-block custom-header">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">
@@ -27,10 +29,11 @@
                         <li><a class="dropdown-item" href="logout.html"><i class="bi bi-box-arrow-right me-2"></i>LOGOUT</a></li>
                     </ul>
                 </li>
+                <!-- da mettere in TUTTE LE PAGINE Dell'artigiano: id="addProductBtn"-->
                 <li class="nav-item">
-                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
-                        <i class="bi bi-plus-circle-fill me-1"></i> Inserisci Prodotto
-                    </a>
+                    <button class="btn add-product-btn" id="addProductBtn" onclick="goToAddProducts(this)">
+                        <i class="bi bi-plus-circle-fill me-1"></i> <span class = "txt-new-product">Inserisci Prodotto </span>
+                    </button>
                 </li>
             </ul>
         </div>
@@ -47,7 +50,7 @@
             <div class="ms-auto"></div> <!-- Spacer to push toggler and logo to the left -->
             <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Dashboard Artigiano</h5>
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Pannello Artigiano</h5>
                      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
@@ -71,24 +74,28 @@
                             </a>
                         </li>
                         </ul>
-                        <hr class="sidebar-divider">
-                        <button class="btn logout-btn w-100">
-                            <i class="bi bi-box-arrow-right me-2" href="logout.html"></i>LOGOUT
+                        <hr class="sidebar-divider" />
+                        <button onclick="window.location.href='logout.html'" class="btn logout-btn w-100">
+                            <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
                         </button>
                     </div>
                 </div>
             </div>
            <ul class="nav nav-pills align-items-center"> <!-- Rimosso ms-auto qui, lo gestisce justify-content-between -->
                 <li class="nav-item"> <!-- Aggiunto ms-auto all'ul per spingerlo a destra -->
-                    <a href="aggiungiProdotto.html" class="btn add-product-btn">
-                        <i class="bi bi-plus-circle-fill"></i>
-                    </a>
+                    <!-- Removed duplicate id="addProductBtn". Using class 'add-product-btn' for JS targeting. -->
+                    <button class="btn add-product-btn" onclick="goToAddProducts(this)">
+                        <i class="bi bi-plus-circle-fill me-1"></i>
+                    </button>
+            
                 </li>
             </ul>
         </div>
     </nav>
 
     <main class="container my-4 pt-lg-0">
+                            <h2 class="page-main-title mb-4">Pannello Artigiano</h2>
+
         <div class="row">
             <div class="col-md-3">
                 <div class="dashboard-sidebar d-flex flex-column">
@@ -112,8 +119,8 @@
                         </li>
                     </ul>
                     <hr class="sidebar-divider">
-                    <button class="btn logout-btn w-100">
-                        <i class="bi bi-box-arrow-right me-2" href="logout.html"></i>LOGOUT
+                    <button onclick="window.location.href='logout.html'" class="btn logout-btn w-100">
+                        <i class="bi bi-box-arrow-right me-2"></i>LOGOUT
                     </button>
                 </div>
             </div>
@@ -132,12 +139,25 @@
                                 <input type="text" class="form-control dashboard-input" id="artisanLastName" value="">
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="artisanEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control dashboard-input" id="artisanEmail" value="">
-                        </div>
 
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="artisanUsername" class="form-label">Username</label>
+                                <input type="text" class="form-control dashboard-input" id="artisanUsername" value="">
+                                <div class="invalid-feedback" id="artisanUsername-error-msg">
+                                    <!-- Messaggio di errore specifico per l'username apparirà qui -->
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="artisanEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control dashboard-input" id="artisanEmail" value="">
+                                <div class="invalid-feedback" id="artisanEmail-error-msg">
+                                    <!-- Messaggio di errore specifico per l'email apparirà qui -->
+                                </div>
+
+                            </div>
+                        </div>
+                        
                         <div class="mb-3">
                             <label for="artisanAddress" class="form-label">Indirizzo Attività</label>
                             <input type="text" class="form-control dashboard-input" id="artisanAddress" value="">
@@ -149,13 +169,19 @@
                         </div>
 
                         <div class="text-center mt-4">
-                            <button onclick="saveData()" type="button" class="btn rounded-pill save-changes-btn">SALVA CAMBIAMENTI</button>
+                            <!-- General messages container, similar to dashboardUtente.html -->
+                            <div id="artisan-form-messages" class="mb-3" style="min-height: 1.5em;">
+                                <span class="success-text" id="successMessage" style="display: none;">Dati aggiornati con successo!</span>
+                                <span class="error-text" id="errorMessage" style="display: none;">Errore nell'aggiornamento dei dati. Riprova.</span>
+                                <button onclick="saveData()" type="button" class="btn rsounded-pill save-changes-btn">SALVA CAMBIAMENTI</button>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </main>
+    
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/fetcher.js"></script>
@@ -165,56 +191,111 @@
             const nome = document.getElementById("artisanFirstName");
             const cognome = document.getElementById("artisanLastName");
             const email = document.getElementById("artisanEmail");
+            const username = document.getElementById("artisanUsername");
             const indirizzo = document.getElementById("artisanAddress");
             const descrizione = document.getElementById("artisanDescription");
-            /*const successMessage = document.getElementById("success");
-            const errorMessage = document.getElementById("error");
-            successMessage.style.visibility = "hidden";
-            errorMessage.style.visibility = "hidden";*/
+            // Hide messages on initial load
+            document.getElementById("successMessage").style.display = "none";
+            document.getElementById("errorMessage").style.display = "none";
+
 
             let infos = (await fetchData("/api/auth/session-info", "GET"));
             if(infos.status == 200){
                 nome.value = infos.data.nome;
                 cognome.value = infos.data.cognome;
                 email.value = infos.data.email;
+                username.value = infos.data.username;
                 indirizzo.value = infos.data.indirizzo;
                 descrizione.value = infos.data.artigianodescrizione;
             }else{
-                //console.log("Errore caricamento prodotti!")
+                document.getElementById("errorMessage").textContent = "Errore nel caricamento dei dati artigiano.";
+                document.getElementById("errorMessage").style.display = "block";
             }
         })
     </script>
     <script>
+        function clearFormErrors() {
+            const inputs = [
+                document.getElementById("artisanFirstName"),
+                document.getElementById("artisanLastName"),
+                document.getElementById("artisanUsername"),
+                document.getElementById("artisanEmail"),
+                document.getElementById("artisanAddress"),
+                document.getElementById("artisanDescription")
+            ];
+            inputs.forEach(input => {
+                input.classList.remove("is-invalid", "is-valid");
+            });
+
+            document.getElementById("artisanEmail-error-msg").textContent = "";
+            document.getElementById("artisanUsername-error-msg").textContent = "";
+            document.getElementById("successMessage").style.display = "none";
+            document.getElementById("errorMessage").style.display = "none";
+        }
+
         async function saveData(){
+            clearFormErrors();
+
             let infos = (await fetchData("/api/auth/session-info", "GET"));
-            const nome = document.getElementById("artisanFirstName").value;
-            const cognome = document.getElementById("artisanLastName").value;
-            const email = document.getElementById("artisanEmail").value;
-            const indirizzo = document.getElementById("artisanAddress").value;
-            const descrizione = document.getElementById("artisanDescription").value;
-            /*const successMessage = document.getElementById("success");
-            const errorMessage = document.getElementById("error");
-            successMessage.style.visibility = "hidden";
-            errorMessage.style.visibility = "hidden";*/
+            if (!infos || infos.status !== 200 || !infos.data || !infos.data.idutente) {
+                document.getElementById("errorMessage").textContent = "Impossibile recuperare informazioni utente per il salvataggio.";
+                document.getElementById("errorMessage").style.display = "block";
+                return;
+            }
 
+            const nomeInput = document.getElementById("artisanFirstName");
+            const cognomeInput = document.getElementById("artisanLastName");
+            const usernameInput = document.getElementById("artisanUsername");
+            const emailInput = document.getElementById("artisanEmail");
+            const indirizzoInput = document.getElementById("artisanAddress");
+            const descrizioneInput = document.getElementById("artisanDescription");
 
+            const successMessage = document.getElementById("successMessage");
+            const errorMessage = document.getElementById("errorMessage");
 
             let obj = {
-                "nome": nome,
-                "cognome": cognome,
-                "email": email,
-                "indirizzo": indirizzo,
-                "artigianodescrizione": descrizione
+                "nome": nomeInput.value,
+                "cognome": cognomeInput.value,
+                "username": usernameInput.value,
+                "email": emailInput.value,
+                "indirizzo": indirizzoInput.value,
+                "artigianodescrizione": descrizioneInput.value
             }
 
             let result = await fetchData(`/api/users/${infos.data.idutente}`, "PUT", obj)
 
-            // if(result.status == 200){
-            //     successMessage.style.visibility = "visible"
-            // }else{
-            //     console.log(result.message);
-            //     errorMessage.style.visibility = "visible";
-            // }
+            if(result.status == 200){
+                successMessage.textContent = "Dati aggiornati con successo!";
+                successMessage.style.display = "block";
+                [nomeInput, cognomeInput, usernameInput, emailInput, indirizzoInput, descrizioneInput].forEach(input => {
+                    input.classList.remove("is-invalid");
+                    input.classList.add("is-valid");
+                });
+                setTimeout(() => { successMessage.style.display = "none"; }, 3000); // Hide after 3 seconds
+            }else{
+                console.error("Errore aggiornamento dati artigiano:", result);
+                let generalErrorText = "Errore generico nell'aggiornamento. Controlla i campi e riprova."; // Default general error
+                let specificErrorHandled = false;
+
+                if (result.body && result.body.field === "email" && result.body.message) {
+                    emailInput.classList.add("is-invalid");
+                    document.getElementById("artisanEmail-error-msg").textContent = result.body.message;
+                    specificErrorHandled = true;
+                } else if (result.body && result.body.field === "username" && result.body.message) {
+                    usernameInput.classList.add("is-invalid");
+                    document.getElementById("artisanUsername-error-msg").textContent = result.body.message;
+                    specificErrorHandled = true;
+                } else if (result.message) {
+                    generalErrorText = `Errore: ${result.message}`;
+                }
+
+                if (!specificErrorHandled) {
+                    errorMessage.textContent = generalErrorText;
+                    errorMessage.style.display = "block";
+                    // Mark all fields as invalid for a general error if no specific field error was handled
+                    [nomeInput, cognomeInput, usernameInput, emailInput, indirizzoInput, descrizioneInput].forEach(input => input.classList.add("is-invalid"));
+                }
+            }
         }
     </script>
 </body>
