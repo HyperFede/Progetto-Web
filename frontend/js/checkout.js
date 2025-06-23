@@ -103,31 +103,33 @@ document.addEventListener('DOMContentLoaded', function () {
     
     populateWithUserData();
     // Placeholder function for "ACQUISTA ORA"
-    async function handleBuyNow() {
-        numberOfClicksinBuyButton++;
-        let errorMessage
-        clearCheckoutMessages(); // Clear previous messages
-
-        let response = await fetchData("api/orders/reserve-and-create-checkout-session", "POST");
-
-        if (response.status==201){
-            let redirectLink = response.data.stripeSessionUrl;
-            window.location.href = redirectLink;
-        }
-        else if (response.status===409 && numberOfClicksinBuyButton == 1){
-            let remindermessage = response.message;
-            errorMessage = "Hai gia un ordine in attesa di pagamento, ID: " + response.body.orderId + ". Clicca ancora ACQUISTA ORA per andare alla pagina di pagamento oppure clicca ANNULLA ORDINE per annullare l'ordine in sospeso.";
-            displayCheckoutMessage(errorMessage, 'error');
-
-        }
-        else if (response.status===409 && numberOfClicksinBuyButton > 1){
-            let redirectLink = response.body.stripeSessionUrl;
-            window.location.href = redirectLink;
-        }
-        else 
-        {
-            errorMessage = response.message || (response.body && response.body.error) || "Si è verificato un errore durante la creazione della sessione di checkout.";
-            displayCheckoutMessage(errorMessage, 'error');
+    async function handleBuyNow(event) {
+        if(!event.detail || event.detail == 1){
+            numberOfClicksinBuyButton++;
+            let errorMessage
+            clearCheckoutMessages(); // Clear previous messages
+    
+            let response = await fetchData("api/orders/reserve-and-create-checkout-session", "POST");
+    
+            if (response.status==201){
+                let redirectLink = response.data.stripeSessionUrl;
+                window.location.href = redirectLink;
+            }
+            else if (response.status===409 && numberOfClicksinBuyButton == 1){
+                let remindermessage = response.message;
+                errorMessage = "Hai gia un ordine in attesa di pagamento, ID: " + response.body.orderId + ". Clicca ancora ACQUISTA ORA per andare alla pagina di pagamento oppure clicca ANNULLA ORDINE per annullare l'ordine in sospeso.";
+                displayCheckoutMessage(errorMessage, 'error');
+    
+            }
+            else if (response.status===409 && numberOfClicksinBuyButton > 1){
+                let redirectLink = response.body.stripeSessionUrl;
+                window.location.href = redirectLink;
+            }
+            else 
+            {
+                errorMessage = response.message || (response.body && response.body.error) || "Si è verificato un errore durante la creazione della sessione di checkout.";
+                displayCheckoutMessage(errorMessage, 'error');
+            }
         }
 
 
