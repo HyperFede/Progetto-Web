@@ -1,5 +1,9 @@
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
+const fs = require('fs');
+const path = require('path');
+
+const image = path.join(__dirname, 'logo.png');
 
 function sendEmail(dest, sub, text, attach = false){
     let transport = nodemailer.createTransport({
@@ -29,7 +33,7 @@ function sendEmail(dest, sub, text, attach = false){
             attachments: [
                 {
                     filename: "logo.png",
-                    path: "../../../frontend/assets/logo.png",
+                    path: image,
                     cid: "logo@bazart"
                 }
             ]
